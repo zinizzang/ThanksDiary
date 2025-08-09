@@ -17,7 +17,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* 강제: 한 번에 한 페이지만 보이게 */
+    .page{display:none} .page.active{display:block}
+  </style>
 </head>
+
 <body>
   <header class="app-header">
     <div class="title-area">
@@ -207,5 +213,45 @@
 
   <!-- 앱 스크립트 (일반 defer, 모듈 아님) -->
   <script src="app.js?v=232" defer></script>
+
+  <script>
+    // 강제로 예전 서비스워커/캐시 제거 (GitHub Pages 캐시 꼬임 방지)
+    (function(){
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
+        if(window.caches && caches.keys) caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+      }
+      // 탭 라우팅 기본 가동
+      function show(name){
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+        document.querySelector('#page-'+(name||'daily')).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+        var tab=document.querySelector('#tab-'+(name||'daily')); if(tab) tab.classList.add('active');
+      }
+      function onHash(){var h=location.hash.replace(/^#\/?/,'')||'daily'; show(h);}
+      window.addEventListener('hashchange', onHash);
+      if(!location.hash) location.hash = '#/daily'; onHash();
+
+      // 로그인 모달 최소 동작(파이어베이스 초기화 실패해도 열고 닫히게)
+      var lm=document.getElementById('loginModal');
+      var openBtn=document.getElementById('authMiniLogin');
+      var openBtn2=document.getElementById('openLogin');
+      var closeBtn=document.getElementById('modalClose');
+      function open(){ if(lm) lm.classList.add('open'); }
+      function close(){ if(lm) lm.classList.remove('open'); }
+      if(openBtn) openBtn.addEventListener('click', open);
+      if(openBtn2) openBtn2.addEventListener('click', open);
+      if(closeBtn) closeBtn.addEventListener('click', close);
+      lm && lm.addEventListener('click', function(e){ if(e.target.id==='loginModal') close(); });
+
+      // 오늘 날짜 표시 기본 세팅 (JS 초기 가동 보장)
+      var dd=document.getElementById('dailyDate'); var dt=document.getElementById('dailyDateText');
+      try{
+        var d=new Date(); var tz=d.getTimezoneOffset()*60000; var ymd=new Date(d.getTime()-tz).toISOString().slice(0,10);
+        if(dd){ dd.value=ymd; if(dt){ dt.textContent = d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.'; } }
+      }catch(e){}
+    })();
+  </script>
 </body>
+
 </html>

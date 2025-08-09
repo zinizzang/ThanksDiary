@@ -1,0 +1,22 @@
+
+<!doctype html><meta charset="utf-8"><title>SW Kill</title>
+<body style="font-family:sans-serif;padding:20px">
+<h2>Service Worker & Cache Clear</h2>
+<p>이 페이지는 서비스워커와 캐시를 제거합니다.</p>
+<pre id="log"></pre>
+<script>
+(async function(){
+  const log = (m)=>document.getElementById('log').textContent += m+"\n";
+  if('serviceWorker' in navigator){
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for(const r of regs){ await r.unregister(); log('unregistered: '+(r.scope||'')); }
+  }
+  if(window.caches && caches.keys){
+    const keys = await caches.keys();
+    for(const k of keys){ await caches.delete(k); log('cache deleted: '+k); }
+  }
+  log('done. redirecting...');
+  setTimeout(()=>location.href='./#/daily', 1000);
+})();
+</script>
+</body>
