@@ -1,53 +1,101 @@
+/* thanksdiary-ui styles.css  v2.7.1 (pastel + spacing + unified font) */
 
+/* 1) Font family — try to use 'SAGeon' if available, else Gowun Dodum, then system */
 :root{
-  --bg:#fffdf7;
-  --card:#ffffff;
-  --ink:#3a2e2a;
-  --muted:#7a6f6a;
-  --accent:#ffd86b;
-  --accent-2:#fff1a6;
-  --pill:#fff6cf;
-  --line:#efe7db;
+  --ui-font: 'SAGeon','Gowun Dodum','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;
+  --ui-accent: #5a4a3f;
+  --ui-pastel-1: #fff3c2;
+  --ui-pastel-2: #ffe9a9;
+  --ui-card: #fffdf6;
+  --ui-border: #f0e2b8;
+  --ui-shadow: 0 6px 16px rgba(0,0,0,.06);
+  --ui-radius: 18px;
 }
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Gowun Dodum',sans-serif}
-.app-header.pastel{
-  background:linear-gradient(180deg,#fff2b6 0%,#ffeaa3 60%, #fff6cf 100%);
-  padding:16px 16px 10px;
-  position:sticky;top:0;z-index:3;border-bottom:1px solid var(--line);
+
+/* Apply font everywhere (titles, inputs, placeholders) */
+html,body,* { font-family: var(--ui-font) !important; }
+::placeholder { font-family: var(--ui-font) !important; color:#b8b0a6; opacity:.95;}
+
+/* 2) Header cute pastel gradient + star icon spacing */
+.app-header{
+  background: linear-gradient(180deg,var(--ui-pastel-1), var(--ui-pastel-2));
+  box-shadow: var(--ui-shadow);
 }
-.title-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.logo{font-family:'Jua',sans-serif;margin:0;font-size:24px;letter-spacing:.5px}
-.auth-strip{display:flex;align-items:center;gap:8px;color:var(--muted)}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:10px}
-.tab-btn{display:block;text-align:center;padding:14px 10px;border-radius:16px;background:var(--pill);color:var(--ink);text-decoration:none;border:1px solid var(--line);box-shadow:0 2px 0 rgba(0,0,0,.04)}
-.tab-btn:active{transform:translateY(1px)}
-#view{padding:14px}
-.app-footer{padding:40px 12px 60px;color:var(--muted);text-align:center}
+.app-header .title-area{ display:flex; align-items:center; gap:10px; }
+.app-header .title-area .logo{ letter-spacing:-.03em; font-weight:800; }
+.app-header .title-area .logo .star-icon{
+  width:18px; height:18px; margin-right:6px; transform: translateY(1px);
+}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
-.section{margin:16px 0;padding:12px;border:1px solid var(--line);border-radius:18px;background:#fff}
-.section h3{margin:0 0 10px;font-family:'Jua'}
-.row{display:flex;gap:10px;align-items:center}
-.btn{border-radius:12px;border:1px solid var(--line);background:#fff;padding:10px 14px}
-.btn.primary{background:#ffe175;border-color:#ffd86b}
-.btn.ghost{background:transparent}
-.btn.sm{padding:6px 10px;font-size:13px}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap}
-.btn-row.gap{gap:12px}
-.input, textarea, input[type=text], input[type=date]{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
-.badge{display:inline-block;background:var(--pill);padding:6px 10px;border-radius:999px;border:1px solid var(--line)}
+/* 3) Tabs — keep the 2x2 layout but add breathing room */
+.tabs{ display:grid; grid-template-columns: repeat(2, 1fr); gap:16px !important; }
+.tab-btn{
+  padding:14px 18px !important;
+  border-radius: var(--ui-radius) !important;
+  background:#fff !important;
+  box-shadow: var(--ui-shadow);
+  border:1px solid var(--ui-border) !important;
+}
 
-dialog::backdrop{background:rgba(0,0,0,.3)}
-dialog{border:0;border-radius:20px;padding:0}
-dialog .card{min-width:320px}
-.hint{color:var(--muted);font-size:14px}
-.msg{margin-top:6px;color:#c24a00}
-.small{color:var(--muted);font-size:13px}
+/* 4) Section cards */
+.card, .section, .panel, .box{
+  background:var(--ui-card) !important;
+  border:1px solid var(--ui-border) !important;
+  border-radius: var(--ui-radius) !important;
+  box-shadow: var(--ui-shadow);
+}
 
-.weekbar{display:flex;gap:10px;align-items:center;justify-content:flex-start;margin:8px 0}
-.weekbar .datepill{flex:1;text-align:center}
+/* Headings unified weight */
+h1,h2,h3,.title,.heading{
+  font-family: var(--ui-font) !important;
+  font-weight: 800 !important;
+  letter-spacing:-.02em;
+  color: var(--ui-accent);
+}
 
-.mission-line{display:flex;gap:10px;align-items:center}
-.mission-add{display:flex;align-items:center;justify-content:center;width:56px}
-.icon{filter:drop-shadow(0 1px 0 rgba(0,0,0,.06))}
+/* 5) Buttons & modal buttons spacing */
+button, .btn{
+  font-family: var(--ui-font) !important;
+  border-radius: 14px !important;
+}
+.modal .actions, .dialog .actions{
+  display:flex; gap:12px !important; flex-wrap:wrap;
+}
+.modal .actions .btn, .dialog .actions .btn, .modal .actions button{
+  padding:12px 18px !important;
+}
+
+/* 6) Helper text (sub description) */
+.helper, .subtext, .note{ color:#9c9288 !important; font-size:.92rem !important;}
+
+/* 7) Weekly single label + layout fixes */
+.week-label{ font-weight:800; color:#5a4a3f; }
+.week-dup { display:none !important; } /* defensive: hidden duplicates */
+
+/* 8) Daily 'mission add' one-line fix */
+.mission-add-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.mission-add-row .add-btn{ white-space:nowrap; }
+
+/* 9) Toast */
+.td-toast{
+  position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+  background:#333; color:#fff; padding:12px 16px; border-radius:14px;
+  font-size:.95rem; box-shadow: var(--ui-shadow); opacity:0; pointer-events:none;
+  transition:opacity .25s ease;
+  z-index:9999;
+}
+.td-toast.show{ opacity:.96; }
+
+/* 10) Pastel background for whole app */
+body{ background: radial-gradient(140% 90% at 0% 0%, #fff6cf 0, #fff8de 40%, #fffef9 100%) fixed !important;}
+
+/* 11) Inputs */
+input, textarea{
+  border-radius: 14px !important;
+  border:1px solid var(--ui-border) !important;
+}
+
+/* 12) Icon color for cute star bullet in headings if present */
+.heading-bullet{ color:#ffd257; margin-right:6px; }
