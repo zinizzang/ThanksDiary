@@ -3,8 +3,8 @@
   "short_name": "감사일기",
   "start_url": "./#/daily",
   "display": "standalone",
-  "background_color": "#fffaf0",
-  "theme_color": "#fff6c9",
+  "background_color": "#fff7dc",
+  "theme_color": "#fff6d4",
   "icons": [
     {
       "src": "icons/icon-192.png",

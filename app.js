@@ -1,215 +1,232 @@
 
-// v2.3.5 – compat SDK + onClick fallbacks + weekly nice text + save alerts
+// ThanksDiary 2.7.2-integrated-fix2 — 기능 2.7.2 + 2.3.x UI
 (function(){
-  const firebaseConfig = {
-    apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
-    authDomain: "thanksdiary-dca35.firebaseapp.com",
-    projectId: "thanksdiary-dca35",
-    storageBucket: "thanksdiary-dca35.appspot.com",
-    messagingSenderId: "250477396044",
-    appId: "1:250477396044:web:aa1cf155f01263e08834e9",
-  };
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  'use strict';
+  // ===== Firebase =====
+  const app = firebase.initializeApp(window.firebaseConfig);
   const auth = firebase.auth();
-  const db = firebase.firestore();
+  const db   = firebase.firestore();
 
-  const $ = s=>document.querySelector(s);
-  const pages = { daily:$('#page-daily'), weekly:$('#page-weekly'), search:$('#page-search'), settings:$('#page-settings') };
-  const tabs = { daily:$('#tab-daily'), weekly:$('#tab-weekly'), search:$('#tab-search'), settings:$('#tab-settings') };
-  function showPage(name){
-    Object.values(pages).forEach(p=>p.classList.remove('active'));
-    Object.values(tabs).forEach(t=>t.classList.remove('active'));
-    (pages[name]||pages.daily).classList.add('active');
-    (tabs[name]||tabs.daily).classList.add('active');
-    if(name==='daily') loadDaily();
-    if(name==='weekly') loadWeekly();
-  }
-  function handleHash(){ const h=(location.hash.replace(/^#\\/?/,'')||'daily'); showPage(h); if(h==='weekly' && !$('#weekPicker').value) setWeekByDate(new Date()); }
-  window.addEventListener('hashchange', handleHash);
+  // ===== Elements =====
+  const view = document.getElementById('view');
+  const openLogin = document.getElementById('openLogin');
+  const authStateEl = document.getElementById('authState');
+  const loginModal = document.getElementById('loginModal');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPass  = document.getElementById('loginPass');
+  const loginMsg   = document.getElementById('loginMsg');
 
-  function ymd(date){ const d=new Date(date); const tz=d.getTimezoneOffset()*60000; return new Date(d.getTime()-tz).toISOString().slice(0,10); }
-  function formatDatePretty(dateStr){ const d=new Date(dateStr); return `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`; }
-  function getWeekId(date){ const d=new Date(date); const t=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const n=(t.getUTCDay()+6)%7; t.setUTCDate(t.getUTCDate()-n+3); const ft=new Date(Date.UTC(t.getUTCFullYear(),0,4)); const w=1+Math.round(((t-ft)/86400000-3+((ft.getUTCDay()+6)%7))/7); const y=t.getUTCFullYear(); return `${y}-W${String(w).padStart(2,'0')}`;}
-  function weekPretty(weekId){ const [y,w]=weekId.split('-W'); return `${y} ${parseInt(w)}번째 주`; }
-  function weekOfMonthStr(date){
-    const d = new Date(date);
-    const first = new Date(d.getFullYear(), d.getMonth(), 1);
-    const firstDay = (first.getDay()===0?7:first.getDay()); // Mon=1..Sun=7
-    const week = Math.floor((firstDay - 1 + d.getDate() + 6) / 7);
-    return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${week}주`;
-  }
-  function parseTags(s){ if(!s) return []; return s.split(',').map(t=>t.trim()).filter(Boolean).map(t=>t.startsWith('#')?t:'#'+t); }
-  function autoResize(el){ el.style.height='auto'; el.style.height=(el.scrollHeight+2)+'px'; }
-  function bindAuto(el){ if(!el) return; autoResize(el); el.addEventListener('input', ()=>autoResize(el)); }
-
-  const storeKey='td-v235-data', settingsKey='td-v235-settings';
-  const loadAll=()=>{ try{ return JSON.parse(localStorage.getItem(storeKey)) || {daily:{},weekly:{}} }catch{ return {daily:{},weekly:{}}; };
-  const saveAll=(d)=>localStorage.setItem(storeKey, JSON.stringify(d));
-  const loadSettings=()=>{ try{ return JSON.parse(localStorage.getItem(settingsKey)) || {} }catch{ return {}; } };
-  const saveSettings=(s)=>localStorage.setItem(settingsKey, JSON.stringify(s));
-
-  const questionPool=[
-    '오늘 나는 무엇을 잘했나요?','사람들에게 어떤 사람으로 기억되고 싶나요?','오늘 나를 웃게 만든 순간은 무엇이었나요?','요즘 나를 설레게 하는 작은 일은?','지금의 나에게 필요한 한 문장은?','오늘 배운 것 하나는 무엇인가요?','나는 무엇을 포기하지 않았나요?','최근 나를 힘들게 한 일, 거기서 배운 점은?','오늘 나에게 가장 고마운 사람은 누구였나요?','앞으로의 나에게 전하고 싶은 말은?','나의 강점 한 가지를 적어보세요.','오늘 놓치지 않은 작은 친절은?','오늘 내 마음의 날씨는 어땠나요?'
-  ];
-  const healingPool=[
-    '부러움 대신 배움을 고르면 마음은 가벼워진다','완벽보다 꾸준함이 조용히 이긴다','오늘의 나를 어제의 나와만 비교하면 삶이 단단해진다','불안은 계획을 좋아한다 작은 계획 하나면 충분하다','한 번의 깊은 호흡이 마음의 재부팅이다','사랑받는 것보다 믿을 만한 사람이 되는 게 오래간다','상처를 말로 꺼내면 무게가 나눠진다','작은 친절은 돌아오지 않아도 흔적을 남긴다','내 속도가 느려 보여도 멈추지 않으면 결국 닿는다','인정은 포기가 아니다 받아들임은 시작이다','해야 할 일 앞에서 숨고 싶을 땐 아주 작은 시작부터','오늘의 수고를 내일의 나에게 친절로 남긴다'
-  ];
-  function nextFromPool(key, pool){
-    const s=loadSettings(); if(!s._cursor) s._cursor={}; if(!s._order) s._order={};
-    if(!s._order[key] || s._order[key].length!==pool.length){ s._order[key]=pool.map((_,i)=>i).sort(()=>Math.random()-0.5); s._cursor[key]=0; }
-    const idx=s._order[key][s._cursor[key]%pool.length]; s._cursor[key]=(s._cursor[key]+1)%pool.length; saveSettings(s); return pool[idx];
-  }
-
-  const dailyDate=$('#dailyDate'), dailyDateText=$('#dailyDateText');
-  const questionText=$('#questionText'), answerText=$('#answerText'), btnAnotherQ=$('#btnAnotherQ');
-  const eventField=$('#eventField'), thoughtField=$('#thoughtField'), feelingField=$('#feelingField'), resultField=$('#resultField');
-  const grat1=$('#grat1'), grat2=$('#grat2'), grat3=$('#grat3'), dailyNote=$('#dailyNote'), tagsField=$('#tagsField');
-  const statusDaily=$('#statusDaily');
-  [questionText,answerText,eventField,thoughtField,feelingField,resultField,dailyNote].forEach(bindAuto);
-
-  function setDailyDate(d){ dailyDate.value=ymd(d); dailyDateText.textContent=formatDatePretty(dailyDate.value); loadDaily(); }
-  function shiftDaily(n){ const cur=new Date(dailyDate.value||new Date()); cur.setDate(cur.getDate()+n); setDailyDate(cur); }
-
-  document.addEventListener('click', (e)=>{
-    const id=e.target && e.target.id;
-    if(id==='prevDay') shiftDaily(-1);
-    if(id==='nextDay') shiftDaily(1);
-    if(id==='todayBtn') setDailyDate(new Date());
-    if(id==='btnAnotherQ'){ questionText.value=nextFromPool('q',questionPool); autoResize(questionText); }
-
-    if(id==='addMission'){ const txt=$('#newMission')?.value?.trim(); if(!txt) return; const data=loadAll(); const key=currentWeekKey(); const w=data.weekly[key]||{missions:[],healing:''}; w.missions.push({text:txt,done:false}); data.weekly[key]=w; saveAll(data); $('#newMission').value=''; renderMissions(w.missions); saveWeeklyData(true); }
-    if(id==='saveWeekly'){ saveWeeklyData(true); }
-    if(id==='clearWeekly'){ if(!confirm('이 주차의 주간 데이터를 모두 지울까요?')) return; const data=loadAll(); const key=currentWeekKey(); delete data.weekly[key]; saveAll(data); const user=auth.currentUser; if(user){ db.collection('users').doc(user.uid).collection('weekly').doc(key).delete().catch(()=>{}); } loadWeekly(); alert('삭제 완료'); }
-    if(id==='randomHealing'){ $('#healingText').value=nextFromPool('h',healingPool); autoResize($('#healingText')); }
-    if(id==='startCopy'){ const c=$('#copyArea'); c.classList.toggle('hidden'); if(!c.classList.contains('hidden')){ c.value=$('#healingText').value; autoResize(c); } }
-
-    if(id==='saveDaily'){ saveDailyNow(); }
-    if(id==='clearDaily'){ clearDailyNow(); }
-
-    if(id==='searchBtn') doSearch();
-    if(id==='searchClear'){ $('#searchInput').value=''; $('#searchResults').innerHTML=''; }
-
-    if(id==='exportJSON') exportJSON();
-    if(id==='shareJSON') shareJSON();
-    if(id==='importJSON') importJSON();
-    if(id==='refreshCache'){ alert('서비스워커 없이 동작합니다. 새로고침하면 최신 적용됩니다.'); }
-    if(id==='resetLocal'){ if(!confirm('로컬 데이터를 모두 삭제할까요?')) return; localStorage.removeItem(storeKey); alert('로컬 데이터 삭제 완료'); }
-
-    if(id==='authMiniLogin' || id==='openLogin'){ openModal(); }
-    if(id==='authMiniLogout' || id==='btnSignOut'){ auth.signOut(); }
-    if(id==='modalClose'){ closeModal(); }
-    if(id==='modalSignIn') signIn();
-    if(id==='modalSignUp') signUp();
+  // ===== Auth UI =====
+  openLogin.addEventListener('click', () => {
+    const u = auth.currentUser;
+    if(u) auth.signOut();
+    else  safeOpenDialog(loginModal);
+  });
+  document.getElementById('closeLogin').addEventListener('click', ()=> safeCloseDialog(loginModal));
+  document.getElementById('doLogin').addEventListener('click', async (e)=>{
+    e.preventDefault();
+    try{
+      await auth.signInWithEmailAndPassword(loginEmail.value.trim(), loginPass.value);
+      loginMsg.textContent='로그인 성공';
+      setTimeout(()=>safeCloseDialog(loginModal), 300);
+    }catch(err){ loginMsg.textContent=userMsg(err); }
+  });
+  document.getElementById('doSignup').addEventListener('click', async (e)=>{
+    e.preventDefault();
+    try{
+      await auth.createUserWithEmailAndPassword(loginEmail.value.trim(), loginPass.value);
+      loginMsg.textContent='가입 완료';
+      setTimeout(()=>safeCloseDialog(loginModal), 300);
+    }catch(err){ loginMsg.textContent=userMsg(err); }
+  });
+  auth.onAuthStateChanged(u=>{
+    authStateEl.textContent = u ? (u.email+' 로그인됨') : '로그아웃 상태';
+    openLogin.textContent = u? '로그아웃' : '로그인';
   });
 
-  dailyDate.addEventListener('change', ()=>{ dailyDateText.textContent=formatDatePretty(dailyDate.value); loadDaily(); });
-  $('#importFile')?.addEventListener('change', (e)=>{ const f=e.target.files[0]; $('#fileName').textContent = f? `선택한 파일: ${f.name}` : ''; });
+  // ===== Router =====
+  const routes = { '#/daily': renderDaily, '#/weekly': renderWeekly, '#/search': renderSearch, '#/settings': renderSettings };
+  window.addEventListener('hashchange', ()=> render(location.hash));
+  window.addEventListener('load', ()=> render(location.hash||'#/daily'));
 
-  async function loadDaily(){
-    const key=dailyDate.value||ymd(new Date()); let d=null;
-    const user=auth.currentUser;
-    if(user){ const ref=db.collection('users').doc(user.uid).collection('daily').doc(key); const snap=await ref.get(); d=snap.exists? snap.data(): null; }
-    if(!d){ const loc=loadAll(); d=loc.daily[key]||{}; }
-    if(!d.question) d.question=nextFromPool('q',questionPool);
-    questionText.value=d.question||''; answerText.value=d.answer||''; eventField.value=d.event||''; thoughtField.value=d.thought||''; feelingField.value=d.feeling||''; resultField.value=d.result||'';
-    grat1.value=(d.gratitude&&d.gratitude[0])||''; grat2.value=(d.gratitude&&d.gratitude[1])||''; grat3.value=(d.gratitude&&d.gratitude[2])||'';
-    dailyNote.value=d.note||''; tagsField.value=(d.tags||[]).join(', '); statusDaily.textContent='불러옴';
+  // ===== Helpers =====
+  const fmtDate=d=> d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.';
+  const iso=d=> d.toISOString().slice(0,10);
+  function weekLabel(d){
+    const y=d.getFullYear(); const m=d.getMonth()+1;
+    const first=new Date(d.getFullYear(),d.getMonth(),1);
+    const w=Math.floor((d.getDate()+first.getDay())/7)+1;
+    return `${y}년 ${m}월 ${w}주`;
   }
-  async function saveDailyNow(){
-    const data=loadAll(); const key=dailyDate.value||ymd(new Date());
-    data.daily[key]={ question:questionText.value, answer:answerText.value.trim(), event:eventField.value.trim(), thought:thoughtField.value.trim(), feeling:feelingField.value.trim(), result:resultField.value.trim(), gratitude:[grat1.value.trim(),grat2.value.trim(),grat3.value.trim()], note:dailyNote.value.trim(), tags:parseTags(tagsField.value), updatedAt:new Date().toISOString() };
-    saveAll(data);
-    const user=auth.currentUser;
-    if(user){ await db.collection('users').doc(user.uid).collection('daily').doc(key).set(data.daily[key], {merge:true}); statusDaily.textContent='저장됨(클라우드)'; alert('저장 완료! (클라우드)'); }
-    else{ statusDaily.textContent='저장됨(로컬)'; alert('저장 완료!'); }
-  }
-  async function clearDailyNow(){
-    if(!confirm('이 날짜의 데이터를 모두 지울까요?')) return;
-    const data=loadAll(); const key=dailyDate.value||ymd(new Date()); delete data.daily[key]; saveAll(data);
-    const user=auth.currentUser; if(user){ await db.collection('users').doc(user.uid).collection('daily').doc(key).delete().catch(()=>{}); }
-    loadDaily(); statusDaily.textContent='삭제됨'; alert('삭제 완료');
-  }
+  function me(){ const u=auth.currentUser; if(!u) throw new Error('로그인 필요'); return u; }
+  function userDoc(){ return db.collection('users').doc(me().uid); }
+  function toast(t){ const n=document.createElement('div'); n.className='toast'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(), 1200); }
+  function userMsg(err){ const m=String(err && err.message || err); if(m.includes('invalid-credential')) return '이메일/비밀번호를 확인해 주세요'; if(m.includes('too-many-requests')) return '잠시 후 다시 시도해 주세요'; return m; }
+  function safeOpenDialog(d){ try{ d.showModal(); }catch(e){ d.setAttribute('open',''); d.style.display='block'; } }
+  function safeCloseDialog(d){ try{ d.close(); }catch(e){ d.removeAttribute('open'); d.style.display='none'; } }
 
-  const weekPicker=$('#weekPicker'), weekText=$('#weekText'), weekTextNice=$('#weekTextNice');
-  function setWeekByDate(dt){
-    const id=getWeekId(dt); weekPicker.value=id; weekText.textContent=weekPretty(id);
-    if(weekTextNice) weekTextNice.textContent=weekOfMonthStr(dt);
-    loadWeekly();
-  }
-  window.TD_setWeekToday = ()=>setWeekByDate(new Date());
-  function shiftWeek(n){ const val=weekPicker.value||getWeekId(new Date()); const [y,w]=val.split('-W'); const base=new Date(Date.UTC(parseInt(y),0,1+(parseInt(w)-1)*7)); base.setUTCDate(base.getUTCDate()+n*7); setWeekByDate(new Date(base)); }
-  $('#prevWeek')?.addEventListener('click', ()=>shiftWeek(-1));
-  $('#nextWeek')?.addEventListener('click', ()=>shiftWeek(1));
-  $('#thisWeekBtn')?.addEventListener('click', ()=>setWeekByDate(new Date()));
-  weekPicker.addEventListener('change', ()=>{ weekText.textContent=weekPretty(weekPicker.value); const parts=weekPicker.value.split('-W'); const y=parseInt(parts[0]); const w=parseInt(parts[1]); const base=new Date(Date.UTC(y,0,1+(w-1)*7)); if(weekTextNice) weekTextNice.textContent=weekOfMonthStr(base); loadWeekly(); });
+  // ===== Daily =====
+  function renderDaily(){
+    let cur = new Date();
+    view.innerHTML = '';
+    const bar = el('div','datebar');
+    const prev = btn('<'); const next = btn('>'); const today = badge('오늘');
+    const dateChip = el('div','date', fmtDate(cur)); const weekChip = el('div','badge', weekLabel(cur));
+    bar.append(prev, dateChip, next, today, weekChip); view.append(bar);
 
-  function renderMissions(items){
-    const missionList=$('#missionList'); missionList.innerHTML='';
-    items.forEach((m,idx)=>{
-      const row=document.createElement('div'); row.className='mission-item';
-      const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!m.done; cb.addEventListener('change',()=>{m.done=cb.checked; saveWeeklyData();});
-      const txt=document.createElement('input'); txt.type='text'; txt.value=m.text||''; txt.placeholder='미션 내용'; txt.addEventListener('input',()=>{m.text=txt.value; saveWeeklyData();});
-      const del=document.createElement('button'); del.className='btn danger'; del.textContent='삭제'; del.addEventListener('click',()=>{ if(!confirm('이 미션을 삭제할까요?')) return; items.splice(idx,1); renderMissions(items); saveWeeklyData(); });
-      row.appendChild(cb); row.appendChild(txt); row.appendChild(del); missionList.appendChild(row);
-    });
-  }
-  function currentWeekKey(){ return weekPicker.value || getWeekId(new Date()); }
-  async function loadWeekly(){
-    const key=currentWeekKey(); let w=null;
-    const user=auth.currentUser; if(user){ const ref=db.collection('users').doc(user.uid).collection('weekly').doc(key); const snap=await ref.get(); w=snap.exists? snap.data(): null; }
-    if(!w){ const data=loadAll(); w=data.weekly[key]||{missions:[],healing:''}; }
-    renderMissions(w.missions||[]); $('#healingText').value=w.healing||''; bindAuto($('#healingText'));
-  }
-  async function saveWeeklyData(withAlert){
-    const key=currentWeekKey(); const data=loadAll(); data.weekly[key]={missions:Array.from(document.querySelectorAll('#missionList .mission-item')).map(r=>{ const cb=r.querySelector('input[type=\"checkbox\"]'); const txt=r.querySelector('input[type=\"text\"]'); return {text:txt.value.trim(), done:cb.checked}; }).filter(x=>x.text.length>0),healing:$('#healingText').value.trim(),updatedAt:new Date().toISOString()}; saveAll(data);
-    const user=auth.currentUser; if(user){ await db.collection('users').doc(user.uid).collection('weekly').doc(key).set(data.weekly[key], {merge:true}); }
-    if(withAlert) alert('주간 데이터 저장 완료');
-  }
+    const qSec = section('오늘의 질문','나를 되돌아보는 한 줄 질문이에요.');
+    const qText = el('div','desc', '로딩 중…'); const other = btn('다른 질문'); other.classList.add('small');
+    const ansLabel = el('label', null, '답변'); const ansBox = textarea('질문에 대한 나의 답을 적어보세요.');
+    const saveRow = el('div','actions'); const saveBtn = primary('저장'); const clrBtn = btn('지우기'); saveRow.append(saveBtn, clrBtn);
+    qSec.append(qText, other, ansLabel, ansBox, saveRow); view.append(qSec);
 
-  // Search
-  function doSearch(){
-    const q=$('#searchInput').value.trim(); const data=loadAll(); const results=[]; const isTag=q.startsWith('#'); const qn=q.replace(/^#/,'').toLowerCase();
-    Object.keys(data.daily).forEach(date=>{ const d=data.daily[date]; const hay=[d.event,d.thought,d.feeling,d.result,...(d.gratitude||[]),d.note].join(' ').toLowerCase(); const tags=(d.tags||[]).map(t=>t.replace(/^#/,'').toLowerCase()); let match=false; if(isTag) match=tags.includes(qn); else match=hay.includes(qn); if(match) results.push({date,d}); });
-    results.sort((a,b)=>a.date.localeCompare(b.date)); const area=$('#searchResults'); area.innerHTML=''; if(results.length===0){ area.innerHTML='<p class="muted">결과가 없습니다.</p>'; return; } results.forEach(item=>{ const div=document.createElement('div'); div.className='res'; const h4=document.createElement('h4'); h4.textContent=item.date; const p=document.createElement('p'); p.innerHTML=`<strong>사건</strong>: ${item.d.event||''}<br><strong>생각</strong>: ${item.d.thought||''}<br><strong>감정</strong>: ${item.d.feeling||''}<br><strong>결과</strong>: ${item.d.result||''}<br><strong>감사</strong>: ${(item.d.gratitude||[]).filter(Boolean).join(', ')}<br><strong>일상</strong>: ${item.d.note||''}`; div.appendChild(h4); div.appendChild(p); area.appendChild(div); });
+    const tSec = section('감사일기','오늘 고마웠던 순간을 3가지 이상 적어보세요.'); const thanks = textarea('감사한 일 3가지를 적어보세요.'); const tSave=primary('저장'); tSec.append(thanks, el('div','actions').appendChild(tSave).parentNode); view.append(tSec);
+
+    const dSec = section('일상일기','오늘의 일상을 자유롭게 남겨보세요.'); const daily = textarea('하루를 가볍게 기록해요.'); const dSave=primary('저장'); dSec.append(daily, el('div','actions').appendChild(dSave).parentNode); view.append(dSec);
+
+    const tagSec = section('태그 달기','쉼표로 구분해 #태그를 달아보세요.'); const tags=input('예) #가족, #산책'); const tagSave=primary('저장'); tagSec.append(tags, el('div','actions').appendChild(tagSave).parentNode); view.append(tagSec);
+
+    const ref = ()=> userDoc().collection('daily').doc(iso(cur));
+    async function load(){
+      if(!auth.currentUser){ qText.textContent = pickQuestion(iso(cur)); return; }
+      const s=await ref().get(); const v=s.exists?s.data():{};
+      qText.textContent = v.question || pickQuestion(iso(cur));
+      ansBox.value = v.answer || ''; thanks.value=v.thanks||''; daily.value=v.journal||''; tags.value=v.tags||'';
+    }
+    async function save(){
+      if(!auth.currentUser) return alert('로그인 후 저장됩니다.');
+      await ref().set({question:qText.textContent, answer:ansBox.value, thanks:thanks.value, journal:daily.value, tags:tags.value, updatedAt:Date.now()},{merge:true});
+      toast('저장 완료!');
+    }
+
+    other.onclick = ()=> qText.textContent = pickQuestion(iso(cur), true);
+    saveBtn.onclick = save; tSave.onclick = save; dSave.onclick = save; tagSave.onclick = save;
+    clrBtn.onclick = async ()=>{ ansBox.value=''; await save(); };
+
+    prev.onclick = ()=>{cur.setDate(cur.getDate()-1); dateChip.textContent=fmtDate(cur); weekChip.textContent=weekLabel(cur); load();};
+    next.onclick = ()=>{cur.setDate(cur.getDate()+1); dateChip.textContent=fmtDate(cur); weekChip.textContent=weekLabel(cur); load();};
+    today.onclick = ()=>{cur=new Date(); dateChip.textContent=fmtDate(cur); weekChip.textContent=weekLabel(cur); load();};
+
+    load();
   }
 
-  // Export/Import
-  async function exportJSON(){ const data=loadAll(); const a=document.createElement('a'); const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); a.href=URL.createObjectURL(blob); a.download=`thanksdiary_backup_${ymd(new Date())}.json`; a.click(); }
-  async function shareJSON(){
-    const data=loadAll(); const textPayload=JSON.stringify(data,null,2);
-    if(navigator.share){ try{ await navigator.share({title:'지니짱 감사일기 백업', text:textPayload}); alert('공유 완료!'); return; }catch(e){} }
-    try{ await navigator.clipboard.writeText(textPayload); alert('클립보드에 복사했어요. 카톡에 붙여넣기 하세요!'); return; }catch(e){}
-    await exportJSON();
+  // ===== Weekly =====
+  function renderWeekly(){
+    let cur = new Date();
+    view.innerHTML='';
+    const bar = el('div','datebar'); const prev=btn('<'); const next=btn('>'); const wk=el('div','badge', weekLabel(cur)); bar.append(prev,next,wk); view.append(bar);
+
+    const mSec = section('미션 (체크박스)','이번 주 목표를 체크하세요.'); const list = el('div','list'); const add=btn('+ 추가'); add.classList.add('small'); const save=primary('저장'); mSec.append(list, el('div','actions').appendChild(add).parentNode, el('div','actions').appendChild(save).parentNode); view.append(mSec);
+
+    const qSec = section('오늘의 문구','마음을 가볍게 하는 한 줄을 골라 필사해요.'); const quote = el('div','desc','로딩 중…'); const copy = textarea('문장을 따라 적어보세요.'); const qSave=primary('저장'); qSec.append(quote, copy, el('div','actions').appendChild(qSave).parentNode); view.append(qSec);
+
+    const ref = ()=> userDoc().collection('weekly').doc(weekLabel(cur));
+
+    function paint(items){ list.innerHTML=''; (items||[]).forEach(it=>{ const row=el('label','row'); row.classList.add('checkbox'); const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!it.done; const ip=input('미션'); ip.value=it.text||''; row.append(cb, ip); list.append(row); }); }
+    async function load(){
+      if(!auth.currentUser){ quote.textContent = randomQuote(); return; }
+      const s=await ref().get(); const v=s.exists?s.data():{items:[], quote:'', copy:''}; paint(v.items||[]); quote.textContent = v.quote||randomQuote(); copy.value=v.copy||'';
+    }
+    async function saveAll(){
+      if(!auth.currentUser) return alert('로그인 후 저장됩니다.');
+      const items = Array.from(list.children).map(row=>({ done: row.querySelector('input[type=checkbox]').checked, text: row.querySelector('input[type=text]').value.trim() })).filter(x=>x.text);
+      await ref().set({ items, quote: quote.textContent, copy: copy.value, updatedAt:Date.now() }, {merge:true});
+      toast('저장 완료!');
+    }
+
+    add.onclick = ()=>{ const row=el('label','row'); row.classList.add('checkbox'); const cb=document.createElement('input'); cb.type='checkbox'; const ip=input('미션'); row.append(cb, ip); list.append(row); };
+    save.onclick = saveAll; qSave.onclick = saveAll;
+    prev.onclick = ()=>{ cur.setDate(cur.getDate()-7); wk.textContent=weekLabel(cur); load(); };
+    next.onclick = ()=>{ cur.setDate(cur.getDate()+7); wk.textContent=weekLabel(cur); load(); };
+
+    load();
   }
-  function importJSON(){
-    const f=$('#importFile').files[0]; if(!f){ alert('JSON 파일을 선택하세요.'); return; }
-    const reader=new FileReader(); reader.onload=e=>{ try{ const incoming=JSON.parse(e.target.result); const cur=loadAll(); cur.daily={...cur.daily, ...(incoming.daily||{})}; cur.weekly={...cur.weekly, ...(incoming.weekly||{})}; saveAll(cur); alert('가져오기 완료'); if(pages.daily.classList.contains('active')) loadDaily(); if(pages.weekly.classList.contains('active')) loadWeekly(); }catch(err){ alert('가져오기 실패: 올바른 JSON이 아닙니다.'); } }; reader.readAsText(f);
+
+  // ===== Search =====
+  function renderSearch(){
+    view.innerHTML='';
+    const s = section('검색','키워드로 일기를 찾아요.');
+    const q = input('예) #가족 / 산책 / 감사'); const go = primary('검색'); const out = el('div','section'); out.style.background='#fff';
+    go.onclick = async ()=>{
+      out.innerHTML='';
+      if(!auth.currentUser) return out.innerHTML='<p class="desc">로그인 후 이용하세요.</p>';
+      const daily = await userDoc().collection('daily').orderBy('updatedAt','desc').limit(400).get();
+      daily.docs.forEach(d=>{ const v=d.data(); const hay=JSON.stringify(v||{}); if(q.value && hay.includes(q.value)) out.append(section(d.id, (v.journal||'').slice(0,120))); });
+      const weekly = await userDoc().collection('weekly').get();
+      weekly.docs.forEach(d=>{ const v=d.data(); const hay=JSON.stringify(v||{}); if(q.value && hay.includes(q.value)) out.append(section(d.id, (v.copy||'').slice(0,120))); });
+    };
+    s.append(q, el('div','actions').appendChild(go).parentNode, out);
+    view.append(s);
   }
 
-  // Modal + Auth
-  const lm=$('#loginModal'), loginEmail=$('#loginEmail'), loginPwd=$('#loginPwd'), loginMsg=$('#loginMsg');
-  function openModal(){ lm.classList.add('open'); loginMsg.textContent=''; }
-  function closeModal(){ lm.classList.remove('open'); }
-  async function signIn(){ try{ await auth.signInWithEmailAndPassword(loginEmail.value.trim(), loginPwd.value); closeModal(); }catch(e){ const m='로그인 실패: '+(e.message||e); loginMsg.textContent=m; alert(m);} }
-  async function signUp(){ try{ await auth.createUserWithEmailAndPassword(loginEmail.value.trim(), loginPwd.value); closeModal(); }catch(e){ const m='회원가입 실패: '+(e.message||e); loginMsg.textContent=m; alert(m);} }
+  // ===== Settings =====
+  function renderSettings(){
+    view.innerHTML='';
+    const acc = section('계정','로그인/로그아웃 및 상태');
+    const openBtn = primary('로그인/회원가입 열기'); openBtn.onclick = ()=> safeOpenDialog(loginModal);
+    const outBtn  = btn('로그아웃'); outBtn.onclick = ()=> auth.signOut();
+    acc.append(el('div','actions').appendChild(openBtn).parentNode, el('div','actions').appendChild(outBtn).parentNode);
+    view.append(acc);
 
-  // expose for inline onClick fallback
-  window.TD_openLogin=openModal; window.TD_closeLogin=closeModal; window.TD_signIn=signIn; window.TD_signUp=signUp;
+    const bu = section('백업/복원','JSON 파일로 내보내거나 가져옵니다.');
+    const exp = primary('JSON 내보내기'); const imp = btn('JSON 가져오기'); const file=document.createElement('input'); file.type='file'; file.accept='application/json';
+    exp.onclick = async ()=>{
+      if(!auth.currentUser) return alert('로그인 후 이용하세요');
+      const data = {
+        daily: (await userDoc().collection('daily').get()).docs.map(d=>({id:d.id,...d.data()})),
+        weekly:(await userDoc().collection('weekly').get()).docs.map(d=>({id:d.id,...d.data()}))
+      };
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='thanks-diary-backup.json'; a.click();
+    };
+    imp.onclick = ()=> file.click();
+    file.onchange = async ()=>{
+      if(!auth.currentUser) return alert('로그인 후 이용하세요');
+      const txt = await file.files[0].text(); const data = JSON.parse(txt||'{}');
+      const batch = db.batch();
+      (data.daily||[]).forEach(x=> batch.set(userDoc().collection('daily').doc(x.id), x, {merge:true}));
+      (data.weekly||[]).forEach(x=> batch.set(userDoc().collection('weekly').doc(x.id), x, {merge:true}));
+      await batch.commit(); toast('복원 완료');
+    };
+    bu.append(el('div','actions').appendChild(exp).parentNode, el('div','actions').appendChild(imp).parentNode, file);
+    view.append(bu);
 
-  auth.onAuthStateChanged((user)=>{
-    const logged=!!user;
-    const miniState=$('#authMiniState'), miniLogin=$('#authMiniLogin'), miniLogout=$('#authMiniLogout');
-    if(miniState) miniState.textContent = logged ? '로그인됨' : '로그아웃 상태';
-    miniLogin?.classList.toggle('hidden', logged);
-    miniLogout?.classList.toggle('hidden', !logged);
-    const node=$('#authState'); if(node) node.textContent = logged ? `로그인됨: ${user.email||user.uid}` : '로그아웃 상태';
-  });
-
-  function init(){
-    document.querySelectorAll('textarea.auto').forEach(bindAuto);
-    if(!location.hash) location.hash = '#/daily';
-    setDailyDate(new Date()); setWeekByDate(new Date());
-    handleHash();
+    const cache = section('캐시/오프라인','업데이트가 안 보이면 강제 새로고침하세요.');
+    const refresh = btn('강제 새로고침'); refresh.onclick = ()=>{ if('caches' in window) caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>location.reload()); else location.reload(); };
+    cache.append(el('div','actions').appendChild(refresh).parentNode);
+    view.append(cache);
   }
-  init();
+
+  // ===== Pools =====
+  const QUESTIONS = [
+    "사람들에게 어떤 사람으로 기억되고 싶나요?","오늘 나를 미소 짓게 한 작은 순간은?","최근 내가 포기하지 않은 일은?",
+    "오늘 감사했던 세 가지는?","요즘 가장 나를 설레게 하는 것은?","내가 바라는 내일의 작은 변화는?",
+    "최근 배운 소소한 교훈은?","오늘 챙겨준 내 마음은 어디인가요?"
+  ];
+  function pickQuestion(dayISO, force){
+    if(force) return QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
+    const n = parseInt((dayISO||'').replace(/-/g,''))||0; return QUESTIONS[n % QUESTIONS.length];
+  }
+  const QUOTES = [
+    "부러움 대신 배움을 고르면 마음이 한결 가벼워진다.",
+    "작은 꾸준함이 큰 변화를 만든다.",
+    "오늘의 나는 어제의 나를 이긴다.",
+    "마음이 향하는 곳으로 한 걸음."
+  ];
+  const randomQuote = () => QUOTES[Math.floor(Math.random()*QUOTES.length)];
+
+  // ===== UI helpers =====
+  function el(tag, cls, text){ const n=document.createElement(tag); if(cls) n.className=cls; if(text!=null) n.textContent=text; return n; }
+  function section(title, desc){
+    const s = el('section','section');
+    if(title) s.append(el('h2',null,title));
+    if(desc) s.append(el('p','desc',desc));
+    return s;
+  }
+  const btn=t=>Object.assign(document.createElement('button'),{className:'btn', textContent:t});
+  const primary=t=>Object.assign(document.createElement('button'),{className:'btn primary', textContent:t});
+  const input=ph=>Object.assign(document.createElement('input'),{placeholder:ph||''});
+  const textarea=ph=>Object.assign(document.createElement('textarea'),{placeholder:ph||''});
+
+  function render(hash){ (routes[hash]||routes['#/daily'])(); }
 })();
