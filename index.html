@@ -42,7 +42,7 @@
 
   <main id="app-main">
     <!-- Daily Page -->
-    <section id="page-daily" class="page">
+    <section id="page-daily" class="page active">
       <div class="date-row">
         <button id="prevDay" class="btn">&lt;</button>
         <input type="date" id="dailyDate">
@@ -177,11 +177,10 @@
         </div>
       </div>
     </section>
-  <noscript><p style="padding:1rem;color:#a00">이 앱은 자바스크립트가 필요합니다. Safari에서 자바스크립트를 켜주세요.</p></noscript>
-</main>
+  </main>
 
   <footer class="app-footer">
-    <small>오프라인 + 클라우드 동기화 · v2.3</small>
+    <small>오프라인 + 클라우드 동기화 · v2.3.2</small>
   </footer>
 
   <!-- 로그인 모달 -->
@@ -201,15 +200,12 @@
     </div>
   </div>
 
-  <!-- Module app (Firebase v12 imports inside) -->
-  <script type="module" src="app.js?v=231"></script>
+  <!-- Firebase compat SDK (안정) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js');
-      });
-    }
-  </script>
+  <!-- 앱 스크립트 (일반 defer, 모듈 아님) -->
+  <script src="app.js?v=232" defer></script>
 </body>
 </html>
