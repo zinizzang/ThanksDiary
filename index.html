@@ -1,161 +1,237 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#fff6c9">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/icon-192.png">
-<title>지니짱 감사일기</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#fff6c9">
+  <title>지니짱 감사일기</title>
 
-<!-- Google Fonts (same as 2.x 계열) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
 
-<link rel="stylesheet" href="styles.css">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css?v=235">
+  <style>.page{display:none}.page.active{display:block}</style>
 </head>
 <body>
   <header class="app-header">
-    <div class="brand">
-      <span class="star" aria-hidden="true">★</span>
-      <h1 class="title">지니짱 감사일기</h1>
-      <div class="auth">
-        <span id="authState">로그아웃 상태</span>
-        <button id="btnSign" class="btn outline small">로그인</button>
+    <div class="title-area">
+      <h1 class="logo">지니짱 감사일기</h1>
+      <div class="header-right">
+        <div class="header-auth">
+          <span id="authMiniState" class="muted">로그아웃 상태</span>
+          <button id="authMiniLogin" class="mini-btn" onclick="window.TD_openLogin && window.TD_openLogin()">로그인</button>
+          <button id="authMiniLogout" class="mini-btn hidden">로그아웃</button>
+        </div>
+        <nav class="tabs">
+          <a href="#/daily" class="tab-btn" id="tab-daily">데일리</a>
+          <a href="#/weekly" class="tab-btn" id="tab-weekly">위클리</a>
+          <a href="#/search" class="tab-btn" id="tab-search">검색</a>
+          <a href="#/settings" class="tab-btn" id="tab-settings">설정/백업</a>
+        </nav>
       </div>
     </div>
-    <nav class="tabs">
-      <button class="tab-btn" data-route="daily">데일리</button>
-      <button class="tab-btn" data-route="weekly">위클리</button>
-      <button class="tab-btn" data-route="search">검색</button>
-      <button class="tab-btn" data-route="settings">설정/백업</button>
-    </nav>
   </header>
 
-  <main id="view">
-    <!-- Daily -->
-    <section id="page-daily" class="page visible">
-      <div class="date-bar">
-        <button class="chip">&lt;</button>
-        <div class="date-display" id="dateText">2025. 8. 9.</div>
-        <button class="chip">&gt;</button>
-        <button class="chip ghost" id="btnToday">오늘</button>
-        <div class="weekpill" id="weekText">2025년 8월 2주</div>
+  <main id="app-main">
+    <section id="page-daily" class="page">
+      <div class="date-row">
+        <button id="prevDay" class="btn">&lt;</button>
+        <input type="date" id="dailyDate">
+        <button id="nextDay" class="btn">&gt;</button>
+        <button id="todayBtn" class="btn outline">오늘</button>
+        <span id="dailyDateText" class="date-text"></span>
       </div>
 
-      <article class="card">
-        <header class="card-head">
-          <span class="dot purple"></span>
-          <h2>오늘의 질문</h2>
-          <button class="chip ghost" id="btnAnother">다른 질문</button>
-        </header>
-        <p class="q" id="qText">사람들에게 어떤 사람으로 기억되고 싶나요?</p>
-        <textarea class="ta" id="qAnswer" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
-        <div class="row">
-          <button class="btn primary" id="btnSaveDaily">저장</button>
-          <button class="btn" id="btnClearDaily">지우기</button>
+      <div class="card">
+        <h2>🪞 오늘의 질문</h2>
+        <div class="qbox">
+          <textarea id="questionText" class="auto" readonly></textarea>
+          <div class="q-actions actions-spaced">
+            <button id="btnAnotherQ" class="btn">다른 질문</button>
+          </div>
         </div>
-      </article>
+        <label class="lbl">답변</label>
+        <textarea id="answerText" class="auto" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+      </div>
 
-      <article class="card">
-        <header class="card-head">
-          <span class="dot green"></span>
-          <h2>미션 (체크박스)</h2>
-        </header>
-        <div id="missionList" class="check-list"></div>
-        <div class="mission-new">
-          <input id="newMission" class="input" placeholder="미션 추가">
-          <button id="addMission" class="btn small">+ 추가</button>
-          <button id="saveMission" class="btn primary small">저장</button>
-        </div>
-      </article>
+      <div class="card">
+        <h2>🧠 감정일기</h2>
+        <p class="muted">사건을 사실대로 적고, 그때의 생각과 감정을 구분해 본 뒤 결과를 간단히 남겨보세요.</p>
+        <label class="lbl">사건</label>
+        <textarea id="eventField" class="auto" placeholder="오늘 무슨 일이 있었나요?"></textarea>
+        <label class="lbl">생각</label>
+        <textarea id="thoughtField" class="auto" placeholder="그때 어떤 생각이 들었나요?"></textarea>
+        <label class="lbl">감정</label>
+        <textarea id="feelingField" class="auto" placeholder="감정의 강도/이유를 함께 적어보세요."></textarea>
+        <label class="lbl">결과</label>
+        <textarea id="resultField" class="auto" placeholder="그 결과 나는 어떻게 행동했나요?"></textarea>
+      </div>
 
-      <article class="card">
-        <header class="card-head">
-          <span class="dot orange"></span>
-          <h2>감사일기</h2>
-        </header>
-        <p class="hint">오늘 고마웠던 순간을 3가지 이상 적어보세요.</p>
-        <textarea class="ta" id="thanksText" placeholder="○○에게 고마웠다 · 작은 행복 · 사소한 배려 등"></textarea>
-      </article>
+      <div class="card">
+        <h2>🌼 감사일기</h2>
+        <ol class="gratitude-list">
+          <li><input type="text" id="grat1" placeholder="작은 것도 좋아요."></li>
+          <li><input type="text" id="grat2" placeholder="사람/행동/행운 등 무엇이든."></li>
+          <li><input type="text" id="grat3" placeholder="오늘을 좋게 만든 것."></li>
+        </ol>
+      </div>
 
-      <article class="card">
-        <header class="card-head">
-          <span class="dot blue"></span>
-          <h2>일상일기</h2>
-        </header>
-        <p class="hint">오늘의 일상을 자유롭게 남겨보세요.</p>
-        <textarea class="ta" id="dailyText" placeholder="하루를 가볍게 기록해요."></textarea>
-      </article>
+      <div class="card">
+        <h2>📔 일상일기</h2>
+        <textarea id="dailyNote" class="auto" placeholder="짧게 요약하거나, 길게 자유롭게 적어도 좋아요."></textarea>
+      </div>
 
-      <article class="card">
-        <header class="card-head">
-          <span class="dot brown"></span>
-          <h2>태그 달기</h2>
-        </header>
-        <input id="tags" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분">
-      </article>
+      <div class="card">
+        <h2>🏷️ 태그</h2>
+        <input type="text" id="tagsField" placeholder="#가족, #업무 처럼 쉼표로 구분">
+      </div>
+
+      <div class="btn-row end actions-spaced" id="dailyActions">
+        <button id="saveDaily" class="btn primary">저장</button>
+        <button id="clearDaily" class="btn danger">지우기</button>
+        <span id="statusDaily" class="muted">불러옴</span>
+      </div>
     </section>
 
-    <!-- Weekly -->
     <section id="page-weekly" class="page">
-      <div class="date-bar">
-        <button class="chip">&lt;</button>
-        <div class="date-display" id="weekDateText">2025 31번째 주</div>
-        <button class="chip">&gt;</button>
-        <div class="weekpill" id="weekDateText2">2025년 8월 2주</div>
+      <div class="date-row">
+        <button id="prevWeek" class="btn">&lt;</button>
+        <input type="week" id="weekPicker">
+        <button id="nextWeek" class="btn">&gt;</button>
+        <button id="thisWeekBtn" class="btn outline">이번 주</button>
+        <span id="weekText" class="date-text"></span>
+        <span id="weekTextNice" class="date-text" style="margin-left:.5rem;color:#7c3aed"></span>
       </div>
-      <article class="card">
-        <header class="card-head">
-          <span class="dot purple"></span>
-          <h2>오늘의 문구</h2>
-          <button class="chip ghost small" id="copyQuote">필사</button>
-        </header>
-        <p id="quoteArea" class="q">오늘의 마음을 닮은 문장을 만났나요?</p>
-        <textarea id="scribe" class="ta" placeholder="마음에 남은 문장을 필사해보세요."></textarea>
-      </article>
-    </section>
 
-    <!-- Search -->
-    <section id="page-search" class="page">
-      <article class="card">
-        <header class="card-head"><span class="dot blue"></span><h2>검색</h2></header>
-        <input class="input" placeholder="키워드로 검색">
-      </article>
-    </section>
-
-    <!-- Settings -->
-    <section id="page-settings" class="page">
-      <article class="card">
-        <header class="card-head"><span class="dot gray"></span><h2>백업/복원</h2></header>
-        <div class="row wrap">
-          <button class="btn">JSON 파일로 저장</button>
-          <label class="filebtn"><input type="file" hidden> JSON 가져오기</label>
-          <button class="btn outline" id="btnLogout">로그아웃</button>
+      <div class="card">
+        <h2>✅ 미션 (체크박스)</h2>
+        <div id="missionList"></div>
+        <div class="add-mission">
+          <input type="text" id="newMission" placeholder="미션 추가">
+          <button id="addMission" class="btn">+ 추가</button>
         </div>
-      </article>
+      </div>
+
+      <div class="card">
+        <h2>🫶 오늘의 문구</h2>
+        <textarea id="healingText" class="auto" placeholder="오늘의 문구"></textarea>
+        <div class="btn-row actions-spaced">
+          <button id="randomHealing" class="btn">랜덤</button>
+          <button id="saveWeekly" class="btn primary">저장</button>
+          <button id="clearWeekly" class="btn danger">지우기</button>
+        </div>
+        <button id="startCopy" class="btn link">✍️ 필사 시작</button>
+        <textarea id="copyArea" class="auto hidden" placeholder="문구를 따라 적어보세요."></textarea>
+      </div>
+    </section>
+
+    <section id="page-search" class="page">
+      <div class="card">
+        <h2>🔎 검색</h2>
+        <input type="text" id="searchInput" placeholder="키워드 또는 #태그 (예: 보고서, #업무)">
+        <div class="btn-row actions-spaced">
+          <button id="searchBtn" class="btn">검색</button>
+          <button id="searchClear" class="btn">지우기</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>결과</h3>
+        <div id="searchResults"></div>
+      </div>
+    </section>
+
+    <section id="page-settings" class="page">
+      <div class="card">
+        <h2>🔐 로그인</h2>
+        <div class="btn-row actions-spaced">
+          <button id="openLogin" class="btn" onclick="window.TD_openLogin && window.TD_openLogin()">로그인</button>
+          <button id="btnSignOut" class="btn outline">로그아웃</button>
+        </div>
+        <p class="muted" id="authState">로그아웃 상태</p>
+      </div>
+
+      <div class="card">
+        <h2>📦 백업/복원</h2>
+        <div class="settings-grid">
+          <button id="exportJSON" class="btn">JSON 파일로 저장</button>
+          <button id="shareJSON" class="btn">JSON 공유(카톡 등)</button>
+          <label class="file-wrap btn">
+            <input type="file" id="importFile" accept=".json"/>파일 선택
+          </label>
+          <button id="importJSON" class="btn">JSON 가져오기</button>
+          <button id="refreshCache" class="btn outline">캐시 새로고침(업데이트)</button>
+          <button id="resetLocal" class="btn danger">로컬 데이터 초기화</button>
+        </div>
+        <p id="fileName" class="muted"></p>
+      </div>
     </section>
   </main>
 
-  <!-- 로그인 모달 -->
-  <div id="loginModal" class="modal hidden">
-    <div class="modal-card">
+  <footer class="app-footer">
+    <small>오프라인 + 클라우드 동기화 · v2.3.5</small>
+  </footer>
+
+  <div id="loginModal" class="modal">
+    <div class="modal-panel">
       <h3>로그인</h3>
-      <label>이메일<input id="loginEmail" class="input" type="email" placeholder="you@example.com"></label>
-      <label>비밀번호<input id="loginPw" class="input" type="password" placeholder="••••••••"></label>
-      <div class="row right gap">
-        <button id="doSignup" class="btn outline">회원가입</button>
-        <button id="doLogin" class="btn primary">로그인</button>
-        <button id="closeLogin" class="btn">닫기</button>
+      <label class="lbl">이메일</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com">
+      <label class="lbl">비밀번호</label>
+      <input type="password" id="loginPwd" placeholder="••••••••">
+      <div class="btn-row actions-spaced modal-actions">
+        <button id="modalSignIn" class="btn primary" onclick="window.TD_signIn && window.TD_signIn()">로그인</button>
+        <button id="modalSignUp" class="btn" onclick="window.TD_signUp && window.TD_signUp()">회원가입</button>
+        <button id="modalClose" class="btn" onclick="window.TD_closeLogin && window.TD_closeLogin()">닫기</button>
       </div>
+      <p id="loginMsg" class="muted"></p>
     </div>
   </div>
 
-  <footer class="app-footer">
-    <small>오프라인 + 로그인 연결 · v2.3.2 UI 패치</small>
-  </footer>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="app.js?v=235" defer></script>
 
-  <script src="ui-override.js"></script>
+  <script>
+    (function(){
+      function show(name){
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+        var p=document.querySelector('#page-'+(name||'daily')); if(p) p.classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+        var t=document.querySelector('#tab-'+(name||'daily')); if(t) t.classList.add('active');
+      }
+      function onHash(){var h=location.hash.replace(/^#\/?/,'')||'daily'; show(h); if(h==='weekly' && !document.getElementById('weekPicker').value){ window.setTimeout(()=>{ if(window.TD_setWeekToday) window.TD_setWeekToday();},0);}}
+      window.addEventListener('hashchange', onHash);
+      if(!location.hash) location.hash = '#/daily'; onHash();
+
+      var lm=document.getElementById('loginModal');
+      function open(){ lm && lm.classList.add('open'); }
+      function close(){ lm && lm.classList.remove('open'); }
+      document.addEventListener('click', function(e){
+        var id=e.target && e.target.id;
+        if(id==='authMiniLogin' || id==='openLogin') open();
+        if(id==='modalClose') close();
+      });
+      lm && lm.addEventListener('click', function(e){ if(e.target.id==='loginModal') close(); });
+
+      try{
+        var dd=document.getElementById('dailyDate'), dt=document.getElementById('dailyDateText');
+        var d=new Date(); var tz=d.getTimezoneOffset()*60000; var ymd=new Date(d.getTime()-tz).toISOString().slice(0,10);
+        if(dd){ dd.value=ymd; if(dt){ dt.textContent = d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.'; } }
+      }catch(e){}
+
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
+        if(window.caches && caches.keys) caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+      }
+    })();
+  </script>
 </body>
 </html>
