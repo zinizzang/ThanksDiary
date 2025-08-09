@@ -52,8 +52,8 @@ textarea{min-height:96px;resize:vertical}
 .row{display:flex;gap:.5rem;align-items:center;margin:.5rem 0}
 .muted{color:var(--muted)}
 /* Modal - safe default hidden */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:50;padding:1rem}
-.modal.open{display:flex!important}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:50;padding:1rem;pointer-events:none}
+.modal.open{display:flex!important;pointer-events:auto}
 .modal-panel{width:min(520px,95vw);background:#fff;border-radius:1rem;padding:1rem;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .modal-panel h3{margin:.25rem 0 1rem;font-size:1.25rem}
 .modal-actions{gap:12px}
@@ -68,7 +68,7 @@ textarea{min-height:96px;resize:vertical}
 const $ = (sel, el=document)=>el.querySelector(sel);
 const $$ = (sel, el=document)=>Array.from(el.querySelectorAll(sel));
 const fmtYMD = d => new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
-const pretty = d => `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate}.`.replace('. NaN','.');
+const pretty = d => `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`;
 const weekOfYear = d => { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const dayNum = (t.getUTCDay() + 6) % 7; t.setUTCDate(t.getUTCDate() - dayNum + 3); const firstThursday = new Date(Date.UTC(t.getUTCFullYear(),0,4)); const diff = (t - firstThursday) / 86400000; return 1 + Math.floor(diff / 7); };
 const weekOfMonth = d => Math.ceil((d.getDate() - new Date(d.getFullYear(), d.getMonth(), 1).getDay() + 6)/7);
 function showPage(id){ $$('.page').forEach(p=>p.classList.remove('active')); $(`#page-${id}`)?.classList.add('active'); $$('.tab-btn').forEach(t=>t.classList.remove('active')); $(`#tab-${id}`)?.classList.add('active'); if(id==='weekly') updateWeekTexts(); }
@@ -87,7 +87,22 @@ function updateWeekTexts(){ const now = new Date(); const wy = weekOfYear(now); 
 function thisWeek(){ $('#weekPicker').value = (new Date()).toISOString().slice(0,4) + '-W' + String(weekOfYear(new Date())).padStart(2,'0'); updateWeekTexts(); }
 function doSearch(){ const q = $('#searchInput').value.trim(); const res = $('#searchResults'); res.innerHTML=''; if(!q){ res.textContent='검색어를 입력하세요.'; return; } const keys = Object.keys(localStorage).filter(k=>k.startsWith('td:v2:daily:')); const items = []; keys.forEach(k=>{ const d = JSON.parse(localStorage.getItem(k)||'null'); if(!d) return; const text = [d.q,d.a,d.e,d.t,d.f,d.r,d.g1,d.g2,d.g3,d.note,d.tags].join(' '); if(text.includes(q)){ items.push({date:k.split(':').pop(), text:d.q||''}); } }); if(!items.length){ res.textContent='결과 없음'; return; } res.innerHTML = items.map(it=>`<div class="mission-item"><strong>${it.date}</strong><span style="margin-left:.5rem">${it.text}</span></div>`).join(''); }
 document.addEventListener('input', e=>{ if(e.target.matches('textarea.auto')){ e.target.style.height='auto'; e.target.style.height=(e.target.scrollHeight+2)+'px'; } });
-document.addEventListener('click', e=>{ const id = e.target.id; if(id==='saveDaily') return void saveDaily(); if(id==='clearDaily') return void clearDaily(); if(id==='btnAnotherQ') return void anotherQ(); if(id==='prevDay') return void moveDay(-1); if(id==='nextDay') return void moveDay(1); if(id==='todayBtn'){ const now=new Date(); $('#dailyDate').value=fmtYMD(now); $('#dailyDateText').textContent=`${now.getFullYear()}. ${now.getMonth()+1}. ${now.getDate()}.`; loadDaily(); return; } if(id==='searchBtn') return void doSearch(); if(id==='searchClear'){ $('#searchInput').value=''; $('#searchResults').textContent=''; return; } if(id==='thisWeekBtn') return void thisWeek(); if(id==='openLogin' || id==='authMiniLogin'){ $('#loginModal').classList.add('open'); return; } if(id==='modalClose') return void $('#loginModal').classList.remove('open'); if(id==='modalSignIn' || id==='modalSignUp'){ alert('로그인은 나중에 연결할게요! (지금은 로컬 저장만 지원)'); return; } });
+document.addEventListener('click', e=>{ const id = e.target.id; if(id==='saveDaily') return void saveDaily(); if(id==='clearDaily') return void clearDaily(); if(id==='btnAnotherQ') return void anotherQ(); if(id==='prevDay') return void moveDay(-1); if(id==='nextDay') return void moveDay(1); if(id==='todayBtn'){ const now=new Date(); $('#dailyDate').value=fmtYMD(now); $('#dailyDateText').textContent=`${now.getFullYear()}. ${now.getMonth()+1}. ${now.getDate()}.`; loadDaily(); return; } if(id==='searchBtn') return void doSearch(); if(id==='searchClear'){ $('#searchInput').value=''; $('#searchResults').textContent=''; return; } if(id==='thisWeekBtn') return void thisWeek(); if(id==='openLogin' || id==='authMiniLogin'){ $('#loginModal').classList.add('open'); return; } if(id==='modalClose') return void $('#loginModal').classList.remove('open'); if(id==='modalSignIn' || id==='modalSignUp'){ alert('로그인은 나중에 연결할게요! (지금은 로컬 저장만 지원)'); $('#loginModal').classList.remove('open'); return; } });
+// 클릭 배경 닫기
+document.getElementById('loginModal').addEventListener('click', (e)=>{ if(e.target.id==='loginModal'){ e.currentTarget.classList.remove('open'); } });
+
+// 탭 클릭 강제 라우팅 (iOS에서 해시 변경 못 잡는 경우 대비)
+document.addEventListener('click', (e)=>{
+  const a = e.target.closest && e.target.closest('a.tab-btn');
+  if(!a) return;
+  e.preventDefault();
+  const id = a.id.replace('tab-','');
+  showPage(id);
+  // 주소 표시도 맞춰줌
+  if(location.hash !== '#/'+id){ location.hash = '#/'+id; }
+});
+// ESC 닫기
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ const m=document.getElementById('loginModal'); if(m.classList.contains('open')) m.classList.remove('open'); } });
 document.addEventListener('change', e=>{ if(e.target.id==='dailyDate'){ const d=new Date(e.target.value); $('#dailyDateText').textContent=`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`; loadDaily(); } if(e.target.id==='weekPicker') updateWeekTexts(); });
 </script>
 </head>
@@ -252,7 +267,7 @@ document.addEventListener('change', e=>{ if(e.target.id==='dailyDate'){ const d=
 </main>
 
 <footer class="app-footer">
-  <small>오프라인(로컬 저장) · v2.5.0</small>
+  <small>오프라인(로컬 저장) · v2.5.2</small>
 </footer>
 
 <div id="loginModal" class="modal"><div class="modal-panel">
