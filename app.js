@@ -1,304 +1,322 @@
+// ===== Firebase =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// v2.3.6 – compat SDK + defensive event wiring + alerts + week nice text
-(function(){
-  var firebaseConfig = {
-    apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
-    authDomain: "thanksdiary-dca35.firebaseapp.com",
-    projectId: "thanksdiary-dca35",
-    storageBucket: "thanksdiary-dca35.appspot.com",
-    messagingSenderId: "250477396044",
-    appId: "1:250477396044:web:aa1cf155f01263e08834e9"
+// >>> 여기에 본인 프로젝트 값으로 바꾸기 <<<
+const firebaseConfig = {
+  apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
+  authDomain: "thanksdiary-dca35.firebaseapp.com",
+  projectId: "thanksdiary-dca35",
+  storageBucket: "thanksdiary-dca35.firebasestorage.app",
+  messagingSenderId: "250477396044",
+  appId: "1:250477396044:web:aa1cf155f01263e08834e9",
+  measurementId: "G-J0Z03LHYYC"
+};
+// ---------------------------------------------
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+enableIndexedDbPersistence(db).catch(()=>{}); // 오프라인 쓰기/읽기
+
+// ====== 전역 ======
+const $ = sel => document.querySelector(sel);
+const view = $("#view");
+const toast = document.createElement('div'); toast.className='toast'; document.body.appendChild(toast);
+const routes = ["daily","weekly","search","settings"];
+let currentRoute = "daily";
+let user = null;
+
+// ====== 질문 50 ======
+const QUESTIONS = [
+ "오늘 하루 중 가장 감사했던 순간은 무엇인가요?",
+ "오늘 나를 웃게 만든 일은 무엇인가요?",
+ "오늘의 기분을 한 단어로 표현한다면?",
+ "내가 오늘 배운 새로운 것은 무엇인가요?",
+ "오늘의 나에게 가장 자랑스러운 점은?",
+ "오늘 내가 다른 사람에게 준 긍정적인 영향은?",
+ "오늘 하루 중 가장 평온했던 시간은 언제인가요?",
+ "오늘 나를 힘들게 했지만 극복한 일은?",
+ "오늘의 나를 1~10으로 점수 매긴다면? 이유는?",
+ "오늘 내가 가장 집중했던 일은 무엇인가요?",
+ "오늘을 떠올리면 가장 먼저 생각나는 장면은?",
+ "오늘 나를 성장시킨 경험은 무엇인가요?",
+ "오늘 느낀 감정 중 가장 강렬했던 것은?",
+ "오늘 내가 놓친 기회는 무엇이었나요?",
+ "오늘의 내가 어제보다 나아진 점은?",
+ "오늘 내가 다른 사람에게 한 친절은?",
+ "오늘 내 마음이 따뜻해진 순간은?",
+ "오늘 내가 한 선택 중 가장 잘한 것은?",
+ "오늘 내가 미루지 않고 끝낸 일은?",
+ "오늘 나를 도와준 사람과 그 이유는?",
+ "오늘 내가 스스로를 돌본 방법은?",
+ "오늘 가장 용기 냈던 순간은?",
+ "오늘 내가 배운 교훈은?",
+ "오늘의 감사 세 가지는?",
+ "오늘 내가 놓친 감사는 무엇일까요?",
+ "오늘 누군가에게 전하고 싶은 말은?",
+ "오늘을 더 행복하게 만들 수 있었던 방법은?",
+ "오늘 의도적으로 멈춘 순간은?",
+ "오늘 불편했지만 성장시킨 일은?",
+ "오늘 조금 더 친절할 수 있었던 순간은?",
+ "오늘 실천한 자기계발 행동은?",
+ "오늘 주변에서 발견한 작은 아름다움은?",
+ "오늘 내가 웃었던 이유는?",
+ "오늘 놓친 작은 기쁨은?",
+ "오늘 나를 놀라게 한 일은?",
+ "오늘 집중해서 들었던 말/대화는?",
+ "오늘 더 잘할 수 있었던 일은?",
+ "오늘 나를 안정시킨 루틴은?",
+ "오늘 새로운 시각으로 본 것은?",
+ "오늘 나를 지치게 한 일은?",
+ "오늘 ‘잘했다’고 느낀 순간은?",
+ "오늘 의도적으로 멀리한 일/사람은?",
+ "오늘 내 마음을 울린 장면은?",
+ "오늘 잠시 멈춰 생각하게 된 이유는?",
+ "오늘 다른 사람에게 배운 점은?",
+ "오늘 스스로에게 준 선물은?",
+ "오늘 마음속으로 ‘고마워’라 한 대상은?",
+ "오늘 계획 없던데 하게 된 일은?",
+ "오늘 나를 더 이해하게 된 계기는?",
+ "오늘 하루를 한 문장으로 정리한다면?"
+];
+
+// ====== 유틸 ======
+const fmtDate = (d=new Date()) => `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')}.`;
+const weekInfo = (d=new Date())=>{
+  const target = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const jan1 = new Date(Date.UTC(target.getUTCFullYear(),0,1));
+  const diff = Math.floor((target-jan1)/86400000);
+  const week = Math.floor((diff + jan1.getUTCDay()+6)/7)+1; // ISO-ish
+  return {year:d.getFullYear(), month:d.getMonth()+1, week};
+};
+const showToast = (msg)=>{ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 1500); }
+
+// ====== 질문 배정(중복방지+클라우드) ======
+async function getOrAssignQuestion(dateKey){
+  if(!user) return QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)]; // 비로그인: 로컬 랜덤
+
+  const stateRef = doc(db, "users", user.uid);
+  const snap = await getDoc(stateRef);
+  let state = snap.exists() ? snap.data() : { usedIndexes: [], daily: {} };
+
+  // 이미 배정된 질문?
+  if(state.daily && state.daily[dateKey] != null){
+    return QUESTIONS[state.daily[dateKey]];
+  }
+  // 사용하지 않은 인덱스 풀에서 하나
+  let pool = [...Array(QUESTIONS.length).keys()].filter(i=>!state.usedIndexes?.includes(i));
+  if(pool.length===0){ state.usedIndexes=[]; pool=[...Array(QUESTIONS.length).keys()]; }
+  const pick = pool[Math.floor(Math.random()*pool.length)];
+
+  state.usedIndexes.push(pick);
+  state.daily = {...(state.daily||{}), [dateKey]: pick};
+  if(snap.exists()) await updateDoc(stateRef, state);
+  else await setDoc(stateRef, state);
+
+  return QUESTIONS[pick];
+}
+
+// ====== 라우팅 ======
+function setActiveTab(route){
+  currentRoute = route;
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.route===route);
+  });
+  render();
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> setActiveTab(btn.dataset.route));
+});
+
+// ====== 화면들 ======
+async function render(){
+  if(currentRoute==="daily") await renderDaily();
+  if(currentRoute==="weekly") renderWeekly();
+  if(currentRoute==="search") renderSearch();
+  if(currentRoute==="settings") renderSettings();
+}
+
+async function renderDaily(){
+  const dateKey = new Date().toISOString().slice(0,10); // yyyy-mm-dd
+  const q = await getOrAssignQuestion(dateKey);
+
+  view.innerHTML = `
+    <section class="card">
+      <div class="spread">
+        <div class="h2">오늘의 질문</div>
+        <div class="row">
+          <span class="kbd">${fmtDate()}</span>
+        </div>
+      </div>
+      <p id="todayQ" class="hint" style="font-size:1.05rem">${q}</p>
+      <label class="mt12">답변
+        <textarea id="answer" rows="5" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+      </label>
+      <div class="row mt12">
+        <button id="btnDailySave" class="btn primary">저장</button>
+        <button id="btnDailyClear" class="btn danger">지우기</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="h2">감정일기</div>
+      <label>사건<input id="ev" class="input" placeholder="오늘 무슨 일이 있었나요?"></label>
+      <label class="mt8">생각<input id="th" class="input" placeholder="그때 어떤 생각이 들었나요?"></label>
+      <label class="mt8">감정<input id="fe" class="input" placeholder="어떤 감정이 올라왔나요?"></label>
+      <label class="mt8">결과<input id="rs" class="input" placeholder="그 결과는 어땠나요?"></label>
+      <div class="row mt12">
+        <button id="btnEmoSave" class="btn primary">저장</button>
+        <button id="btnEmoClear" class="btn danger">지우기</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="h2">감사일기 (3개)</div>
+      <label><input id="g1" class="input" placeholder="감사 한 가지"/></label>
+      <label class="mt8"><input id="g2" class="input" placeholder="감사 한 가지"/></label>
+      <label class="mt8"><input id="g3" class="input" placeholder="감사 한 가지"/></label>
+      <div class="row mt12">
+        <button id="btnThanksSave" class="btn primary">저장</button>
+      </div>
+    </section>
+  `;
+
+  // 저장 핸들러 (로그인 시 Firestore 동기화)
+  $("#btnDailySave").onclick = async ()=>{
+    const payload = { date: dateKey, question: $("#todayQ").textContent, answer: $("#answer").value, ts: Date.now() };
+    localStorage.setItem(`daily:${dateKey}`, JSON.stringify(payload));
+    if(user){
+      await setDoc(doc(db, "users", user.uid, "daily", dateKey), payload, { merge:true });
+    }
+    showToast("저장 완료!");
   };
-  try{ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); }catch(e){ console.log('Firebase init error', e); }
-  var auth=null, db=null; try{ auth=firebase.auth(); db=firebase.firestore(); }catch(e){ console.log('Firebase libs not ready', e); }
+  $("#btnDailyClear").onclick = ()=>{ $("#answer").value=""; };
 
-  function $(s){ return document.querySelector(s); }
-  function ymd(date){ var d=new Date(date); var tz=d.getTimezoneOffset()*60000; return new Date(d.getTime()-tz).toISOString().slice(0,10); }
-  function formatDatePretty(dateStr){ var d=new Date(dateStr); return d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.'; }
-  function getWeekId(date){
-    var d=new Date(date); var t=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    var n=(t.getUTCDay()+6)%7; t.setUTCDate(t.getUTCDate()-n+3);
-    var ft=new Date(Date.UTC(t.getUTCFullYear(),0,4));
-    var w=1+Math.round(((t-ft)/86400000-3+((ft.getUTCDay()+6)%7))/7); var y=t.getUTCFullYear();
-    return y+'-W'+(''+w).padStart(2,'0');
+  $("#btnEmoSave").onclick = async ()=>{
+    const payload = { date: dateKey, ev:$("#ev").value, th:$("#th").value, fe:$("#fe").value, rs:$("#rs").value, ts:Date.now() };
+    localStorage.setItem(`emo:${dateKey}`, JSON.stringify(payload));
+    if(user) await setDoc(doc(db,"users",user.uid,"emotion",dateKey), payload, {merge:true});
+    showToast("감정일기 저장 완료!");
+  };
+  $("#btnEmoClear").onclick = ()=>["#ev","#th","#fe","#rs"].forEach(s=>$(s).value="");
+
+  $("#btnThanksSave").onclick = async ()=>{
+    const payload = { date: dateKey, list:[ $("#g1").value, $("#g2").value, $("#g3").value ], ts:Date.now() };
+    localStorage.setItem(`thanks:${dateKey}`, JSON.stringify(payload));
+    if(user) await setDoc(doc(db,"users",user.uid,"thanks",dateKey), payload, {merge:true});
+    showToast("감사일기 저장 완료!");
+  };
+}
+
+function renderWeekly(){
+  const {year,month,week} = weekInfo();
+  view.innerHTML = `
+    <section class="card">
+      <div class="h2">이번 주</div>
+      <div class="row">
+        <div class="week-line">${year}년 ${week}번째 주</div>
+        <div class="week-sub">(${year}년 ${month}월)</div>
+      </div>
+      <div class="row inline-end mt12">
+        <input id="newMission" class="input" placeholder="미션 추가" />
+        <button id="btnAddMission" class="btn primary">+ 추가</button>
+      </div>
+      <ul id="missionList" class="mt12"></ul>
+    </section>
+
+    <section class="card">
+      <div class="h2">힐링문구</div>
+      <p class="hint">부러움 대신 배움을 고르면 마음은 가벼워진다</p>
+      <button class="btn">필사 시작</button>
+    </section>
+  `;
+  $("#btnAddMission").onclick = ()=>{
+    const v = $("#newMission").value.trim();
+    if(!v) return;
+    const li = document.createElement('li');
+    li.textContent = v;
+    $("#missionList").appendChild(li);
+    $("#newMission").value="";
+  };
+}
+
+function renderSearch(){
+  view.innerHTML = `
+    <section class="card">
+      <div class="h2">검색</div>
+      <input id="kw" class="input" placeholder="키워드를 입력하세요"/>
+      <div class="mt12" id="result" class="hint"></div>
+    </section>
+  `;
+}
+
+function renderSettings(){
+  view.innerHTML = `
+    <section class="card">
+      <div class="h2">백업/복원</div>
+      <div class="row">
+        <button id="btnExport" class="btn">JSON 파일로 저장</button>
+        <input id="imp" type="file" accept="application/json" />
+      </div>
+      <p class="hint mt8">로그인 상태라면 클라우드에도 자동 동기화됩니다.</p>
+    </section>
+  `;
+  $("#btnExport").onclick = ()=>{
+    const dump = JSON.stringify(localStorage);
+    const blob = new Blob([dump],{type:"application/json"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = "thanks-diary-backup.json"; a.click();
+  };
+  $("#imp").onchange = e=>{
+    const file = e.target.files?.[0]; if(!file) return;
+    const fr = new FileReader();
+    fr.onload = ()=>{ try{
+      const data = JSON.parse(fr.result);
+      Object.entries(data).forEach(([k,v])=> localStorage.setItem(k,v));
+      showToast("가져오기 완료!");
+    }catch{ showToast("JSON 형식 오류"); } };
+    fr.readAsText(file);
+  };
+}
+
+// ====== 로그인 모달 ======
+const dlg = $("#loginModal");
+$("#btnOpenLogin").onclick = ()=> dlg.showModal();
+$("#btnCloseLogin").onclick = ()=> dlg.close();
+
+$("#btnDoLogin").onclick = async (e)=>{
+  e.preventDefault();
+  try{
+    const email = $("#loginEmail").value.trim();
+    const pass = $("#loginPass").value;
+    await signInWithEmailAndPassword(auth,email,pass);
+    $("#loginMsg").textContent = "로그인 성공!";
+    setTimeout(()=>dlg.close(), 300);
+  }catch(err){
+    $("#loginMsg").textContent = "로그인 실패: " + (err.code||"");
   }
-  function weekPretty(weekId){ var sp=weekId.split('-W'); return sp[0]+' '+parseInt(sp[1],10)+'번째 주'; }
-  function weekOfMonthStr(date){
-    var d=new Date(date); var first=new Date(d.getFullYear(), d.getMonth(), 1);
-    var fd=first.getDay(); if(fd===0) fd=7; var w=Math.floor((fd-1 + d.getDate() + 6)/7); if(w<1) w=1;
-    return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+w+'주';
+};
+$("#btnDoSignup").onclick = async (e)=>{
+  e.preventDefault();
+  try{
+    const email = $("#loginEmail").value.trim();
+    const pass = $("#loginPass").value;
+    await createUserWithEmailAndPassword(auth,email,pass);
+    $("#loginMsg").textContent = "회원가입/로그인 완료!";
+    setTimeout(()=>dlg.close(), 300);
+  }catch(err){
+    $("#loginMsg").textContent = "회원가입 실패: " + (err.code||"");
   }
-  function parseTags(s){ if(!s) return []; return s.split(',').map(function(t){t=t.trim(); return t? (t[0]==='#'?t:'#'+t):null}).filter(Boolean); }
-  function autoResize(el){ if(!el) return; el.style.height='auto'; el.style.height=(el.scrollHeight+2)+'px'; }
-  function bindAuto(el){ if(!el) return; autoResize(el); el.addEventListener('input', function(){ autoResize(el); }); }
+};
 
-  var questionPool=['오늘 나는 무엇을 잘했나요?','사람들에게 어떤 사람으로 기억되고 싶나요?','오늘 나를 웃게 만든 순간은 무엇이었나요?','요즘 나를 설레게 하는 작은 일은?','지금의 나에게 필요한 한 문장은?','오늘 배운 것 하나는 무엇인가요?','나는 무엇을 포기하지 않았나요?','최근 나를 힘들게 한 일, 거기서 배운 점은?','오늘 나에게 가장 고마운 사람은 누구였나요?','앞으로의 나에게 전하고 싶은 말은?','나의 강점 한 가지를 적어보세요.','오늘 놓치지 않은 작은 친절은?','오늘 내 마음의 날씨는 어땠나요?'];
-  var healingPool=['부러움 대신 배움을 고르면 마음은 가벼워진다','완벽보다 꾸준함이 조용히 이긴다','오늘의 나를 어제의 나와만 비교하면 삶이 단단해진다','불안은 계획을 좋아한다 작은 계획 하나면 충분하다','한 번의 깊은 호흡이 마음의 재부팅이다','사랑받는 것보다 믿을 만한 사람이 되는 게 오래간다','상처를 말로 꺼내면 무게가 나눠진다','작은 친절은 돌아오지 않아도 흔적을 남긴다','내 속도가 느려 보여도 멈추지 않으면 결국 닿는다','인정은 포기가 아니다 받아들임은 시작이다','해야 할 일 앞에서 숨고 싶을 땐 아주 작은 시작부터','오늘의 수고를 내일의 나에게 친절로 남긴다'];
-  var settingsKey='td-v236-settings';
-  function loadSettings(){ try{ return JSON.parse(localStorage.getItem(settingsKey)) || {}; }catch(e){ return {}; } }
-  function saveSettings(s){ localStorage.setItem(settingsKey, JSON.stringify(s)); }
-  function nextFromPool(key, pool){
-    var s=loadSettings(); if(!s._cursor) s._cursor={}; if(!s._order) s._order={};
-    if(!s._order[key] || s._order[key].length!==pool.length){
-      s._order[key]=[]; for(var i=0;i<pool.length;i++) s._order[key].push(i);
-      s._order[key].sort(function(){ return Math.random()-0.5; }); s._cursor[key]=0;
-    }
-    var idx=s._order[key][s._cursor[key]%pool.length]; s._cursor[key]=(s._cursor[key]+1)%pool.length;
-    saveSettings(s); return pool[idx];
-  }
+// ====== Auth 상태 ======
+onAuthStateChanged(auth, async (u)=>{
+  user = u||null;
+  $("#authState").textContent = user ? `${user.email} 로그인됨` : "로그아웃 상태";
+});
 
-  var dailyDate=$('#dailyDate'), dailyDateText=$('#dailyDateText');
-  var questionText=$('#questionText'), answerText=$('#answerText'), btnAnotherQ=$('#btnAnotherQ');
-  var eventField=$('#eventField'), thoughtField=$('#thoughtField'), feelingField=$('#feelingField'), resultField=$('#resultField');
-  var grat1=$('#grat1'), grat2=$('#grat2'), grat3=$('#grat3'), dailyNote=$('#dailyNote'), tagsField=$('#tagsField');
-  var statusDaily=$('#statusDaily');
-  [questionText,answerText,eventField,thoughtField,feelingField,resultField,dailyNote].forEach(bindAuto);
-
-  var storeKey='td-v236-data';
-  function loadAll(){ try{ return JSON.parse(localStorage.getItem(storeKey)) || {daily:{},weekly:{}}; }catch(e){ return {daily:{},weekly:{}}; }
-  function saveAll(d){ localStorage.setItem(storeKey, JSON.stringify(d)); }
-
-  function setDailyDate(d){ dailyDate.value=ymd(d); dailyDateText.textContent=formatDatePretty(dailyDate.value); loadDaily(); }
-  function shiftDaily(n){ var cur=new Date(dailyDate.value||new Date()); cur.setDate(cur.getDate()+n); setDailyDate(cur); }
-
-  document.addEventListener('click', function(e){
-    var id=e && e.target && e.target.id;
-    if(id==='prevDay') shiftDaily(-1);
-    if(id==='nextDay') shiftDaily(1);
-    if(id==='todayBtn') setDailyDate(new Date());
-    if(id==='btnAnotherQ'){ questionText.value=nextFromPool('q',questionPool); autoResize(questionText); }
-
-    if(id==='addMission'){
-      var nv=$('#newMission') && $('#newMission').value ? $('#newMission').value.trim() : '';
-      if(!nv) return;
-      var all=loadAll(); var key=currentWeekKey(); var w=all.weekly[key]||{missions:[],healing:''};
-      w.missions.push({text=nv,done:false}); all.weekly[key]=w; saveAll(all);
-      $('#newMission').value=''; renderMissions(w.missions); saveWeeklyData();
-    }
-    if(id==='saveWeekly'){ saveWeeklyData(); alert('주간 데이터 저장 완료'); }
-    if(id==='clearWeekly'){
-      if(!confirm('이 주차의 주간 데이터를 모두 지울까요?')) return;
-      var all=loadAll(); var k=currentWeekKey(); delete all.weekly[k]; saveAll(all);
-      var user=auth && auth.currentUser; if(user && db){ db.collection('users').doc(user.uid).collection('weekly').doc(k).delete().catch(function(){}); }
-      loadWeekly();
-    }
-    if(id==='randomHealing'){ var ht=$('#healingText'); if(ht){ ht.value=nextFromPool('h',healingPool); autoResize(ht); } }
-    if(id==='startCopy'){ var c=$('#copyArea'); if(!c) return; if(c.classList.contains('hidden')){ c.classList.remove('hidden'); c.value=$('#healingText').value; autoResize(c);} else { c.classList.add('hidden'); } }
-
-    if(id==='saveDaily'){ saveDailyNow(); }
-    if(id==='clearDaily'){ clearDailyNow(); }
-
-    if(id==='searchBtn') doSearch();
-    if(id==='searchClear'){ var si=$('#searchInput'); if(si) si.value=''; var sr=$('#searchResults'); if(sr) sr.innerHTML=''; }
-
-    if(id==='exportJSON') exportJSON();
-    if(id==='shareJSON') shareJSON();
-    if(id==='importJSON') importJSON();
-    if(id==='refreshCache'){ alert('서비스워커 없이 동작합니다. 새로고침하면 최신 적용됩니다.'); }
-    if(id==='resetLocal'){ if(!confirm('로컬 데이터를 모두 삭제할까요?')) return; localStorage.removeItem(storeKey); alert('로컬 데이터 삭제 완료'); }
-
-    if(id==='authMiniLogout' || id==='btnSignOut'){ if(auth) auth.signOut(); }
-  });
-
-  if(dailyDate) dailyDate.addEventListener('change', function(){ dailyDateText.textContent=formatDatePretty(dailyDate.value); loadDaily(); });
-  var importFile=$('#importFile'); if(importFile) importFile.addEventListener('change', function(e){ var f=e.target.files[0]; var fn=$('#fileName'); if(fn) fn.textContent = f? ('선택한 파일: '+f.name) : ''; });
-
-  function loadDaily(){
-    var key=dailyDate.value||ymd(new Date()); var d=null;
-    var user=auth && auth.currentUser;
-    function fill(d){
-      if(!d) d={};
-      if(!d.question) d.question=nextFromPool('q',questionPool);
-      questionText.value=d.question||'';
-      answerText.value=d.answer||'';
-      eventField.value=d.event||'';
-      thoughtField.value=d.thought||'';
-      feelingField.value=d.feeling||'';
-      resultField.value=d.result||'';
-      grat1.value=(d.gratitude&&d.gratitude[0])||'';
-      grat2.value=(d.gratitude&&d.gratitude[1])||'';
-      grat3.value=(d.gratitude&&d.gratitude[2])||'';
-      dailyNote.value=d.note||'';
-      tagsField.value=(d.tags||[]).join(', ');
-      statusDaily.textContent='불러옴';
-      [questionText,answerText,eventField,thoughtField,feelingField,resultField,dailyNote].forEach(autoResize);
-    }
-    if(user && db){
-      db.collection('users').doc(user.uid).collection('daily').doc(key).get().then(function(snap){
-        d=snap.exists ? snap.data() : null; if(!d){ var loc=loadAll(); d=loc.daily[key]||null; } fill(d);
-      }).catch(function(){ var loc=loadAll(); d=loc.daily[key]||null; fill(d); });
-    }else{
-      var loc=loadAll(); d=loc.daily[key]||null; fill(d);
-    }
-  }
-  function saveDailyNow(){
-    var all=loadAll(); var key=dailyDate.value||ymd(new Date());
-    all.daily[key]={
-      question:questionText.value,
-      answer:answerText.value.trim(),
-      event:eventField.value.trim(),
-      thought:thoughtField.value.trim(),
-      feeling:feelingField.value.trim(),
-      result:resultField.value.trim(),
-      gratitude:[grat1.value.trim(),grat2.value.trim(),grat3.value.trim()],
-      note:dailyNote.value.trim(),
-      tags:parseTags(tagsField.value),
-      updatedAt:new Date().toISOString()
-    };
-    saveAll(all);
-    var user=auth && auth.currentUser;
-    if(user && db){
-      db.collection('users').doc(user.uid).collection('daily').doc(key).set(all.daily[key], {merge:true}).then(function(){
-        statusDaily.textContent='저장됨(클라우드)'; alert('저장 완료! (클라우드)');
-      }).catch(function(err){ statusDaily.textContent='오류'; alert('저장 실패: '+err); });
-    }else{
-      statusDaily.textContent='저장됨(로컬)'; alert('저장 완료!');
-    }
-  }
-  function clearDailyNow(){
-    if(!confirm('이 날짜의 데이터를 모두 지울까요?')) return;
-    var all=loadAll(); var key=dailyDate.value||ymd(new Date()); delete all.daily[key]; saveAll(all);
-    var user=auth && auth.currentUser; if(user && db){ db.collection('users').doc(user.uid).collection('daily').doc(key).delete().catch(function(){}); }
-    loadDaily(); statusDaily.textContent='삭제됨';
-  }
-
-  var weekPicker=$('#weekPicker'), weekText=$('#weekText'), weekTextNice=$('#weekTextNice');
-  function setWeekByDate(dt){
-    var id=getWeekId(dt); if(weekPicker) weekPicker.value=id;
-    if(weekText) weekText.textContent=weekPretty(id);
-    if(weekTextNice) weekTextNice.textContent=weekOfMonthStr(dt);
-    loadWeekly();
-  }
-  function shiftWeek(n){
-    var val=weekPicker && weekPicker.value ? weekPicker.value : getWeekId(new Date());
-    var sp=val.split('-W'); var y=parseInt(sp[0],10); var w=parseInt(sp[1],10);
-    var base=new Date(Date.UTC(y,0,1+(w-1)*7)); base.setUTCDate(base.getUTCDate()+n*7);
-    setWeekByDate(new Date(base));
-  }
-  if(weekPicker) weekPicker.addEventListener('change', function(){
-    if(weekText) weekText.textContent=weekPretty(weekPicker.value);
-    var y=parseInt(weekPicker.value.split('-W')[0],10), w=parseInt(weekPicker.value.split('-W')[1],10);
-    var base=new Date(Date.UTC(y,0,1+(w-1)*7));
-    if(weekTextNice) weekTextNice.textContent=weekOfMonthStr(base);
-    loadWeekly();
-  });
-  document.addEventListener('click', function(e){
-    var id=e && e.target && e.target.id;
-    if(id==='prevWeek') shiftWeek(-1);
-    if(id==='nextWeek') shiftWeek(1);
-    if(id==='thisWeekBtn') setWeekByDate(new Date());
-  });
-
-  function renderMissions(items){
-    var missionList=$('#missionList'); if(!missionList) return; missionList.innerHTML='';
-    for(var i=0;i<items.length;i++){
-      (function(idx){
-        var m=items[idx];
-        var row=document.createElement('div'); row.className='mission-item';
-        var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!m.done;
-        cb.addEventListener('change', function(){ m.done=cb.checked; saveWeeklyData(); });
-        var txt=document.createElement('input'); txt.type='text'; txt.value=m.text||''; txt.placeholder='미션 내용';
-        txt.addEventListener('input', function(){ m.text=txt.value; });
-        var del=document.createElement('button'); del.className='btn danger'; del.textContent='삭제';
-        del.addEventListener('click', function(){ if(!confirm('이 미션을 삭제할까요?')) return; items.splice(idx,1); renderMissions(items); saveWeeklyData(); });
-        row.appendChild(cb); row.appendChild(txt); row.appendChild(del); missionList.appendChild(row);
-      })(i);
-    }
-  }
-  function currentWeekKey(){ return weekPicker && weekPicker.value ? weekPicker.value : getWeekId(new Date()); }
-  function loadWeekly(){
-    var key=currentWeekKey(); var w=null;
-    var user=auth && auth.currentUser;
-    function fill(w){
-      if(!w) w={missions:[],healing:''};
-      renderMissions(w.missions||[]);
-      var ht=$('#healingText'); if(ht){ ht.value=w.healing||''; bindAuto(ht); }
-    }
-    if(user && db){
-      db.collection('users').doc(user.uid).collection('weekly').doc(key).get().then(function(snap){
-        w=snap.exists ? snap.data() : null;
-        if(!w){ var data=loadAll(); w=data.weekly[key]||null; } fill(w);
-      }).catch(function(){ var data=loadAll(); w=data.weekly[key]||null; fill(w); });
-    }else{
-      var data=loadAll(); w=data.weekly[key]||null; fill(w);
-    }
-  }
-  function collectMissions(){
-    var rows=document.querySelectorAll('#missionList .mission-item'); var out=[];
-    for(var i=0;i<rows.length;i++){
-      var r=rows[i]; var cb=r.querySelector('input[type="checkbox"]'); var txt=r.querySelector('input[type="text"]');
-      var t=(txt && txt.value) ? txt.value.trim() : ''; if(!t) continue; out.push({text:t,done:cb && cb.checked});
-    }
-    return out;
-  }
-  function saveWeeklyData(){
-    var key=currentWeekKey(); var all=loadAll();
-    var ht=$('#healingText'); var heal=ht ? ht.value.trim() : '';
-    all.weekly[key]={ missions:collectMissions(), healing:heal, updatedAt:new Date().toISOString() };
-    saveAll(all);
-    var user=auth && auth.currentUser;
-    if(user && db){ db.collection('users').doc(user.uid).collection('weekly').doc(key).set(all.weekly[key], {merge:true}); }
-  }
-
-  function doSearch(){
-    var q=$('#searchInput').value.trim().toLowerCase();
-    var res=$('#searchResults'); if(!res) return; res.innerHTML='';
-    if(!q){ res.textContent='검색어를 입력하세요.'; return; }
-    var all=loadAll(); var out=[];
-    function pushIf(k, d){
-      var text=[d.question,d.answer,d.event,d.thought,d.feeling,d.result,d.note,(d.tags||[]).join(' ')].join(' ').toLowerCase();
-      if(text.indexOf(q)>=0) out.push({when:k, data:d});
-    }
-    for(var k in all.daily){ if(all.daily.hasOwnProperty(k)) pushIf(k, all.daily[k]); }
-    res.innerHTML = out.length ? out.map(function(x){ return '<div class=\"search-item\"><b>'+x.when+'</b> — '+(x.data.note||x.data.answer||'')+'</div>'; }).join('') : '결과 없음';
-  }
-
-  var lm=$('#loginModal'), loginEmail=$('#loginEmail'), loginPwd=$('#loginPwd'), loginMsg=$('#loginMsg');
-  function openModal(){ if(lm){ lm.classList.add('open'); loginMsg.textContent=''; } }
-  function closeModal(){ if(lm){ lm.classList.remove('open'); } }
-  function signIn(){
-    if(!auth){ alert('Firebase 초기화 실패'); return; }
-    var email=(loginEmail && loginEmail.value)||''; var pwd=(loginPwd && loginPwd.value)||'';
-    auth.signInWithEmailAndPassword(email.trim(), pwd).then(function(){ closeModal(); })
-      .catch(function(e){ var m='로그인 실패: '+(e && e.message ? e.message : e); loginMsg.textContent=m; alert(m); });
-  }
-  function signUp(){
-    if(!auth){ alert('Firebase 초기화 실패'); return; }
-    var email=(loginEmail && loginEmail.value)||''; var pwd=(loginPwd && loginPwd.value)||'';
-    auth.createUserWithEmailAndPassword(email.trim(), pwd).then(function(){ closeModal(); })
-      .catch(function(e){ var m='회원가입 실패: '+(e && e.message ? e.message : e); loginMsg.textContent=m; alert(m); });
-  }
-  window.TD_openLogin=openModal; window.TD_closeLogin=closeModal; window.TD_signIn=signIn; window.TD_signUp=signUp;
-
-  if(auth){
-    auth.onAuthStateChanged(function(user){
-      var logged=!!user;
-      var miniState=$('#authMiniState'), miniLogin=$('#authMiniLogin'), miniLogout=$('#authMiniLogout');
-      if(miniState) miniState.textContent = logged ? '로그인됨' : '로그아웃 상태';
-      if(miniLogin) miniLogin.classList.toggle('hidden', logged);
-      if(miniLogout) miniLogout.classList.toggle('hidden', !logged);
-      var node=$('#authState'); if(node) node.textContent = logged ? ('로그인됨: '+(user.email||user.uid)) : '로그아웃 상태';
-    });
-  }
-
-  function init(){
-    var d=new Date(); setDailyDate(d); setWeekByDate(d);
-    if(!location.hash) location.hash='#/daily';
-    var h=(location.hash.replace(/^#\\/?/,'')||'daily');
-    if(h==='weekly' && !(weekPicker && weekPicker.value)) setWeekByDate(new Date());
-    loadDaily();
-  }
-  init();
-
-  function exportJSON(){ var data=loadAll(); var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='thanks-diary-backup.json'; a.click(); }
-  function importJSON(){ var f=$('#importFile'); if(!f || !f.files || !f.files[0]){ alert('가져올 JSON 파일을 선택해 주세요.'); return; }
-    var reader=new FileReader(); reader.onload=function(){ try{ var obj=JSON.parse(reader.result); if(!obj || !obj.daily || !obj.weekly) throw '형식 오류';
-      saveAll(obj); alert('가져오기 완료'); }catch(e){ alert('가져오기 실패: '+e); } }; reader.readAsText(f.files[0]); }
-  async function shareJSON(){ try{ var data=loadAll(); var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    var file=new File([blob],'thanks-diary-backup.json',{type:'application/json'});
-    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file], title:'지니짱 감사일기 백업', text:'백업 파일입니다.'});
-    }else{ exportJSON(); alert('공유 API를 지원하지 않아 파일 다운로드로 대체합니다.'); }
-  }catch(e){ alert('공유 실패/취소: '+e); } }
-})();
+// 초기 라우트
+setActiveTab("daily");
