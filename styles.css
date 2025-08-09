@@ -1,58 +1,127 @@
-/* ===== v2.6 look & feel ===== */
+
+/* ThanksDiary v2.6.6 – Pastel Theme Patch
+   - Soft pastel yellow gradient header
+   - Card shadows softened
+   - Buttons rounded & airy
+   - Modal button spacing increased
+   Drop this file as /styles.css in your GitHub Pages repo and refresh.
+*/
+
 :root{
-  --bg1:#fff6c9; --bg2:#ffee9a;
-  --ink:#3a2d2d; --ink2:#7a6a6a;
-  --line:#efdfb3;
-  --card:#ffffff;
-  --brand:#ffd778; --accent:#ffec9a;
-  --ok:#4caf50; --danger:#ff7b8a;
-  font-size:16px;
+  --bg: #fffaf0;
+  --card: #ffffff;
+  --ink: #3a2c26;
+  --muted: #8a7f79;
+  --brand-0: #fff7cf;
+  --brand-1: #fff0b3;
+  --brand-2: #ffe89a;
+  --accent: #6b8cff;    /* link, week */
+  --accent2:#7a49f5;    /* secondary accent */
+  --good: #ffd352;      /* primary button */
+  --radius: 16px;
+  --shadow: 0 6px 18px rgba(0,0,0,.08);
+  --shadow-soft: 0 8px 28px rgba(0,0,0,.06);
 }
-*{box-sizing:border-box}
-body{margin:0;font-family:'Gowun Dodum',sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--bg1),var(--bg2))}
-.app-header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--bg1),var(--bg2));padding:18px 16px 14px;border-bottom:1px solid var(--line)}
-.title-area{display:flex;align-items:center;gap:8px}
-.logo{margin:0;font-family:'Jua',sans-serif;font-size:28px;letter-spacing:.5px}
-.star{color:#ffbf00}
-.auth-mini{display:flex;align-items:center;gap:8px;margin-top:8px;color:var(--ink2)}
-.tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:12px}
-.tab-btn{display:flex;align-items:center;justify-content:center;height:64px;border-radius:16px;font-size:20px;background:#fff;border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.06);cursor:pointer;text-decoration:none;color:inherit}
-.tab-btn.active{outline:3px solid #ffe08c}
-.btn{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 16px;cursor:pointer}
-.btn.small{padding:6px 10px;font-size:.92rem}
-.btn.ghost{background:transparent}
-.btn.primary{background:var(--brand)}
-.btn.ok{background:#d7f5da}
-.btn.danger{background:var(--danger);color:#fff}
 
-#view{padding:16px;max-width:900px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 2px 16px rgba(0,0,0,.05);padding:18px;margin:16px 0}
-.section-title{display:flex;align-items:center;gap:8px;font-family:'Jua',sans-serif;font-size:22px;margin:4px 0 10px}
-label{display:block;color:var(--ink2);margin:8px 0 6px}
-input,textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#fffdf4;padding:12px}
-textarea{min-height:110px;resize:vertical}
-.grid{display:grid;gap:10px}
-.grid-2{grid-template-columns:1fr 1fr}
-.grid-3{grid-template-columns:repeat(3,1fr)}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.muted{color:#8e7f6a}
+html, body{ height:100%; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Gowun Dodum', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
 
-.datebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
-.pill{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:#fff;min-width:72px;text-align:center}
-.pill.blue{color:#1565c0}.pill.violet{color:#6a35c2}
-.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+/* Header */
+.pastel-yellow{
+  background: linear-gradient(180deg, var(--brand-1), var(--brand-0) 55%, var(--brand-2));
+}
+.app-header{
+  position: sticky; top: 0; z-index: 15;
+  border-bottom: 1px solid rgba(0,0,0,.04);
+}
+.title-area{ display:flex; align-items:center; gap:10px; padding:14px 16px; }
+.star{ color:#f3b400; font-size:20px; }
+.logo{ font-family:'Jua', cursive; font-size:28px; margin:0; letter-spacing:.5px; }
+.auth-chip{ margin-left:auto; display:flex; align-items:center; gap:8px; color:var(--muted); }
 
-.app-footer{padding:28px 0 42px;text-align:center;color:#a08e73}
+/* Tabs */
+.tabs{ display:flex; flex-wrap:wrap; gap:16px; padding:10px 16px 18px; }
+.tab-btn{
+  display:inline-block; text-decoration:none; color:var(--ink);
+  background:#fff; padding:14px 22px; border-radius:14px;
+  box-shadow: var(--shadow);
+  transition: transform .08s ease, box-shadow .12s ease;
+}
+.tab-btn:active{ transform: translateY(1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+.tab-btn.active{ outline: 2px solid rgba(107,140,255,.6); }
 
-/* 로그인 모달(버튼 간격 띄움) */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
-.modal.hidden{display:none}
-.modal-card{background:#fff;border-radius:16px;border:1px solid var(--line);box-shadow:0 8px 20px rgba(0,0,0,.08);width:min(520px,92vw);padding:18px}
-.modal-title{font-family:'Jua',sans-serif;margin:0 0 12px 0}
-.login-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-.hint{color:#b15959;margin-top:6px}
+/* Layout */
+main{ padding:16px; }
+.card{
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 18px;
+  margin: 14px 0;
+}
+.card h3{ margin:0 0 10px; font-family:'Jua', cursive; }
 
-/* 토스트 */
-.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .25s}
-.toast.show{opacity:1}
-.toast.hidden{display:none}
+/* Controls */
+.row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.controls{ display:flex; align-items:center; gap:10px; margin:8px 0; }
+
+.btn{
+  border:0; border-radius:12px; padding:10px 16px; background:#f4f4f4; color:var(--ink);
+}
+.btn.primary{ background: var(--good); }
+.btn.ghost{ background: transparent; outline:1px solid rgba(0,0,0,.18); }
+.btn.pill{ border-radius:999px; }
+.btn.sm{ padding:6px 12px; }
+.btn.icon{ width:44px; height:44px; display:inline-grid; place-items:center; }
+
+.hint{ color: var(--muted); margin: 8px 0; font-size: 0.95rem; }
+
+/* Inputs */
+input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea{
+  width:100%; border:1px solid rgba(0,0,0,.16);
+  border-radius:12px; padding:12px; background:#fff;
+  font-family: inherit;
+}
+textarea{ min-height:110px; resize:vertical; }
+
+/* Date / Week line */
+.date-nav{ display:flex; align-items:center; gap:12px; margin:6px 0; }
+.date-nav .btn{ width:48px; }
+.date-display{
+  flex:1; text-align:center; padding:12px;
+  border-radius:999px; background:#fff; box-shadow: var(--shadow);
+}
+.weekline{ display:flex; gap:12px; align-items:center; justify-content:flex-end; }
+.weekline .badge{ color:#5b63ff; }
+
+.badge{
+  padding:4px 10px; background:#f3f5ff; border-radius:999px;
+  font-weight:600; letter-spacing:.2px;
+}
+
+/* Login Modal */
+dialog{ border:0; border-radius:18px; padding:0; width:min(520px,92vw); }
+.modal-card{ padding: 20px; }
+.modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; } /* spacing restored */
+
+/* Footer */
+.app-footer{ padding: 32px 0; color: var(--muted); text-align:center; }
+
+/* Icons / section titles */
+.section-title{ display:flex; align-items:center; gap:8px; }
+.section-title .emoji{ font-size:20px; }
+
+/* Today quote / copy */
+.copy-area{ background:#fffdf5; border:1px dashed rgba(0,0,0,.12); padding:12px; border-radius:12px; }
+.copy-actions{ display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top:8px; }
+
+/* Mission add button one-line */
+.mission-line{ display:flex; gap:10px; align-items:center; }
+.mission-add{ margin-left:auto; }
