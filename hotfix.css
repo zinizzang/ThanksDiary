@@ -1,0 +1,12 @@
+
+/* ThanksDiary click guard hotfix */
+.tab-btn, #openLogin, #doLogin, #doSignup, #closeLogin, button.btn {
+  pointer-events: auto !important;
+}
+dialog#loginModal, dialog#loginDialog {
+  z-index: 9999 !important;
+}
+/* 일부 레이아웃이 버튼을 덮는 경우 대비 */
+*[data-blocker], .header-overlay, .page-overlay {
+  pointer-events: none !important;
+}
