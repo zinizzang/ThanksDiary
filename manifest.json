@@ -1,10 +1,10 @@
 {
   "name": "지니짱 감사일기",
-  "short_name": "지니짱 감사일기",
+  "short_name": "지니짱일기",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#fffdf3",
-  "theme_color": "#fff4c2",
+  "background_color": "#fff6cc",
+  "theme_color": "#fff6cc",
   "icons": [
     {
       "src": "icons/icon-192.png",
