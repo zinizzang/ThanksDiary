@@ -1,75 +1,161 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#fff6dd">
-  <title>지니짱 감사일기</title>
-  <link rel="manifest" href="manifest.json?v=272">
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=272">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff6c9">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<title>지니짱 감사일기</title>
+
+<!-- Google Fonts (same as 2.x 계열) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="app-header">
-  <div class="title-wrap">
-    <span class="star" aria-hidden="true">★</span>
-    <h1 class="logo">지니짱 감사일기</h1>
-    <div class="auth-info">
-      <span id="loginState">로그아웃 상태</span>
-      <button id="openLogin" class="btn ghost">로그인</button>
+  <header class="app-header">
+    <div class="brand">
+      <span class="star" aria-hidden="true">★</span>
+      <h1 class="title">지니짱 감사일기</h1>
+      <div class="auth">
+        <span id="authState">로그아웃 상태</span>
+        <button id="btnSign" class="btn outline small">로그인</button>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn" data-route="daily">데일리</button>
+      <button class="tab-btn" data-route="weekly">위클리</button>
+      <button class="tab-btn" data-route="search">검색</button>
+      <button class="tab-btn" data-route="settings">설정/백업</button>
+    </nav>
+  </header>
+
+  <main id="view">
+    <!-- Daily -->
+    <section id="page-daily" class="page visible">
+      <div class="date-bar">
+        <button class="chip">&lt;</button>
+        <div class="date-display" id="dateText">2025. 8. 9.</div>
+        <button class="chip">&gt;</button>
+        <button class="chip ghost" id="btnToday">오늘</button>
+        <div class="weekpill" id="weekText">2025년 8월 2주</div>
+      </div>
+
+      <article class="card">
+        <header class="card-head">
+          <span class="dot purple"></span>
+          <h2>오늘의 질문</h2>
+          <button class="chip ghost" id="btnAnother">다른 질문</button>
+        </header>
+        <p class="q" id="qText">사람들에게 어떤 사람으로 기억되고 싶나요?</p>
+        <textarea class="ta" id="qAnswer" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+        <div class="row">
+          <button class="btn primary" id="btnSaveDaily">저장</button>
+          <button class="btn" id="btnClearDaily">지우기</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <span class="dot green"></span>
+          <h2>미션 (체크박스)</h2>
+        </header>
+        <div id="missionList" class="check-list"></div>
+        <div class="mission-new">
+          <input id="newMission" class="input" placeholder="미션 추가">
+          <button id="addMission" class="btn small">+ 추가</button>
+          <button id="saveMission" class="btn primary small">저장</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <span class="dot orange"></span>
+          <h2>감사일기</h2>
+        </header>
+        <p class="hint">오늘 고마웠던 순간을 3가지 이상 적어보세요.</p>
+        <textarea class="ta" id="thanksText" placeholder="○○에게 고마웠다 · 작은 행복 · 사소한 배려 등"></textarea>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <span class="dot blue"></span>
+          <h2>일상일기</h2>
+        </header>
+        <p class="hint">오늘의 일상을 자유롭게 남겨보세요.</p>
+        <textarea class="ta" id="dailyText" placeholder="하루를 가볍게 기록해요."></textarea>
+      </article>
+
+      <article class="card">
+        <header class="card-head">
+          <span class="dot brown"></span>
+          <h2>태그 달기</h2>
+        </header>
+        <input id="tags" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분">
+      </article>
+    </section>
+
+    <!-- Weekly -->
+    <section id="page-weekly" class="page">
+      <div class="date-bar">
+        <button class="chip">&lt;</button>
+        <div class="date-display" id="weekDateText">2025 31번째 주</div>
+        <button class="chip">&gt;</button>
+        <div class="weekpill" id="weekDateText2">2025년 8월 2주</div>
+      </div>
+      <article class="card">
+        <header class="card-head">
+          <span class="dot purple"></span>
+          <h2>오늘의 문구</h2>
+          <button class="chip ghost small" id="copyQuote">필사</button>
+        </header>
+        <p id="quoteArea" class="q">오늘의 마음을 닮은 문장을 만났나요?</p>
+        <textarea id="scribe" class="ta" placeholder="마음에 남은 문장을 필사해보세요."></textarea>
+      </article>
+    </section>
+
+    <!-- Search -->
+    <section id="page-search" class="page">
+      <article class="card">
+        <header class="card-head"><span class="dot blue"></span><h2>검색</h2></header>
+        <input class="input" placeholder="키워드로 검색">
+      </article>
+    </section>
+
+    <!-- Settings -->
+    <section id="page-settings" class="page">
+      <article class="card">
+        <header class="card-head"><span class="dot gray"></span><h2>백업/복원</h2></header>
+        <div class="row wrap">
+          <button class="btn">JSON 파일로 저장</button>
+          <label class="filebtn"><input type="file" hidden> JSON 가져오기</label>
+          <button class="btn outline" id="btnLogout">로그아웃</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- 로그인 모달 -->
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>로그인</h3>
+      <label>이메일<input id="loginEmail" class="input" type="email" placeholder="you@example.com"></label>
+      <label>비밀번호<input id="loginPw" class="input" type="password" placeholder="••••••••"></label>
+      <div class="row right gap">
+        <button id="doSignup" class="btn outline">회원가입</button>
+        <button id="doLogin" class="btn primary">로그인</button>
+        <button id="closeLogin" class="btn">닫기</button>
+      </div>
     </div>
   </div>
-  <nav class="tabs">
-    <a class="tab-btn" href="#/daily" data-tab="daily">데일리</a>
-    <a class="tab-btn" href="#/weekly" data-tab="weekly">위클리</a>
-    <a class="tab-btn" href="#/search" data-tab="search">검색</a>
-    <a class="tab-btn" href="#/settings" data-tab="settings">설정/백업</a>
-  </nav>
-</header>
 
-<main id="view" role="main"></main>
+  <footer class="app-footer">
+    <small>오프라인 + 로그인 연결 · v2.3.2 UI 패치</small>
+  </footer>
 
-<footer class="app-footer">
-  <small>오프라인 + 로그인 연결 · <span id="appVer">v2.7.2 (cache‑safe)</span></small>
-</footer>
-
-<!-- Login modal -->
-<dialog id="loginModal" class="modal">
-  <form method="dialog" class="modal-card" id="loginFormCard">
-    <h3>로그인</h3>
-    <label>이메일
-      <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username">
-    </label>
-    <label>비밀번호
-      <input type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password">
-    </label>
-    <div class="modal-actions">
-      <button id="doLogin" class="btn primary">로그인</button>
-      <button id="doSignup" class="btn">회원가입</button>
-      <button id="closeLogin" class="btn ghost" value="close">닫기</button>
-    </div>
-    <p id="loginMsg" class="help"></p>
-  </form>
-</dialog>
-
-<script>
-// === (선택) Firebase CDN: 설정을 이미 쓰고 있다면 아래 주석 제거 후 값만 붙여넣으세요. ===
-// const firebaseConfig = {
-//   apiKey: "...", authDomain: "...",
-//   projectId: "...", storageBucket: "...",
-//   messagingSenderId: "...", appId: "..."
-// };
-</script>
-<script type="module" src="app.js?v=272"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', ()=>{
-      navigator.serviceWorker.register('service-worker.js?v=272');
-    });
-  }
-</script>
+  <script src="ui-override.js"></script>
 </body>
 </html>

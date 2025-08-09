@@ -1,67 +1,68 @@
-
+/* 2.3.2 느낌의 파스텔 테마 */
 :root{
-  --bg:#fff9ee; --card:#fffdf7; --ink:#3c2f2f;
-  --muted:#7f6f6f; --accent:#ffd76a; --accent-ink:#5a4100;
-  --btn:#ffffff; --btn-ink:#3c2f2f; --primary:#ffd053; --primary-ink:#3a2a00;
-  --ring: rgba(255,200,0,.45);
-  --radius:16px;
+  --bg:#fff9e8;
+  --paper:#fffdf6;
+  --ink:#3d2b1f;
+  --muted:#8b7f77;
+  --brand:#ffd54d;
+  --accent:#ffcb66;
+  --pill:#ffffffcc;
+  --primary:#f5c14e;
 }
 *{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; background:linear-gradient(180deg,#fff6dd, #fffaf0);
-  color:var(--ink); font-family:"Gowun Dodum", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  line-height:1.5; -webkit-font-smoothing:antialiased;
-}
-h1,h2,h3,.logo{font-family:"Jua","Gowun Dodum",sans-serif}
-.app-header{
-  position:sticky; top:0; z-index:10;
-  background:linear-gradient(180deg,#fff3c7, #fff7da);
-  border-bottom:1px solid #f0e4bb; padding:14px 16px 8px;
-}
-.title-wrap{display:flex; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap}
-.title-wrap .logo{margin:0; font-size:28px; letter-spacing:.5px}
-.star{color:#ffbf00; font-size:20px}
-.auth-info{display:flex; align-items:center; gap:8px}
-.tabs{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:12px}
-.tab-btn{
-  display:block; text-align:center; padding:14px 10px; background:var(--btn); color:var(--btn-ink);
-  border-radius:16px; text-decoration:none; box-shadow:0 1px 0 #f2e6c3, 0 6px 20px rgba(0,0,0,.03);
-}
-.tab-btn:focus-visible{outline:2px solid var(--ring); outline-offset:2px}
-#view{padding:16px; max-width:820px; margin:0 auto}
-.section{background:var(--card); border:1px solid #f3ead0; border-radius:20px; padding:18px; margin:16px 0; box-shadow:0 6px 30px rgba(0,0,0,.035)}
-.section h2{display:flex; align-items:center; gap:10px; margin:0 0 10px}
-.section .desc{color:var(--muted); font-size:15px; margin:-2px 0 10px}
-label{display:block; font-weight:600; margin:10px 0 6px}
-input[type=text],input[type=email],input[type=password],textarea{
-  width:100%; padding:14px 14px; border:1px solid #f0e7ce; border-radius:16px; background:#fffef9; font-size:16px;
-}
-textarea{min-height:120px; resize:vertical}
-.btn{border:1px solid #efdfb6; background:#fff; padding:12px 16px; border-radius:999px; cursor:pointer; font-weight:700}
-.btn.primary{background:var(--primary); border-color:#f6cf79; color:var(--primary-ink)}
-.btn.ghost{background:transparent}
-.btn + .btn{margin-left:8px}
-.row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
-.right{margin-left:auto}
-.kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background:#fff; border:1px solid #ecdcae; border-radius:8px; padding:2px 6px}
-.footer-actions{display:flex; gap:10px; justify-content:flex-end}
-.app-footer{padding:32px 0 80px; text-align:center; color:var(--muted)}
-/* modal */
-.modal{border:none; padding:0; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.modal[open]{animation:pop .14s ease}
-@keyframes pop{from{transform:translateY(6px); opacity:0}}
-.modal-card{min-width:320px; padding:18px; background:var(--card); border:1px solid #f1e4be; border-radius:16px}
-.modal-card h3{margin:0 0 8px}
-.modal-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
-.toast{position:fixed; left:50%; transform:translateX(-50%); bottom:18px; background:#222; color:#fff; padding:10px 14px; border-radius:999px; font-size:14px; opacity:.95}
-/* week pills */
-.pills{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-.pill{padding:8px 12px; border-radius:999px; border:1px solid #efe3bf; background:#fffef7; font-weight:700}
-.small{font-size:14px}
-.icon{font-style:normal}
-/* spacing for primary actions in cards */
-.card-actions{display:flex; gap:10px; align-items:center; margin-top:10px}
-.plus-btn{padding:10px 14px}
-/* focus ring */
-:focus-visible{outline:2px solid var(--ring); outline-offset:2px}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+body{font-family:'Gowun Dodum', 'Apple SD Gothic Neo', sans-serif;}
+
+.app-header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#fff7d6,#fff1c2);border-bottom:1px solid #f2e3b5;padding:12px 16px 10px}
+.brand{display:flex;align-items:center;gap:10px}
+.star{color:#f7c600;font-size:22px}
+.title{font-family:'Jua', cursive;margin:0;font-size:28px;letter-spacing:.5px}
+.auth{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.tab-btn{border:0;border-radius:18px;padding:14px 10px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.07);font-size:18px}
+
+.page{display:none;padding:14px}
+.page.visible{display:block}
+
+.date-bar{display:flex;align-items:center;gap:10px;margin:8px 0 14px}
+.chip{border:0;border-radius:12px;padding:8px 12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.chip.ghost{background:var(--pill)}
+.weekpill{margin-left:auto;background:var(--pill);padding:8px 12px;border-radius:12px;color:#6d54a1}
+
+.card{background:var(--paper);border:1px solid #f1e6c3;border-radius:16px;padding:14px 14px 16px;margin:12px 0;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.card-head h2{font-family:'Jua';font-size:22px;margin:0}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot.purple{background:#8c6cf0}.dot.green{background:#77c36b}.dot.orange{background:#ffa54d}.dot.blue{background:#5aa2ff}.dot.brown{background:#b68b6b}.dot.gray{background:#c4c4c4}
+
+.q{font-size:18px;margin:6px 0 10px}
+.hint{color:var(--muted);margin:2px 0 8px}
+.input,.ta{width:100%;padding:12px 12px;border-radius:12px;border:1px solid #eadfbd;background:#fff}
+.ta{min-height:120px;resize:vertical}
+
+.row{display:flex;gap:10px;align-items:center;margin-top:10px}
+.row.right{justify-content:flex-end}
+.row.wrap{flex-wrap:wrap}
+.gap{gap:8px}
+
+.btn{border:0;border-radius:14px;padding:10px 16px;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.btn.small{padding:8px 12px}
+.btn.primary{background:var(--primary)}
+.btn.outline{background:#fff;border:1px solid #e9d79e}
+
+.filebtn{display:inline-block;border:1px dashed #d7c68b;border-radius:12px;padding:10px 14px;background:#fff;cursor:pointer}
+
+.check-list{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #eee6c8;border-radius:12px;padding:10px 12px}
+.check-item input{transform:scale(1.2)}
+.check-item .rm{margin-left:auto}
+
+.mission-new{display:flex;gap:8px;margin-top:10px}
+.mission-new .input{flex:1}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
+.modal.hidden{display:none}
+.modal-card{background:#fff;border-radius:16px;padding:16px;min-width:280px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.modal-card h3{margin:0 0 10px;font-family:'Jua'}
+
+.app-footer{padding:24px 14px;color:#9a8f80;text-align:center}
