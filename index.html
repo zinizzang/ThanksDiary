@@ -13,45 +13,41 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="lockScreen" class="lock hidden">
+  <!-- 잠금 화면 (기본 비활성화) -->
+  <div id="lockScreen" class="lock hidden" aria-hidden="true">
     <div class="lock-card">
-      <h2>Face ID / 기기 인증</h2>
-      <p class="muted">일기 잠금을 해제하려면 인증해 주세요.</p>
+      <h2>🔐 잠금 해제</h2>
+      <p class="muted">설정에서 잠금을 켜면 Face ID / PIN으로 보호할 수 있어요.</p>
       <div class="btn-row">
-        <button id="unlockBtn" class="btn primary">잠금 해제</button>
-        <button id="lockBypass" class="btn">암호 입력</button>
+        <button id="unlockBtn" class="btn primary">Face ID로 해제</button>
+        <button id="lockBypass" class="btn">PIN 입력</button>
       </div>
       <div id="pinArea" class="pin-area hidden">
-        <input type="password" id="pinInput" placeholder="6자리 암호 (설정에서 관리)">
+        <input type="password" id="pinInput" placeholder="6자리 PIN">
         <button id="pinSubmit" class="btn">확인</button>
       </div>
-      <small class="muted">* Face ID는 설정에서 켜면 다음부터 적용됩니다.</small>
     </div>
   </div>
 
   <header class="app-header">
     <div class="title-area">
       <h1 class="logo">지니짱 감사일기</h1>
-      <div class="right-controls">
-        <button id="darkToggle" class="btn small">다크</button>
-        <button id="installBtn" class="btn small" style="display:none">설치</button>
-      </div>
+      <nav class="tabs" role="tablist">
+        <a href="#/daily" class="tab-btn" id="tab-daily" role="tab" aria-controls="daily">🌼 데일리</a>
+        <a href="#/weekly" class="tab-btn" id="tab-weekly" role="tab" aria-controls="weekly">✅ 위클리</a>
+        <a href="#/search" class="tab-btn" id="tab-search" role="tab" aria-controls="search">🔎 검색</a>
+        <a href="#/settings" class="tab-btn" id="tab-settings" role="tab" aria-controls="settings">⚙️ 설정/백업</a>
+      </nav>
     </div>
-    <nav class="tabs" role="tablist">
-      <button class="tab-btn active" data-tab="daily" role="tab" aria-controls="daily">🧠 데일리</button>
-      <button class="tab-btn" data-tab="weekly" role="tab" aria-controls="weekly">✅ 위클리</button>
-      <button class="tab-btn" data-tab="search" role="tab" aria-controls="search">🔎 검색</button>
-      <button class="tab-btn" data-tab="settings" role="tab" aria-controls="settings">🔐 설정/백업</button>
-    </nav>
   </header>
 
-  <main>
+  <main id="app">
     <!-- Daily -->
-    <section id="daily" class="tab active" role="tabpanel">
+    <section id="daily" class="page" role="tabpanel" aria-labelledby="tab-daily">
       <div class="date-row">
-        <button id="prevDay" class="btn" aria-label="이전 날짜">&lt;</button>
+        <button id="prevDay" class="btn">&lt;</button>
         <input type="date" id="dailyDate">
-        <button id="nextDay" class="btn" aria-label="다음 날짜">&gt;</button>
+        <button id="nextDay" class="btn">&gt;</button>
         <button id="todayBtn" class="btn outline">오늘</button>
       </div>
 
@@ -86,15 +82,17 @@
         <input type="text" id="tagsField" placeholder="#가족, #업무 처럼 쉼표로 구분">
       </div>
 
-      <div class="btn-row stick">
-        <button id="saveDaily" class="btn primary">저장</button>
-        <button id="clearDaily" class="btn danger">지우기</button>
-        <span id="saveStatus" class="muted"></span>
+      <div class="savebar" id="savebar-daily">
+        <span id="savedStatus">저장 안 됨</span>
+        <div class="btn-row">
+          <button id="saveDaily" class="btn primary">저장</button>
+          <button id="clearDaily" class="btn danger">지우기</button>
+        </div>
       </div>
     </section>
 
     <!-- Weekly -->
-    <section id="weekly" class="tab" role="tabpanel">
+    <section id="weekly" class="page" role="tabpanel" aria-labelledby="tab-weekly">
       <div class="date-row">
         <button id="prevWeek" class="btn">&lt;</button>
         <input type="week" id="weekPicker">
@@ -107,7 +105,7 @@
         <div id="missionList"></div>
         <div class="add-mission">
           <input type="text" id="newMission" placeholder="미션 추가">
-          <button id="addMission" class="btn">+ 미션 추가</button>
+          <button id="addMission" class="btn">+ 추가</button>
         </div>
       </div>
 
@@ -116,21 +114,19 @@
         <textarea id="healingText" placeholder="이번 주 나를 지켜줄 한 문장."></textarea>
         <div class="btn-row">
           <button id="randomHealing" class="btn">랜덤 추천</button>
-          <button id="copyHealing" class="btn">필사 시작</button>
-          <button id="clearHealing" class="btn danger">지우기</button>
+          <button id="startCopy" class="btn outline">✍️ 필사 시작</button>
+          <button id="clearWeekly" class="btn danger">지우기</button>
+          <button id="saveWeekly" class="btn primary">저장</button>
         </div>
-        <div id="copyPadWrap" class="card subtle hidden">
-          <h3>✍️ 필사 모드</h3>
-          <textarea id="copyPad" placeholder="힐링문구를 보고 따라 적어보세요."></textarea>
-          <div class="btn-row">
-            <button id="saveWeekly" class="btn primary">주간 저장</button>
-          </div>
+        <div id="copyArea" class="copy-area hidden">
+          <p class="muted">아래 칸에 힐링문구를 보고 그대로 적어보세요.</p>
+          <textarea id="copyPad" placeholder="필사 모드"></textarea>
         </div>
       </div>
     </section>
 
     <!-- Search -->
-    <section id="search" class="tab" role="tabpanel">
+    <section id="search" class="page" role="tabpanel" aria-labelledby="tab-search">
       <div class="card">
         <h2>🔎 검색</h2>
         <input type="text" id="searchInput" placeholder="키워드 또는 #태그 (예: 보고서, #업무)">
@@ -146,7 +142,7 @@
     </section>
 
     <!-- Settings -->
-    <section id="settings" class="tab" role="tabpanel">
+    <section id="settings" class="page" role="tabpanel" aria-labelledby="tab-settings">
       <div class="card">
         <h2>🔐 보안</h2>
         <label class="row">
@@ -156,12 +152,14 @@
           <input type="password" id="pinCode" placeholder="옵션: 6자리 PIN(백업용)">
           <button id="savePin" class="btn">PIN 저장</button>
         </div>
-        <small class="muted">* Face ID는 WebAuthn(로컬) 사용. 서버 동기화를 켜면 추가 암호화를 권장합니다.</small>
+        <small class="muted">* 기본은 잠금 OFF입니다. 필요 시 켜주세요.</small>
       </div>
 
       <div class="card">
         <h2>🎨 테마</h2>
-        <label class="row"><input type="checkbox" id="darkMode"> 다크모드 사용</label>
+        <label class="row">
+          <input type="checkbox" id="darkMode"> 다크모드 사용
+        </label>
       </div>
 
       <div class="card">
@@ -179,20 +177,15 @@
   </main>
 
   <footer class="app-footer">
-    <small>로컬 저장 · 오프라인 지원 · v1.3</small>
+    <small>오프라인 지원 · 로컬 저장 · v1.3.1</small>
   </footer>
 
   <script src="app.js"></script>
   <script>
-    // Install PWA prompt
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault(); deferredPrompt = e;
-      const b = document.getElementById('installBtn');
-      if (b) { b.style.display='inline-flex'; b.onclick=()=>{ deferredPrompt.prompt(); }; }
-    });
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js'));
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js');
+      });
     }
   </script>
 </body>
