@@ -1,81 +1,75 @@
+
 <!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#fff6d4">
+  <meta name="theme-color" content="#fff6c9">
   <title>지니짱 감사일기</title>
-  <link rel="manifest" href="manifest.json?v=2.7.2-integrated-fix2">
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=2.7.2-integrated-fix2">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="app-header">
-  <div class="title-row">
-    <span class="star" aria-hidden="true">★</span>
-    <h1 class="logo">지니짱 감사일기</h1>
-    <div class="auth-line">
-      <span id="authState">로그아웃 상태</span>
-      <button id="openLogin" class="btn ghost small" type="button">로그인</button>
+  <header class="app-header">
+    <div class="title-wrap">
+      <span class="star" aria-hidden="true">★</span>
+      <h1 class="logo">지니짱 감사일기</h1>
     </div>
-  </div>
+    <div class="auth-area">
+      <span id="authEmail" class="muted"></span>
+      <button id="btnLoginOpen" class="btn pill small">로그인</button>
+      <button id="btnLogout" class="btn pill small hide">로그아웃</button>
+    </div>
+  </header>
+
   <nav class="tabs">
-    <a class="tab-btn" href="#/daily">데일리</a>
-    <a class="tab-btn" href="#/weekly">위클리</a>
-    <a class="tab-btn" href="#/search">검색</a>
-    <a class="tab-btn" href="#/settings">설정/백업</a>
+    <a class="tab-btn" data-route="#/daily">데일리</a>
+    <a class="tab-btn" data-route="#/weekly">위클리</a>
+    <a class="tab-btn" data-route="#/search">검색</a>
+    <a class="tab-btn" data-route="#/settings">설정/백업</a>
   </nav>
-</header>
 
-<main id="view" aria-live="polite"></main>
+  <main id="view" aria-live="polite"></main>
 
-<footer class="app-footer">
-  <small>오프라인 + 로그인 동기화 • v2.7.2-integrated-fix2</small>
-</footer>
+  <footer class="app-footer">
+    <small id="statusText">오프라인 + 로그인 동기화 · v2.7.2-integrated</small>
+  </footer>
 
-<!-- 로그인 모달 -->
-<dialog id="loginModal">
-  <form method="dialog" class="modal-card" id="loginForm">
-    <h3>로그인</h3>
-    <label>이메일
-      <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="username" required>
-    </label>
-    <label>비밀번호
-      <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" required>
-    </label>
-    <div id="loginMsg" class="hint"></div>
-    <div class="actions">
-      <button id="doLogin" class="btn primary" value="close">로그인</button>
-      <button id="doSignup" class="btn" value="close">회원가입</button>
-      <button id="closeLogin" class="btn ghost" value="cancel">닫기</button>
-    </div>
-  </form>
-</dialog>
+  <!-- Login modal -->
+  <dialog id="loginModal">
+    <form method="dialog" id="loginForm" class="modal">
+      <h3>로그인</h3>
+      <label>이메일
+        <input id="email" type="email" required placeholder="you@example.com">
+      </label>
+      <label>비밀번호
+        <input id="password" type="password" required>
+      </label>
+      <div class="row">
+        <button id="btnLogin" class="btn primary">로그인</button>
+        <button id="btnSignup" class="btn">회원가입</button>
+        <button id="btnCloseLogin" class="btn light" value="close">닫기</button>
+      </div>
+      <p class="muted small">지금은 이메일/비밀번호 방식만 지원합니다.</p>
+    </form>
+  </dialog>
 
-<!-- Firebase compat v9 (안정) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite"></div>
 
-<script>
-// 프로젝트 키: 네가 제공한 thanksdiary-dca35 (그대로 사용)
-window.firebaseConfig = {
-  apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
-  authDomain: "thanksdiary-dca35.firebaseapp.com",
-  projectId: "thanksdiary-dca35",
-  storageBucket: "thanksdiary-dca35.firebasestorage.app",
-  messagingSenderId: "250477396044",
-  appId: "1:250477396044:web:aa1cf155f01263e08834e9"
-};
-</script>
-<script src="app.js?v=2.7.2-integrated-fix2"></script>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js?v=2.7.2-integrated-fix2'));
-}
-</script>
+  <!-- Firebase compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js'));
+    }
+  </script>
 </body>
 </html>
