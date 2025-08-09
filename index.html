@@ -22,6 +22,11 @@
   <header class="app-header">
     <div class="title-area">
       <h1 class="logo">지니짱 감사일기</h1>
+      <div class="login-mini">
+        <span id="loginStatus" class="muted">로그아웃 상태</span>
+        <button id="openLogin" class="btn xs">로그인</button>
+        <button id="logoutBtn" class="btn xs outline hidden">로그아웃</button>
+      </div>
       <nav class="tabs">
         <a href="#/daily" class="tab-btn" id="tab-daily">데일리</a>
         <a href="#/weekly" class="tab-btn" id="tab-weekly">위클리</a>
@@ -30,6 +35,30 @@
       </nav>
     </div>
   </header>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>로그인</h3>
+      <label class="lbl">이메일</label>
+      <input type="email" id="emailInput" placeholder="you@example.com">
+      <label class="lbl">비밀번호</label>
+      <input type="password" id="pwdInput" placeholder="6자 이상">
+      <div class="btn-row actions-spaced">
+        <button id="doLogin" class="btn primary">로그인</button>
+        <button id="openSignup" class="btn">회원가입</button>
+        <button id="closeLogin" class="btn outline">닫기</button>
+      </div>
+      <p id="authMsg" class="muted tiny"></p>
+      <div id="signupArea" class="hidden">
+        <hr>
+        <h4>회원가입</h4>
+        <div class="btn-row">
+          <button id="doSignup" class="btn primary">이메일로 회원가입</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <main id="app-main">
     <!-- Daily Page -->
@@ -144,23 +173,6 @@
     <!-- Settings Page -->
     <section id="page-settings" class="page">
       <div class="card">
-        <h2>🔐 로그인</h2>
-        <div class="btn-row actions-spaced">
-          <button id="btnSignUp" class="btn">회원가입(이메일/비번)</button>
-          <button id="btnSignIn" class="btn">로그인</button>
-          <button id="btnSignOut" class="btn outline">로그아웃</button>
-        </div>
-        <p class="muted" id="authState">로그아웃 상태</p>
-      </div>
-
-      <div class="card">
-        <h2>🔒 보안</h2>
-        <label class="row">
-          <input type="checkbox" id="lockEnabled"> Face ID 잠금 사용 (기본 꺼짐)
-        </label>
-      </div>
-
-      <div class="card">
         <h2>📦 백업/복원</h2>
         <div class="btn-row actions-spaced">
           <button id="exportJSON" class="btn">JSON 파일로 저장</button>
@@ -179,10 +191,12 @@
   </main>
 
   <footer class="app-footer">
-    <small>오프라인 + 클라우드 동기화 · v2.1 (modules)</small>
+    <small>오프라인 + 클라우드 동기화 · v2.2</small>
   </footer>
 
+  <!-- Firebase v12 modules -->
   <script type="module" src="app.js"></script>
+
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
