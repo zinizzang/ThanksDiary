@@ -219,7 +219,7 @@ body.one-line-week #weekTextNice{display:none}
 </main>
 
 <footer class="app-footer">
-  <small>오프라인 + 로그인 연결 · v2.6.3</small>
+  <small>오프라인 + 로그인 연결 · v2.6.4</small>
 </footer>
 
 <div id="loginModal" class="modal"><div class="modal-panel">
@@ -327,7 +327,9 @@ document.addEventListener('input', e=>{ if(e.target.matches('textarea.auto')){ e
 document.addEventListener('change', e=>{ if(e.target.id==='dailyDate'){ const d=new Date(e.target.value); $('#dailyDateText').textContent=`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`; loadDaily(); } });
 
 // ---------- init
-document.addEventListener('DOMContentLoaded', ()=>{
+function route(){ const page=(location.hash.replace('#/','')||'daily'); showPage(page); }
+window.addEventListener('hashchange', route);
+document.addEventListener('DOMContentLoaded', ()=>{ if(!location.hash) location.hash = '#/daily'; route();
   // date + question
   const now = new Date(); const dInput = $('#dailyDate'); if(dInput && !dInput.value) dInput.value = fmtYMD(now); const dText = $('#dailyDateText'); if(dText && !dText.textContent) dText.textContent = `${now.getFullYear()}. ${now.getMonth()+1}. ${now.getDate()}.`; const q = $('#questionText'); if(q && !q.value) q.value = QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
   // route
