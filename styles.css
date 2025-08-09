@@ -1,0 +1,95 @@
+
+:root{
+  --bg:#fff9fb;
+  --card:#ffffff;
+  --ink:#3a2e39;
+  --muted:#8b7f86;
+  --brand:#ff86b3;
+  --brand-2:#a6c8ff;
+  --accent:#ffd3e6;
+  --danger:#ff6b88;
+  --line:#f3e7ee;
+}
+:root.dark{
+  --bg:#1a1525;
+  --card:#231a2c;
+  --ink:#f6e8f0;
+  --muted:#cbb8c3;
+  --brand:#ff99c8;
+  --brand-2:#a8c0ff;
+  --accent:#3a2a46;
+  --danger:#ff88a3;
+  --line:#3a2f3b;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;padding:0;background:linear-gradient(180deg, var(--accent), var(--bg) 30%);
+  color:var(--ink);
+  font-family:'Gowun Dodum','Gamja Flower','Jua', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+}
+h1,h2,h3{font-family:'Jua','Gowun Dodum',sans-serif; letter-spacing:.2px}
+.hidden{display:none}
+.lock{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:999}
+.lock-card{background:var(--card);border:1px solid var(--line);border-radius:1rem;padding:1rem 1.2rem;max-width:420px;width:92%;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.app-header{
+  position:sticky;top:0;
+  background:linear-gradient(90deg, var(--accent), #fff 60%);
+  border-bottom:1px solid var(--line);
+  padding:.6rem .9rem;z-index:10}
+.title-area{display:flex;align-items:center;gap:.5rem;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.4rem}
+.logo:before{
+  content:'❤'; font-size:1.1rem; color:var(--brand);
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.1));
+}
+.right-controls{display:flex;gap:.4rem;align-items:center}
+h1{font-size:1.25rem;margin:.25rem 0}
+.tabs{display:flex;gap:.5rem;margin-top:.35rem}
+.tab-btn{
+  flex:1;padding:.6rem;border:1px solid var(--line);
+  background:#fff;border-radius:.85rem;font-weight:700;
+  transition:.15s transform ease;
+}
+.tab-btn:hover{transform:translateY(-1px)}
+:root.dark .tab-btn{background:#2a2133}
+.tab-btn.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(255,134,179,.18)}
+main{padding:1rem;max-width:860px;margin:0 auto}
+.card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:1rem;padding:1rem;margin:1rem 0;
+  box-shadow:0 6px 18px rgba(0,0,0,.06)
+}
+.lbl{display:block;font-weight:700;margin:.5rem 0 .25rem}
+textarea,input[type="text"],input[type="password"],input[type="date"],input[type="week"]{
+  width:100%;padding:.85rem;border:1px solid var(--line);border-radius:.75rem;font-size:1.02rem;background:#fff
+}
+:root.dark textarea,:root.dark input{background:#2a2232;color:var(--ink);border-color:#3a2f3b}
+textarea{min-height:96px;resize:vertical}
+.gratitude-list{margin:.25rem 0 .5rem 1rem}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap}
+.btn{
+  padding:.65rem .95rem;border:1px solid var(--line);
+  border-radius:.9rem;background:#fff;font-weight:700;cursor:pointer
+}
+.btn.small{padding:.35rem .6rem;font-size:.9rem}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn.outline{background:#fff}
+.date-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.import-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.app-footer{padding:1.2rem;text-align:center;color:var(--muted)}
+.muted{color:var(--muted)}
+.add-mission{display:flex;gap:.5rem;margin-top:.5rem}
+.mission-item{
+  display:flex;gap:.5rem;align-items:center;border:1px solid var(--line);
+  padding:.5rem;border-radius:.75rem;margin:.25rem 0;background:#fff
+}
+:root.dark .mission-item{background:#2a2232;border-color:#3a2f3b}
+.mission-item input[type="text"]{flex:1;border:none;padding:.5rem;background:transparent}
+.mission-item input[type="checkbox"]{transform:scale(1.2)}
+.mission-item button{white-space:nowrap}
+.row{display:flex;gap:.5rem;align-items:center;margin:.5rem 0}
+.pin-area{margin-top:.5rem;display:flex;gap:.5rem;align-items:center}
+#searchResults .res{border-top:1px dashed var(--line);padding:.6rem 0}
+#searchResults .res h4{margin:.1rem 0}
+#searchResults .badge{display:inline-block;border:1px solid var(--line);border-radius:.75rem;padding:.15rem .5rem;margin-right:.25rem;font-size:.9rem}
