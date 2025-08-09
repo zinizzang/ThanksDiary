@@ -1,61 +1,59 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#fff6d6">
-<title>지니짱 감사일기</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff6c9">
+  <title>지니짱 감사일기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2.8.1">
 </head>
 <body>
   <header class="app-header">
-    <div class="header-row">
-      <div class="logo-wrap">
-        <span class="spark">★</span>
-        <h1 class="logo">지니짱 감사일기</h1>
-      </div>
-      <div class="auth-mini">
-        <span id="authState">로그아웃 상태</span>
-        <button class="btn small" id="openLogin">로그인</button>
-      </div>
+    <div class="title-area">
+      <span class="star">★</span>
+      <h1 class="logo">지니짱 감사일기</h1>
+    </div>
+    <div class="auth-mini">
+      <span id="authState">로그아웃 상태</span>
+      <button class="btn ghost small" id="openLogin">로그인</button>
     </div>
     <nav class="tabs">
-      <a class="tab-btn" data-tab="daily">데일리</a>
-      <a class="tab-btn" data-tab="weekly">위클리</a>
-      <a class="tab-btn" data-tab="search">검색</a>
-      <a class="tab-btn" data-tab="settings">설정/백업</a>
+      <a class="tab-btn" data-route="daily">데일리</a>
+      <a class="tab-btn" data-route="weekly">위클리</a>
+      <a class="tab-btn" data-route="search">검색</a>
+      <a class="tab-btn" data-route="settings">설정/백업</a>
     </nav>
   </header>
 
-  <main id="view" class="view"></main>
+  <main id="view" aria-live="polite"></main>
 
   <footer class="app-footer">
-    <small>오프라인 + 로그인 연동 · <span id="ver">v2.8.0 (cache-safe)</span></small>
+    <small>로그인 동기화 · v2.8.1 (v2.6 스타일)</small>
   </footer>
 
   <!-- 로그인 모달 -->
   <div id="loginModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-card">
-      <h3>로그인</h3>
+      <h3 class="modal-title">로그인</h3>
       <label>이메일</label>
-      <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="username">
+      <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="username" required>
       <label>비밀번호</label>
-      <input id="loginPw" type="password" placeholder="********" autocomplete="current-password">
-      <div class="row gap">
+      <input id="loginPw" type="password" placeholder="********" autocomplete="current-password" required>
+      <div class="actions login-actions">
         <button class="btn primary" id="btnSignIn">로그인</button>
         <button class="btn" id="btnSignUp">회원가입</button>
-        <button class="btn light" id="btnCloseLogin">닫기</button>
+        <button class="btn ghost" id="btnCloseLogin">닫기</button>
       </div>
-      <p id="loginMsg" class="muted"></p>
+      <p id="loginMsg" class="hint"></p>
     </div>
   </div>
 
   <div id="toast" class="toast hidden"></div>
 
-  <!-- Firebase (module) -->
-  <script type="module" src="app.js"></script>
+  <!-- Firebase (module CDN) -->
+  <script type="module" src="app.js?v=2.8.1"></script>
 </body>
 </html>
