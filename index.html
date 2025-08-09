@@ -3,68 +3,105 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#fff3b0"/>
+  <meta name="theme-color" content="#fff3bf"/>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png" sizes="192x192">
   <title>지니짱 감사일기</title>
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // PWA install prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('installBtn');
+      if (installBtn) installBtn.style.display = 'inline-flex';
+    });
+    function installPWA(){
+      if (!deferredPrompt) { alert('홈 화면에 추가는 브라우저 공유/옵션 메뉴에서 가능합니다.'); return; }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(()=>{
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) installBtn.style.display = 'none';
+      });
+    }
+  </script>
 </head>
 <body>
   <header class="app-header">
-    <div class="title">
-      <span class="logo">🌞</span>
-      <h1>지니짱 감사일기</h1>
-      <div class="spacer"></div>
-      <button id="installBtn" class="btn small" style="display:none">설치</button>
+    <div class="title-area">
+      <h1 class="logo">지니짱 감사일기</h1>
+      <div class="right-controls">
+        <button id="darkToggle" class="btn small">다크</button>
+        <button id="installBtn" class="btn small" onclick="installPWA()" style="display:none">설치</button>
+      </div>
     </div>
     <nav class="tabs">
-      <a href="#/daily" class="tab-link" data-route="daily">데일리</a>
-      <a href="#/weekly" class="tab-link" data-route="weekly">위클리</a>
-      <a href="#/search" class="tab-link" data-route="search">검색</a>
-      <a href="#/settings" class="tab-link" data-route="settings">설정/백업</a>
+      <a class="tab-btn" href="#/daily" data-tab="daily">데일리</a>
+      <a class="tab-btn" href="#/weekly" data-tab="weekly">위클리</a>
+      <a class="tab-btn" href="#/search" data-tab="search">검색</a>
+      <a class="tab-btn" href="#/settings" data-tab="settings">설정/백업</a>
     </nav>
   </header>
 
-  <main id="app">
+  <main>
     <!-- Daily Page -->
     <section id="page-daily" class="page">
       <div class="date-row">
         <button id="prevDay" class="btn">&lt;</button>
         <input type="date" id="dailyDate">
         <button id="nextDay" class="btn">&gt;</button>
-        <button id="todayBtn" class="btn">오늘</button>
+        <button id="todayBtn" class="btn outline">오늘</button>
       </div>
 
-      <div class="card"><h2>🧠 감정일기</h2>
-        <label class="lbl">사건</label><textarea id="eventField"></textarea>
-        <label class="lbl">생각</label><textarea id="thoughtField"></textarea>
-        <label class="lbl">감정</label><textarea id="feelingField"></textarea>
-        <label class="lbl">결과</label><textarea id="resultField"></textarea>
+      <div class="card">
+        <h2>🪞 오늘의 질문</h2>
+        <div class="row">
+          <input type="text" id="reflectionQuestion" class="mono" readonly>
+          <button id="newQuestion" class="btn">다른 질문</button>
+        </div>
+        <textarea id="reflectionAnswer" placeholder="나에게 조용히 대답해보세요."></textarea>
       </div>
 
-      <div class="card"><h2>🌼 감사일기</h2>
+      <div class="card">
+        <h2>🧠 감정일기</h2>
+        <label class="lbl">사건</label>
+        <textarea id="eventField" placeholder="오늘 무슨 일이 있었나요?"></textarea>
+        <label class="lbl">생각</label>
+        <textarea id="thoughtField" placeholder="그때 어떤 생각이 들었나요?"></textarea>
+        <label class="lbl">감정</label>
+        <textarea id="feelingField" placeholder="감정의 강도/이유를 함께 적어보세요."></textarea>
+        <label class="lbl">결과</label>
+        <textarea id="resultField" placeholder="그 결과 나는 어떻게 행동했나요?"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>🌼 감사일기</h2>
         <ol class="gratitude-list">
-          <li><input type="text" id="grat1" placeholder="감사한 일 1"></li>
-          <li><input type="text" id="grat2" placeholder="감사한 일 2"></li>
-          <li><input type="text" id="grat3" placeholder="감사한 일 3"></li>
+          <li><input type="text" id="grat1" placeholder="작은 것도 좋아요."></li>
+          <li><input type="text" id="grat2" placeholder="사람/행동/행운 등 무엇이든."></li>
+          <li><input type="text" id="grat3" placeholder="오늘을 좋게 만든 것."></li>
         </ol>
       </div>
 
-      <div class="card"><h2>📔 일상일기</h2>
-        <textarea id="dailyNote" placeholder="오늘 하루 메모"></textarea>
+      <div class="card">
+        <h2>📔 일상일기</h2>
+        <textarea id="dailyNote" placeholder="짧게 요약하거나, 길게 자유롭게 적어도 좋아요."></textarea>
       </div>
 
-      <div class="card"><h2>🏷️ 태그</h2>
+      <div class="card">
+        <h2>🏷️ 태그</h2>
         <input type="text" id="tagsField" placeholder="#가족, #업무 처럼 쉼표로 구분">
       </div>
 
-      <div class="stickybar">
+      <div class="savebar" id="savebar-daily">
         <button id="saveDaily" class="btn primary">저장</button>
         <button id="clearDaily" class="btn danger">지우기</button>
-        <span id="status" class="muted"></span>
+        <span class="status" id="statusDaily">불러옴</span>
       </div>
     </section>
 
@@ -74,30 +111,34 @@
         <button id="prevWeek" class="btn">&lt;</button>
         <input type="week" id="weekPicker">
         <button id="nextWeek" class="btn">&gt;</button>
-        <button id="thisWeekBtn" class="btn">이번 주</button>
+        <button id="thisWeekBtn" class="btn outline">이번 주</button>
       </div>
 
       <div class="card">
         <h2>✅ 미션</h2>
         <div id="missionList"></div>
         <div class="add-mission">
-          <input type="text" id="newMission" placeholder="미션 내용">
+          <input type="text" id="newMission" placeholder="미션 추가">
           <button id="addMission" class="btn">+ 추가</button>
         </div>
       </div>
 
       <div class="card">
         <h2>🫶 힐링문구</h2>
-        <textarea id="healingText" placeholder="이번 주 나를 지켜줄 문장"></textarea>
+        <textarea id="healingText" placeholder="이번 주 나를 지켜줄 문장 2줄 정도."></textarea>
         <div class="btn-row">
           <button id="randomHealing" class="btn">랜덤 추천</button>
           <button id="saveWeekly" class="btn primary">저장</button>
           <button id="clearWeekly" class="btn danger">지우기</button>
+          <button id="startCopy" class="btn outline">✍️ 필사 시작</button>
         </div>
-        <div class="philo">
-          <button id="copyHealing" class="btn">✍️ 필사 시작</button>
-          <textarea id="healingCopy" class="hidden" placeholder="힐링문구를 따라 적어보세요"></textarea>
+        <div id="copyArea" class="hidden">
+          <textarea id="copyPad" placeholder="힐링문구를 따라 적어보세요."></textarea>
         </div>
+      </div>
+
+      <div class="savebar" id="savebar-weekly">
+        <span class="status" id="statusWeekly">불러옴</span>
       </div>
     </section>
 
@@ -105,14 +146,14 @@
     <section id="page-search" class="page">
       <div class="card">
         <h2>🔎 검색</h2>
-        <input type="text" id="searchInput" placeholder="키워드 또는 #태그">
+        <input type="text" id="searchInput" placeholder="키워드 또는 #태그 (예: 보고서, #업무)">
         <div class="btn-row">
           <button id="searchBtn" class="btn">검색</button>
           <button id="searchClear" class="btn">지우기</button>
         </div>
       </div>
       <div class="card">
-        <h2>결과</h2>
+        <h3>결과</h3>
         <div id="searchResults"></div>
       </div>
     </section>
@@ -121,17 +162,21 @@
     <section id="page-settings" class="page">
       <div class="card">
         <h2>🔐 보안</h2>
-        <label class="row"><input type="checkbox" id="lockEnabled"> Face ID 잠금 사용</label>
+        <label class="row">
+          <input type="checkbox" id="lockEnabled"> Face ID 잠금 사용
+        </label>
         <div class="row">
           <input type="password" id="pinCode" placeholder="옵션: 6자리 PIN(백업용)">
           <button id="savePin" class="btn">PIN 저장</button>
         </div>
-        <small class="muted">* 기본은 비활성화. 필요할 때만 켜세요.</small>
+        <small class="muted">* 기본값은 잠금 OFF입니다. 필요할 때만 켜세요.</small>
       </div>
 
       <div class="card">
         <h2>🎨 테마</h2>
-        <label class="row"><input type="checkbox" id="darkMode"> 다크모드</label>
+        <label class="row">
+          <input type="checkbox" id="darkMode"> 다크모드 사용(시스템/수동 전환)
+        </label>
       </div>
 
       <div class="card">
@@ -148,6 +193,10 @@
     </section>
   </main>
 
+  <footer class="app-footer">
+    <small>로컬 저장 · 오프라인 지원 · v1.3.4</small>
+  </footer>
+
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
@@ -155,13 +204,6 @@
         navigator.serviceWorker.register('service-worker.js');
       });
     }
-    // install button (optional)
-    let deferredPrompt; 
-    window.addEventListener('beforeinstallprompt', e => {
-      e.preventDefault(); deferredPrompt = e;
-      const b = document.getElementById('installBtn'); if(b) b.style.display='inline-flex';
-      b?.addEventListener('click', ()=>{ deferredPrompt.prompt(); });
-    });
   </script>
 </body>
 </html>
