@@ -16,26 +16,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css">
-
-  <style>
-    /* 강제: 한 번에 한 페이지만 보이게 */
-    .page{display:none} .page.active{display:block}
-  </style>
+  <link rel="stylesheet" href="styles.css?v=234">
+  <style>.page{display:none}.page.active{display:block}</style>
 </head>
-
 <body>
   <header class="app-header">
     <div class="title-area">
       <h1 class="logo">지니짱 감사일기</h1>
-
       <div class="header-right">
         <div class="header-auth">
           <span id="authMiniState" class="muted">로그아웃 상태</span>
           <button id="authMiniLogin" class="mini-btn">로그인</button>
           <button id="authMiniLogout" class="mini-btn hidden">로그아웃</button>
         </div>
-
         <nav class="tabs">
           <a href="#/daily" class="tab-btn" id="tab-daily">데일리</a>
           <a href="#/weekly" class="tab-btn" id="tab-weekly">위클리</a>
@@ -47,8 +40,7 @@
   </header>
 
   <main id="app-main">
-    <!-- Daily Page -->
-    <section id="page-daily" class="page active">
+    <section id="page-daily" class="page">
       <div class="date-row">
         <button id="prevDay" class="btn">&lt;</button>
         <input type="date" id="dailyDate">
@@ -56,7 +48,6 @@
         <button id="todayBtn" class="btn outline">오늘</button>
         <span id="dailyDateText" class="date-text"></span>
       </div>
-
       <div class="card">
         <h2>🪞 오늘의 질문</h2>
         <div class="qbox">
@@ -68,7 +59,6 @@
         <label class="lbl">답변</label>
         <textarea id="answerText" class="auto" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
       </div>
-
       <div class="card">
         <h2>🧠 감정일기</h2>
         <p class="muted">사건을 사실대로 적고, 그때의 생각과 감정을 구분해 본 뒤 결과를 간단히 남겨보세요.</p>
@@ -81,7 +71,6 @@
         <label class="lbl">결과</label>
         <textarea id="resultField" class="auto" placeholder="그 결과 나는 어떻게 행동했나요?"></textarea>
       </div>
-
       <div class="card">
         <h2>🌼 감사일기</h2>
         <ol class="gratitude-list">
@@ -90,17 +79,14 @@
           <li><input type="text" id="grat3" placeholder="오늘을 좋게 만든 것."></li>
         </ol>
       </div>
-
       <div class="card">
         <h2>📔 일상일기</h2>
         <textarea id="dailyNote" class="auto" placeholder="짧게 요약하거나, 길게 자유롭게 적어도 좋아요."></textarea>
       </div>
-
       <div class="card">
         <h2>🏷️ 태그</h2>
         <input type="text" id="tagsField" placeholder="#가족, #업무 처럼 쉼표로 구분">
       </div>
-
       <div class="btn-row end actions-spaced" id="dailyActions">
         <button id="saveDaily" class="btn primary">저장</button>
         <button id="clearDaily" class="btn danger">지우기</button>
@@ -108,7 +94,6 @@
       </div>
     </section>
 
-    <!-- Weekly Page -->
     <section id="page-weekly" class="page">
       <div class="date-row">
         <button id="prevWeek" class="btn">&lt;</button>
@@ -117,7 +102,6 @@
         <button id="thisWeekBtn" class="btn outline">이번 주</button>
         <span id="weekText" class="date-text"></span>
       </div>
-
       <div class="card">
         <h2>✅ 미션 (체크박스)</h2>
         <div id="missionList"></div>
@@ -126,7 +110,6 @@
           <button id="addMission" class="btn">+ 추가</button>
         </div>
       </div>
-
       <div class="card">
         <h2>🫶 오늘의 문구</h2>
         <textarea id="healingText" class="auto" placeholder="오늘의 문구"></textarea>
@@ -140,7 +123,6 @@
       </div>
     </section>
 
-    <!-- Search Page -->
     <section id="page-search" class="page">
       <div class="card">
         <h2>🔎 검색</h2>
@@ -156,7 +138,6 @@
       </div>
     </section>
 
-    <!-- Settings Page -->
     <section id="page-settings" class="page">
       <div class="card">
         <h2>🔐 로그인</h2>
@@ -166,38 +147,29 @@
         </div>
         <p class="muted" id="authState">로그아웃 상태</p>
       </div>
-
       <div class="card">
         <h2>📦 백업/복원</h2>
-        <div class="btn-row actions-spaced">
+        <div class="settings-grid">
           <button id="exportJSON" class="btn">JSON 파일로 저장</button>
           <button id="shareJSON" class="btn">JSON 공유(카톡 등)</button>
-        </div>
-        <div class="import-row">
-          <input type="file" id="importFile" accept=".json"/>
+          <label class="file-wrap btn"><input type="file" id="importFile" accept=".json"/>파일 선택</label>
           <button id="importJSON" class="btn">JSON 가져오기</button>
-        </div>
-        <div class="btn-row actions-spaced">
           <button id="refreshCache" class="btn outline">캐시 새로고침(업데이트)</button>
           <button id="resetLocal" class="btn danger">로컬 데이터 초기화</button>
         </div>
+        <p id="fileName" class="muted"></p>
       </div>
     </section>
   </main>
 
-  <footer class="app-footer">
-    <small>오프라인 + 클라우드 동기화 · v2.3.2</small>
-  </footer>
+  <footer class="app-footer"><small>오프라인 + 클라우드 동기화 · v2.3.4</small></footer>
 
-  <!-- 로그인 모달 -->
   <div id="loginModal" class="modal">
     <div class="modal-panel">
       <h3>로그인</h3>
-      <label class="lbl">이메일</label>
-      <input type="email" id="loginEmail" placeholder="you@example.com">
-      <label class="lbl">비밀번호</label>
-      <input type="password" id="loginPwd" placeholder="••••••••">
-      <div class="btn-row actions-spaced">
+      <label class="lbl">이메일</label><input type="email" id="loginEmail" placeholder="you@example.com">
+      <label class="lbl">비밀번호</label><input type="password" id="loginPwd" placeholder="••••••••">
+      <div class="btn-row actions-spaced modal-actions">
         <button id="modalSignIn" class="btn primary">로그인</button>
         <button id="modalSignUp" class="btn">회원가입</button>
         <button id="modalClose" class="btn">닫기</button>
@@ -206,52 +178,40 @@
     </div>
   </div>
 
-  <!-- Firebase compat SDK (안정) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-  <!-- 앱 스크립트 (일반 defer, 모듈 아님) -->
-  <script src="app.js?v=232" defer></script>
-
+  <script src="app.js?v=234" defer></script>
   <script>
-    // 강제로 예전 서비스워커/캐시 제거 (GitHub Pages 캐시 꼬임 방지)
     (function(){
-      if('serviceWorker' in navigator){
-        navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
-        if(window.caches && caches.keys) caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
-      }
-      // 탭 라우팅 기본 가동
       function show(name){
         document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-        document.querySelector('#page-'+(name||'daily')).classList.add('active');
+        var page=document.querySelector('#page-'+(name||'daily')); if(page) page.classList.add('active');
         document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
         var tab=document.querySelector('#tab-'+(name||'daily')); if(tab) tab.classList.add('active');
       }
       function onHash(){var h=location.hash.replace(/^#\/?/,'')||'daily'; show(h);}
       window.addEventListener('hashchange', onHash);
       if(!location.hash) location.hash = '#/daily'; onHash();
-
-      // 로그인 모달 최소 동작(파이어베이스 초기화 실패해도 열고 닫히게)
       var lm=document.getElementById('loginModal');
-      var openBtn=document.getElementById('authMiniLogin');
-      var openBtn2=document.getElementById('openLogin');
-      var closeBtn=document.getElementById('modalClose');
-      function open(){ if(lm) lm.classList.add('open'); }
-      function close(){ if(lm) lm.classList.remove('open'); }
-      if(openBtn) openBtn.addEventListener('click', open);
-      if(openBtn2) openBtn2.addEventListener('click', open);
-      if(closeBtn) closeBtn.addEventListener('click', close);
+      function open(){ lm && lm.classList.add('open'); }
+      function close(){ lm && lm.classList.remove('open'); }
+      document.addEventListener('click', function(e){
+        var id=e.target && e.target.id;
+        if(id==='authMiniLogin' || id==='openLogin') open();
+        if(id==='modalClose') close();
+      });
       lm && lm.addEventListener('click', function(e){ if(e.target.id==='loginModal') close(); });
-
-      // 오늘 날짜 표시 기본 세팅 (JS 초기 가동 보장)
-      var dd=document.getElementById('dailyDate'); var dt=document.getElementById('dailyDateText');
       try{
-        var d=new Date(); var tz=d.getTimezoneOffset()*60000; var ymd=new Date(d.getTime()-tz).toISOString().slice(0,10);
-        if(dd){ dd.value=ymd; if(dt){ dt.textContent = d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.'; } }
+        var dd=document.getElementById('dailyDate'), dt=document.getElementById('dailyDateText');
+        var d=new Date(); var tz=d.getTimezoneOffset()*60000; var y=new Date(d.getTime()-tz).toISOString().slice(0,10);
+        if(dd){ dd.value=y; if(dt){ dt.textContent = d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.'; } }
       }catch(e){}
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
+        if(window.caches && caches.keys) caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+      }
     })();
   </script>
 </body>
-
 </html>
