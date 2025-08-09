@@ -1,25 +1,27 @@
-
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#fff6cf">
-  <title>지니짱 감사일기</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff7d6">
+<title>지니짱 감사일기</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="app-header pastel">
-  <div class="title-row">
-    <h1 class="logo">✶ 지니짱 감사일기</h1>
-    <div class="auth-strip">
-      <span id="authState">로그아웃 상태</span>
-      <button id="btnLogin" class="btn sm">로그인</button>
+<header class="app-header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <img src="images/star-yellow.svg" alt="*" class="star">
+      <h1 class="logo">지니짱 감사일기</h1>
+    </div>
+    <div class="auth-area">
+      <span id="authStatus">로그아웃 상태</span>
+      <button class="btn pill small" id="openLogin">로그인</button>
     </div>
   </div>
   <nav class="tabs">
@@ -32,49 +34,49 @@
 
 <main id="view" aria-live="polite"></main>
 
-<footer class="app-footer"><small>오프라인 + 로그인 연결 · v2.7.1</small></footer>
+<footer class="app-footer">
+  <small id="build">오프라인 + 로그인 연결 · v2.7.1</small>
+</footer>
 
-<!-- 로그인 모달 -->
-<dialog id="loginModal">
-  <form method="dialog" class="card">
+<!-- Login Modal -->
+<div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-dim" data-close></div>
+  <div class="modal-card">
     <h3>로그인</h3>
     <label>이메일
-      <input id="loginEmail" type="email" placeholder="you@example.com" required>
+      <input id="loginEmail" type="email" placeholder="you@example.com">
     </label>
     <label>비밀번호
-      <input id="loginPass" type="password" required>
+      <input id="loginPass" type="password" placeholder="••••••••">
     </label>
-    <div class="btn-row gap">
-      <button id="doLogin" class="btn primary">로그인</button>
-      <button id="doSignup" class="btn">회원가입</button>
-      <button id="closeLogin" class="btn ghost">닫기</button>
+    <div class="actions-row">
+      <button class="btn primary" id="doLogin">로그인</button>
+      <button class="btn line" id="doSignup">회원가입</button>
+      <button class="btn" id="closeLogin">닫기</button>
     </div>
-    <p id="loginMsg" class="msg"></p>
-  </form>
-</dialog>
+    <p class="hint">지금은 로컬 저장 + 클라우드 동기화. 동일 계정으로 다른 기기에서도 이어집니다.</p>
+  </div>
+</div>
 
-<!-- 카톡 불러오기(붙여넣기) 모달 -->
-<dialog id="kakaoModal">
-  <form method="dialog" class="card">
-    <h3>카톡 불러오기</h3>
-    <p class="hint">카톡에서 복사한 문장을 아래에 붙여넣고 불러오기를 누르세요.</p>
-    <textarea id="kakaoPaste" rows="6" placeholder="여기에 붙여넣기"></textarea>
-    <div class="btn-row gap">
-      <button id="kakaoImport" class="btn primary">불러오기</button>
-      <button class="btn ghost">닫기</button>
-    </div>
-  </form>
-</dialog>
-
+<script>
+// --- Firebase (prod) ---
+// 자신의 값으로 바꿔도 됩니다. 지금 값은 너가 준 프로젝트 값.
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
+  authDomain: "thanksdiary-dca35.firebaseapp.com",
+  projectId: "thanksdiary-dca35",
+  storageBucket: "thanksdiary-dca35.firebasestorage.app",
+  messagingSenderId: "250477396044",
+  appId: "1:250477396044:web:aa1cf155f01263e08834e9"
+};
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="app.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', ()=> {
-    navigator.serviceWorker.register('service-worker.js');
-  });
+  window.addEventListener('load', ()=> navigator.serviceWorker.register('service-worker.js'));
 }
 </script>
 </body>

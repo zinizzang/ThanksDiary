@@ -1,101 +1,69 @@
-/* thanksdiary-ui styles.css  v2.7.1 (pastel + spacing + unified font) */
-
-/* 1) Font family — try to use 'SAGeon' if available, else Gowun Dodum, then system */
+/* Pastel theme */
 :root{
-  --ui-font: 'SAGeon','Gowun Dodum','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;
-  --ui-accent: #5a4a3f;
-  --ui-pastel-1: #fff3c2;
-  --ui-pastel-2: #ffe9a9;
-  --ui-card: #fffdf6;
-  --ui-border: #f0e2b8;
-  --ui-shadow: 0 6px 16px rgba(0,0,0,.06);
-  --ui-radius: 18px;
+  --bg:#fffaf0;
+  --panel:#fffdf7;
+  --card:#ffffff;
+  --accent:#ffd35a;
+  --accent2:#7b6cff;
+  --text:#3b2c22;
+  --muted:#8c7b6f;
+  --border:#f2e7d6;
+  --shadow: 0 6px 18px rgba(0,0,0,.08);
+  --radius:18px;
 }
-
-/* Apply font everywhere (titles, inputs, placeholders) */
-html,body,* { font-family: var(--ui-font) !important; }
-::placeholder { font-family: var(--ui-font) !important; color:#b8b0a6; opacity:.95;}
-
-/* 2) Header cute pastel gradient + star icon spacing */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:'Gowun Dodum',sans-serif;background:var(--bg);color:var(--text)}
 .app-header{
-  background: linear-gradient(180deg,var(--ui-pastel-1), var(--ui-pastel-2));
-  box-shadow: var(--ui-shadow);
+  background: linear-gradient(90deg,#fff3bf, #fff1c7 35%, #fff7dc);
+  padding:18px 16px 8px;
+  position:sticky; top:0; z-index:10;
+  border-bottom:1px solid var(--border);
 }
-.app-header .title-area{ display:flex; align-items:center; gap:10px; }
-.app-header .title-area .logo{ letter-spacing:-.03em; font-weight:800; }
-.app-header .title-area .logo .star-icon{
-  width:18px; height:18px; margin-right:6px; transform: translateY(1px);
-}
-
-/* 3) Tabs — keep the 2x2 layout but add breathing room */
-.tabs{ display:grid; grid-template-columns: repeat(2, 1fr); gap:16px !important; }
+.header-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo{font-size:28px;margin:0;font-weight:900;letter-spacing:.5px}
+.star{width:18px;height:18px}
+.auth-area{display:flex;align-items:center;gap:10px;color:var(--muted)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:14px 4px 6px}
 .tab-btn{
-  padding:14px 18px !important;
-  border-radius: var(--ui-radius) !important;
-  background:#fff !important;
-  box-shadow: var(--ui-shadow);
-  border:1px solid var(--ui-border) !important;
+  display:flex;align-items:center;justify-content:center;height:64px;
+  background:var(--card);border-radius:20px;border:1px solid var(--border);
+  color:#2f2a22;text-decoration:none;box-shadow:var(--shadow);font-size:22px;
 }
-
-/* 4) Section cards */
-.card, .section, .panel, .box{
-  background:var(--ui-card) !important;
-  border:1px solid var(--ui-border) !important;
-  border-radius: var(--ui-radius) !important;
-  box-shadow: var(--ui-shadow);
+#view{padding:14px;max-width:900px;margin:0 auto}
+.section{background:var(--panel);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);padding:18px;margin:14px 0}
+.section h2{display:flex;align-items:center;gap:10px;margin:0 0 12px 0;font-size:26px}
+.sec-desc{color:var(--muted);margin:-4px 0 14px 0}
+label{display:block;font-size:15px;margin:8px 0 6px 2px;color:var(--muted)}
+input,textarea{
+  width:100%;border:1px solid var(--border);border-radius:16px;background:#fff;padding:14px 16px;
+  font-size:18px;color:var(--text);outline:none;box-shadow: inset 0 1px 0 rgba(0,0,0,.03);
 }
-
-/* Headings unified weight */
-h1,h2,h3,.title,.heading{
-  font-family: var(--ui-font) !important;
-  font-weight: 800 !important;
-  letter-spacing:-.02em;
-  color: var(--ui-accent);
+textarea{min-height:120px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.actions-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{
+  border:none;background:#f1f1f1;padding:12px 18px;border-radius:16px;cursor:pointer;
+  font-size:16px;box-shadow:var(--shadow)
 }
-
-/* 5) Buttons & modal buttons spacing */
-button, .btn{
-  font-family: var(--ui-font) !important;
-  border-radius: 14px !important;
-}
-.modal .actions, .dialog .actions{
-  display:flex; gap:12px !important; flex-wrap:wrap;
-}
-.modal .actions .btn, .dialog .actions .btn, .modal .actions button{
-  padding:12px 18px !important;
-}
-
-/* 6) Helper text (sub description) */
-.helper, .subtext, .note{ color:#9c9288 !important; font-size:.92rem !important;}
-
-/* 7) Weekly single label + layout fixes */
-.week-label{ font-weight:800; color:#5a4a3f; }
-.week-dup { display:none !important; } /* defensive: hidden duplicates */
-
-/* 8) Daily 'mission add' one-line fix */
-.mission-add-row{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.mission-add-row .add-btn{ white-space:nowrap; }
-
-/* 9) Toast */
-.td-toast{
-  position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-  background:#333; color:#fff; padding:12px 16px; border-radius:14px;
-  font-size:.95rem; box-shadow: var(--ui-shadow); opacity:0; pointer-events:none;
-  transition:opacity .25s ease;
-  z-index:9999;
-}
-.td-toast.show{ opacity:.96; }
-
-/* 10) Pastel background for whole app */
-body{ background: radial-gradient(140% 90% at 0% 0%, #fff6cf 0, #fff8de 40%, #fffef9 100%) fixed !important;}
-
-/* 11) Inputs */
-input, textarea{
-  border-radius: 14px !important;
-  border:1px solid var(--ui-border) !important;
-}
-
-/* 12) Icon color for cute star bullet in headings if present */
-.heading-bullet{ color:#ffd257; margin-right:6px; }
+.btn.pill{border-radius:20px}
+.btn.primary{background:var(--accent);color:#3b2c22}
+.btn.line{background:#fff;border:1px solid var(--border)}
+.btn.small{padding:8px 12px;font-size:14px}
+.kicker{font-size:18px;color:var(--muted)}
+.date-bar{display:flex;gap:12px;align-items:center;margin:10px 0}
+.date-chip{flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:18px;padding:10px 12px;font-size:24px;color:#1c62d3}
+.round{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.round:active{transform:translateY(1px)}
+.app-footer{padding:28px 12px;color:var(--muted);text-align:center}
+/* Modal */
+.modal{position:fixed;inset:0;display:none}
+.modal.show{display:block}
+.modal-dim{position:absolute;inset:0;background:rgba(0,0,0,.35)}
+.modal-card{position:relative;margin:10vh auto 0;max-width:480px;background:#fff;border-radius:22px;padding:18px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.modal-card h3{margin:0 0 8px 0}
+.hint{color:var(--muted);font-size:14px;margin-top:8px}
+/* Chips */
+.badge{display:inline-block;background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:14px;color:#6b5a48}
+/* Helpers */
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
