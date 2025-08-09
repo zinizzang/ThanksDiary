@@ -2,7 +2,7 @@
 <!doctype html><meta charset="utf-8"><title>SW Kill</title>
 <body style="font-family:sans-serif;padding:20px">
 <h2>Service Worker & Cache Clear</h2>
-<p>이 페이지는 서비스워커와 캐시를 제거합니다.</p>
+<p>서비스워커와 캐시를 제거합니다.</p>
 <pre id="log"></pre>
 <script>
 (async function(){
@@ -16,7 +16,7 @@
     for(const k of keys){ await caches.delete(k); log('cache deleted: '+k); }
   }
   log('done. redirecting...');
-  setTimeout(()=>location.href='./#/daily', 1000);
+  setTimeout(()=>location.href='./#/daily?v='+Date.now(), 800);
 })();
 </script>
 </body>
