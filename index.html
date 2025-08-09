@@ -3,14 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f9e6f2"/>
+  <meta name="theme-color" content="#fff4c2"/>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png" sizes="192x192">
-  <title>TTC 감사·감정·일상 일기</title>
-  <!-- Cute Korean fonts -->
+  <title>지니짱 감사일기</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gamja+Flower&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script>
     let deferredPrompt;
@@ -31,27 +30,11 @@
   </script>
 </head>
 <body>
-  <div id="lockScreen" class="lock hidden">
-    <div class="lock-card">
-      <h2>Face ID / 기기 인증</h2>
-      <p class="muted">일기 잠금을 해제하려면 인증해 주세요.</p>
-      <div class="btn-row">
-        <button id="unlockBtn" class="btn primary">잠금 해제</button>
-        <button id="lockBypass" class="btn">암호 입력</button>
-      </div>
-      <div id="pinArea" class="pin-area hidden">
-        <input type="password" id="pinInput" placeholder="6자리 암호 (설정에서 관리)">
-        <button id="pinSubmit" class="btn">확인</button>
-      </div>
-      <small class="muted">* 인증이 동작하지 않으면 Safari에서 다시 열거나 홈화면 설치 후 시도해 보세요.</small>
-    </div>
-  </div>
-
   <header class="app-header">
     <div class="title-area">
-      <h1 class="logo">TTC 감사·감정·일상 일기</h1>
+      <h1 class="logo">지니짱 감사일기</h1>
       <div class="right-controls">
-        <button id="darkToggle" class="btn small">다크</button>
+        <button id="darkToggle" class="btn small" title="다크모드">🌙</button>
         <button id="installBtn" class="btn small" onclick="installPWA()" style="display:none">설치</button>
       </div>
     </div>
@@ -64,7 +47,6 @@
   </header>
 
   <main>
-    <!-- Daily -->
     <section id="daily" class="tab active">
       <div class="date-row">
         <button id="prevDay" class="btn">&lt;</button>
@@ -72,45 +54,39 @@
         <button id="nextDay" class="btn">&gt;</button>
         <button id="todayBtn" class="btn outline">오늘</button>
       </div>
-
       <div class="card">
-        <h2>1) 감정일기</h2>
+        <h2>🧠 감정일기</h2>
         <label class="lbl">사건</label>
-        <textarea id="eventField" placeholder="오늘 무슨 일이 있었나요?"></textarea>
+        <textarea id="eventField"></textarea>
         <label class="lbl">생각</label>
-        <textarea id="thoughtField" placeholder="그때 어떤 생각이 들었나요?"></textarea>
+        <textarea id="thoughtField"></textarea>
         <label class="lbl">감정</label>
-        <textarea id="feelingField" placeholder="감정의 강도/이유를 함께 적어보세요."></textarea>
+        <textarea id="feelingField"></textarea>
         <label class="lbl">결과</label>
-        <textarea id="resultField" placeholder="그 결과 나는 어떻게 행동했나요?"></textarea>
+        <textarea id="resultField"></textarea>
       </div>
-
       <div class="card">
-        <h2>2) 감사일기 (3개)</h2>
+        <h2>🌼 감사일기 (3개)</h2>
         <ol class="gratitude-list">
-          <li><input type="text" id="grat1" placeholder="작은 것도 좋아요."></li>
-          <li><input type="text" id="grat2" placeholder="사람/행동/행운 등 무엇이든."></li>
-          <li><input type="text" id="grat3" placeholder="오늘을 좋게 만든 것."></li>
+          <li><input type="text" id="grat1"></li>
+          <li><input type="text" id="grat2"></li>
+          <li><input type="text" id="grat3"></li>
         </ol>
       </div>
-
       <div class="card">
-        <h2>3) 일상일기</h2>
-        <textarea id="dailyNote" placeholder="짧게 요약하거나, 길게 자유롭게 적어도 좋아요."></textarea>
+        <h2>📔 일상일기</h2>
+        <textarea id="dailyNote"></textarea>
       </div>
-
       <div class="card">
-        <h2>태그</h2>
+        <h2>🏷️ 태그</h2>
         <input type="text" id="tagsField" placeholder="#가족, #업무 처럼 쉼표로 구분">
       </div>
-
       <div class="btn-row">
         <button id="saveDaily" class="btn primary">저장</button>
         <button id="clearDaily" class="btn danger">지우기</button>
       </div>
     </section>
 
-    <!-- Weekly -->
     <section id="weekly" class="tab">
       <div class="date-row">
         <button id="prevWeek" class="btn">&lt;</button>
@@ -118,31 +94,36 @@
         <button id="nextWeek" class="btn">&gt;</button>
         <button id="thisWeekBtn" class="btn outline">이번 주</button>
       </div>
-
       <div class="card">
-        <h2>1) 미션 (체크박스)</h2>
+        <h2>✅ 미션</h2>
         <div id="missionList"></div>
         <div class="add-mission">
           <input type="text" id="newMission" placeholder="미션 추가">
-          <button id="addMission" class="btn">추가</button>
+          <button id="addMission" class="btn">+ 미션 추가</button>
         </div>
       </div>
-
       <div class="card">
-        <h2>2) 힐링문구</h2>
-        <textarea id="healingText" placeholder="이번 주 나를 지켜줄 한 문장."></textarea>
+        <h2>🫶 힐링문구</h2>
+        <textarea id="healingText" placeholder="이번 주 나를 지켜줄 한 문장. (자동 추천됨)"></textarea>
         <div class="btn-row">
-          <button id="randomHealing" class="btn">랜덤 추천</button>
+          <button id="randomHealing" class="btn">다른 문구 추천</button>
           <button id="saveWeekly" class="btn primary">저장</button>
           <button id="clearWeekly" class="btn danger">지우기</button>
+        </div>
+        <div class="copy-area">
+          <h3>✍️ 필사 모드</h3>
+          <textarea id="copyPad" placeholder="힐링문구를 따라 적어보세요. (자동 채움/수정 가능)"></textarea>
+          <div class="btn-row">
+            <button id="fillCopy" class="btn">힐링문구 불러오기</button>
+            <button id="clearCopy" class="btn">필사 지우기</button>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Search -->
     <section id="search" class="tab">
       <div class="card">
-        <h2>검색</h2>
+        <h2>🔎 검색</h2>
         <input type="text" id="searchInput" placeholder="키워드 또는 #태그 (예: 보고서, #업무)">
         <div class="btn-row">
           <button id="searchBtn" class="btn">검색</button>
@@ -155,29 +136,22 @@
       </div>
     </section>
 
-    <!-- Settings/Backup -->
     <section id="settings" class="tab">
       <div class="card">
-        <h2>보안</h2>
-        <label class="row">
-          <input type="checkbox" id="lockEnabled"> Face ID 잠금 사용
-        </label>
+        <h2>🔐 보안</h2>
+        <label class="row"><input type="checkbox" id="lockEnabled"> Face ID 잠금 사용</label>
         <div class="row">
           <input type="password" id="pinCode" placeholder="옵션: 6자리 PIN(백업용)">
           <button id="savePin" class="btn">PIN 저장</button>
         </div>
-        <small class="muted">* Face ID는 WebAuthn을 사용합니다(기기/브라우저에 종속). 서버 검증 없이 로컬 보호용이므로, 고급 보안이 필요한 데이터라면 추가 보호를 권장합니다.</small>
+        <small class="muted">* 기본값은 잠금 해제 상태입니다. 켜야만 잠깁니다.</small>
       </div>
-
       <div class="card">
-        <h2>테마</h2>
-        <label class="row">
-          <input type="checkbox" id="darkMode"> 다크모드 사용(시스템/수동 전환)
-        </label>
+        <h2>🎨 테마</h2>
+        <label class="row"><input type="checkbox" id="darkMode"> 다크모드 사용</label>
       </div>
-
       <div class="card">
-        <h2>백업/복원</h2>
+        <h2>📦 백업/복원</h2>
         <div class="btn-row">
           <button id="exportJSON" class="btn">JSON 내보내기</button>
           <button id="exportCSV" class="btn">CSV 내보내기</button>
@@ -190,17 +164,8 @@
     </section>
   </main>
 
-  <footer class="app-footer">
-    <small>로컬 저장 · 오프라인 지원 · v1.1</small>
-  </footer>
-
+  <footer class="app-footer"><small>로컬 저장 · 오프라인 지원 · v1.2</small></footer>
   <script src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js');
-      });
-    }
-  </script>
+  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js');});}</script>
 </body>
 </html>

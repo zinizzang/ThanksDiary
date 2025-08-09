@@ -1,10 +1,10 @@
 {
-  "name": "TTC 감사·감정·일상 일기",
-  "short_name": "TTC 일기",
+  "name": "지니짱 감사일기",
+  "short_name": "지니짱 감사일기",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#fff9fb",
-  "theme_color": "#f9e6f2",
+  "background_color": "#fffdf3",
+  "theme_color": "#fff4c2",
   "icons": [
     {
       "src": "icons/icon-192.png",
