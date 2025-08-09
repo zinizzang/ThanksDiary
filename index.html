@@ -1,74 +1,186 @@
-
 <!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#fff6c9">
+  <meta name="theme-color" content="#fff5cf">
   <title>지니짱 감사일기</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json?v=2.7.2-final-ui232r2">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2.7.2-final-ui232r2">
 </head>
 <body>
   <header class="app-header">
-    <div class="title-wrap">
-      <span class="star" aria-hidden="true">★</span>
+    <div class="brand">
+      <img src="img/star.svg" alt="" class="star" width="18" height="18">
       <h1 class="logo">지니짱 감사일기</h1>
     </div>
-    <div class="auth-area">
-      <span id="authEmail" class="muted"></span>
-      <button id="btnLoginOpen" class="btn pill small">로그인</button>
-      <button id="btnLogout" class="btn pill small hide">로그아웃</button>
-    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab-btn" data-view="daily" aria-selected="true"><img src="img/daily.svg" alt="" />데일리</button>
+      <button class="tab-btn" data-view="weekly"><img src="img/weekly.svg" alt="" />위클리</button>
+      <button class="tab-btn" data-view="search"><img src="img/search.svg" alt="" />검색</button>
+      <button class="tab-btn" data-view="settings"><img src="img/settings.svg" alt="" />설정/백업</button>
+    </nav>
   </header>
 
-  <nav class="tabs">
-    <a class="tab-btn" data-route="#/daily">데일리</a>
-    <a class="tab-btn" data-route="#/weekly">위클리</a>
-    <a class="tab-btn" data-route="#/search">검색</a>
-    <a class="tab-btn" data-route="#/settings">설정/백업</a>
-  </nav>
+  <main id="view">
+    <!-- DAILY -->
+    <section id="view-daily" class="view active" aria-labelledby="tab-daily">
+      <div class="toolbar">
+        <label class="label">날짜</label>
+        <input id="dailyDate" type="date" />
+        <button id="btnToday" class="btn ghost">오늘</button>
+      </div>
 
-  <main id="view" aria-live="polite"></main>
+      <article class="card">
+        <h2><img src="img/mirror.svg" alt="" /> 오늘의 질문</h2>
+        <p class="hint">나를 되돌아보는 한 줄 질문이에요.</p>
+        <div id="questionText" class="q-box"></div>
+        <div class="field">
+          <label class="subtle">답변</label>
+          <textarea id="answer" rows="4" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+        </div>
+        <div class="grid-2">
+          <button id="btnRandQ" class="btn ghost">다른 질문</button>
+          <button id="btnSaveQA" class="btn primary">저장</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2><img src="img/emotion.svg" alt="" /> 감정일기</h2>
+        <p class="hint">사건 · 생각 · 감정 · 결과</p>
+        <div class="grid-2">
+          <div class="field"><label>사건</label><textarea id="ev-event" rows="2" placeholder="오늘 무슨 일이 있었나요?"></textarea></div>
+          <div class="field"><label>생각</label><textarea id="ev-thought" rows="2" placeholder="그때 어떤 생각이 들었나요?"></textarea></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>감정</label><textarea id="ev-emotion" rows="2" placeholder="감정의 강도/이유를 함께 적어보세요."></textarea></div>
+          <div class="field"><label>결과</label><textarea id="ev-result" rows="2" placeholder="그 일의 결과는 어땠나요?"></textarea></div>
+        </div>
+        <button id="btnSaveEmotion" class="btn primary block">저장</button>
+      </article>
+
+      <article class="card">
+        <h2><img src="img/thanks.svg" alt="" /> 감사일기</h2>
+        <p class="hint">3개를 채워보세요.</p>
+        <input id="thx1" class="input" placeholder="감사한 일 1" />
+        <input id="thx2" class="input" placeholder="감사한 일 2" />
+        <input id="thx3" class="input" placeholder="감사한 일 3" />
+        <button id="btnSaveThanks" class="btn primary block">저장</button>
+      </article>
+
+      <article class="card">
+        <h2><img src="img/journal.svg" alt="" /> 일상일기</h2>
+        <textarea id="dailyNote" rows="4" placeholder="하루를 가볍게 기록해요."></textarea>
+        <button id="btnSaveNote" class="btn primary block">저장</button>
+      </article>
+
+      <article class="card">
+        <h2><img src="img/tag.svg" alt="" /> 태그 달기</h2>
+        <input id="tags" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분" />
+        <button id="btnSaveTags" class="btn primary block">저장</button>
+      </article>
+    </section>
+
+    <!-- WEEKLY -->
+    <section id="view-weekly" class="view" aria-labelledby="tab-weekly">
+      <div class="toolbar">
+        <button id="btnWeekPrev" class="btn ghost">&lt;</button>
+        <span id="weekLabel" class="week-label"></span>
+        <button id="btnWeekNext" class="btn ghost">&gt;</button>
+      </div>
+
+      <article class="card">
+        <h2><img src="img/check.svg" alt="" /> 미션 (체크박스)</h2>
+        <div id="missionList" class="mission-list"></div>
+        <div class="grid-2">
+          <input id="newMission" class="input" placeholder="미션 추가" />
+          <button id="btnAddMission" class="btn ghost">+ 추가</button>
+        </div>
+        <button id="btnSaveMissions" class="btn primary block">저장</button>
+      </article>
+
+      <article class="card">
+        <h2><img src="img/leaf.svg" alt="" /> 힐링문구</h2>
+        <p id="healingText" class="hint"></p>
+        <textarea id="healingCopy" rows="3" placeholder="문장을 따라 적어보세요."></textarea>
+        <div class="grid-2">
+          <button id="btnNextHealing" class="btn ghost">다음 문구</button>
+          <button id="btnSaveHealing" class="btn primary">저장</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- SEARCH -->
+    <section id="view-search" class="view" aria-labelledby="tab-search">
+      <article class="card">
+        <h2><img src="img/search.svg" alt="" /> 전체 내용 검색</h2>
+        <div class="grid-2">
+          <input id="searchInput" class="input" placeholder="키워드를 입력하세요" />
+          <button id="btnSearch" class="btn primary">검색</button>
+        </div>
+        <ul id="searchResults" class="result-list"></ul>
+      </article>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settings" class="view" aria-labelledby="tab-settings">
+      <article class="card">
+        <h2><img src="img/lock.svg" alt="" /> 로그인 / 회원가입</h2>
+        <div class="grid-2">
+          <input id="email" class="input" placeholder="이메일" autocomplete="username"/>
+          <input id="password" class="input" type="password" placeholder="비밀번호" autocomplete="current-password"/>
+        </div>
+        <div class="grid-3">
+          <button id="btnLogin" class="btn primary">로그인</button>
+          <button id="btnSignup" class="btn outline">회원가입</button>
+          <button id="btnLogout" class="btn ghost">로그아웃</button>
+        </div>
+        <p id="authState" class="hint">로그아웃 상태</p>
+      </article>
+
+      <article class="card">
+        <h2><img src="img/backup.svg" alt="" /> 백업 / 복원</h2>
+        <div class="grid-3">
+          <button id="btnExport" class="btn outline">JSON 파일로 저장</button>
+          <button id="btnShare" class="btn outline">카카오톡 등 공유</button>
+          <label class="filebtn btn outline">JSON 가져오기<input id="fileImport" type="file" accept="application/json" hidden></label>
+        </div>
+        <button id="btnClearLocal" class="btn danger block">로컬 데이터 초기화</button>
+      </article>
+    </section>
+  </main>
 
   <footer class="app-footer">
-    <small id="statusText">오프라인 + 로그인 동기화 · v2.7.2-integrated</small>
+    <small>오프라인 + 로그인 동기화 · v2.7.2-final-ui232r2</small>
   </footer>
 
-  <!-- Login modal -->
-  <dialog id="loginModal">
-    <form method="dialog" id="loginForm" class="modal">
-      <h3>로그인</h3>
-      <label>이메일
-        <input id="email" type="email" required placeholder="you@example.com">
-      </label>
-      <label>비밀번호
-        <input id="password" type="password" required>
-      </label>
-      <div class="row">
-        <button id="btnLogin" class="btn primary">로그인</button>
-        <button id="btnSignup" class="btn">회원가입</button>
-        <button id="btnCloseLogin" class="btn light" value="close">닫기</button>
-      </div>
-      <p class="muted small">지금은 이메일/비밀번호 방식만 지원합니다.</p>
-    </form>
-  </dialog>
-
-  <!-- Toast -->
   <div id="toast" role="status" aria-live="polite"></div>
 
-  <!-- Firebase compat CDN -->
+  <!-- Firebase compat -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="app.js"></script>
+
+  <script>
+  // 프로젝트 키 (그대로 사용)
+  window.firebaseConfig = {
+    apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
+    authDomain: "thanksdiary-dca35.firebaseapp.com",
+    projectId: "thanksdiary-dca35",
+    storageBucket: "thanksdiary-dca35.firebasestorage.app",
+    messagingSenderId: "250477396044",
+    appId: "1:250477396044:web:aa1cf155f01263e08834e9"
+  };
+  </script>
+
+  <script src="app.js?v=2.7.2-final-ui232r2"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js'));
+      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js?v=2.7.2-final-ui232r2'));
     }
   </script>
 </body>
