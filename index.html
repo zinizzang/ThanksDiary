@@ -27,7 +27,9 @@ h1,h2,h3{font-family:'Jua','Gowun Dodum',sans-serif;margin:.2rem 0 .6rem}
 .tab-btn{flex:1 1 120px;text-align:center;text-decoration:none;color:inherit;padding:.65rem .9rem;border:1px solid var(--line);background:#fff;border-radius:.9rem;font-weight:700}
 .tab-btn.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(245,215,110,.24)}
 main{padding:1rem;max-width:900px;margin:0 auto}
-.page{display:none} #daily{display:block}
+.page{display:none}
+#daily{display:block}
+.page.active{display:block} #daily{display:block}
 .page.active{display:block}
 .date-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem}
 #weekPicker{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
@@ -86,10 +88,10 @@ body.one-line-week #weekTextNice{display:none}
         <button id="authMiniLogin" class="mini-btn">로그인</button>
       </div>
       <nav class="tabs">
-        <a href="#/daily" class="tab-btn" id="tab-daily">데일리</a>
-        <a href="#/weekly" class="tab-btn" id="tab-weekly">위클리</a>
-        <a href="#/search" class="tab-btn" id="tab-search">검색</a>
-        <a href="#/settings" class="tab-btn" id="tab-settings">설정/백업</a>
+        <a id="btnDaily" href="#/daily" class="tab-btn" id="tab-daily">데일리</a>
+        <a id="btnWeekly" href="#/weekly" class="tab-btn" id="tab-weekly">위클리</a>
+        <a id="btnSearch" href="#/search" class="tab-btn" id="tab-search">검색</a>
+        <a id="btnSettings" href="#/settings" class="tab-btn" id="tab-settings">설정/백업</a>
       </nav>
     </div>
   </div>
@@ -219,7 +221,7 @@ body.one-line-week #weekTextNice{display:none}
 </main>
 
 <footer class="app-footer">
-  <small>오프라인 + 로그인 연결 · v2.6.5</small>
+  <small>오프라인 + 로그인 연결 · v2.7.0 (cache-safe)</small>
 </footer>
 
 <div id="loginModal" class="modal"><div class="modal-panel">
@@ -430,5 +432,64 @@ try{
   $('#loginMsg').textContent='Firebase 초기화 오류';
 }
 </script>
+
+<!-- Emergency safe router: works even if main JS fails -->
+<script>
+  function safeShow(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    var el = document.getElementById(id);
+    if (el) el.classList.add('active');
+  }
+  document.getElementById('btnDaily')  && document.getElementById('btnDaily').addEventListener('click', ()=>{ location.hash='#/daily';  safeShow('daily');  });
+  document.getElementById('btnWeekly') && document.getElementById('btnWeekly').addEventListener('click',()=>{ location.hash='#/weekly'; safeShow('weekly');});
+  document.getElementById('btnSearch') && document.getElementById('btnSearch').addEventListener('click', ()=>{ location.hash='#/search';  safeShow('search'); });
+  document.getElementById('btnSettings')&& document.getElementById('btnSettings').addEventListener('click',()=>{ location.hash='#/settings';safeShow('settings');});
+
+  window.addEventListener('load', ()=>{
+    const page = (location.hash.replace('#/','') || 'daily');
+    safeShow(page);
+  });
+  window.addEventListener('hashchange', ()=>{
+    const page = (location.hash.replace('#/','') || 'daily');
+    safeShow(page);
+  });
+</script>
+
+
+<!-- Cache-safe Service Worker registration -->
+<script>
+(function(){
+  if (!('serviceWorker' in navigator)) return;
+  const swUrl = 'service-worker.js?v=2.7.0';
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register(swUrl, {scope: './'});
+      // If there's a waiting worker, prompt refresh
+      if (reg.waiting) {
+        reg.waiting.postMessage({type:'SKIP_WAITING'});
+      }
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            nw.postMessage({type:'SKIP_WAITING'});
+          }
+        });
+      });
+      // When controller changes, reload once
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        location.reload();
+      });
+    } catch(e){
+      console.log('SW reg failed', e);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
