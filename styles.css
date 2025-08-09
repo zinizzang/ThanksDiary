@@ -1,127 +1,53 @@
 
-/* ThanksDiary v2.6.6 – Pastel Theme Patch
-   - Soft pastel yellow gradient header
-   - Card shadows softened
-   - Buttons rounded & airy
-   - Modal button spacing increased
-   Drop this file as /styles.css in your GitHub Pages repo and refresh.
-*/
-
 :root{
-  --bg: #fffaf0;
-  --card: #ffffff;
-  --ink: #3a2c26;
-  --muted: #8a7f79;
-  --brand-0: #fff7cf;
-  --brand-1: #fff0b3;
-  --brand-2: #ffe89a;
-  --accent: #6b8cff;    /* link, week */
-  --accent2:#7a49f5;    /* secondary accent */
-  --good: #ffd352;      /* primary button */
-  --radius: 16px;
-  --shadow: 0 6px 18px rgba(0,0,0,.08);
-  --shadow-soft: 0 8px 28px rgba(0,0,0,.06);
+  --bg:#fffdf7;
+  --card:#ffffff;
+  --ink:#3a2e2a;
+  --muted:#7a6f6a;
+  --accent:#ffd86b;
+  --accent-2:#fff1a6;
+  --pill:#fff6cf;
+  --line:#efe7db;
 }
-
-html, body{ height:100%; }
-body{
-  margin:0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: 'Gowun Dodum', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Gowun Dodum',sans-serif}
+.app-header.pastel{
+  background:linear-gradient(180deg,#fff2b6 0%,#ffeaa3 60%, #fff6cf 100%);
+  padding:16px 16px 10px;
+  position:sticky;top:0;z-index:3;border-bottom:1px solid var(--line);
 }
+.title-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-family:'Jua',sans-serif;margin:0;font-size:24px;letter-spacing:.5px}
+.auth-strip{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:10px}
+.tab-btn{display:block;text-align:center;padding:14px 10px;border-radius:16px;background:var(--pill);color:var(--ink);text-decoration:none;border:1px solid var(--line);box-shadow:0 2px 0 rgba(0,0,0,.04)}
+.tab-btn:active{transform:translateY(1px)}
+#view{padding:14px}
+.app-footer{padding:40px 12px 60px;color:var(--muted);text-align:center}
 
-/* Header */
-.pastel-yellow{
-  background: linear-gradient(180deg, var(--brand-1), var(--brand-0) 55%, var(--brand-2));
-}
-.app-header{
-  position: sticky; top: 0; z-index: 15;
-  border-bottom: 1px solid rgba(0,0,0,.04);
-}
-.title-area{ display:flex; align-items:center; gap:10px; padding:14px 16px; }
-.star{ color:#f3b400; font-size:20px; }
-.logo{ font-family:'Jua', cursive; font-size:28px; margin:0; letter-spacing:.5px; }
-.auth-chip{ margin-left:auto; display:flex; align-items:center; gap:8px; color:var(--muted); }
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
+.section{margin:16px 0;padding:12px;border:1px solid var(--line);border-radius:18px;background:#fff}
+.section h3{margin:0 0 10px;font-family:'Jua'}
+.row{display:flex;gap:10px;align-items:center}
+.btn{border-radius:12px;border:1px solid var(--line);background:#fff;padding:10px 14px}
+.btn.primary{background:#ffe175;border-color:#ffd86b}
+.btn.ghost{background:transparent}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-row.gap{gap:12px}
+.input, textarea, input[type=text], input[type=date]{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
+.badge{display:inline-block;background:var(--pill);padding:6px 10px;border-radius:999px;border:1px solid var(--line)}
 
-/* Tabs */
-.tabs{ display:flex; flex-wrap:wrap; gap:16px; padding:10px 16px 18px; }
-.tab-btn{
-  display:inline-block; text-decoration:none; color:var(--ink);
-  background:#fff; padding:14px 22px; border-radius:14px;
-  box-shadow: var(--shadow);
-  transition: transform .08s ease, box-shadow .12s ease;
-}
-.tab-btn:active{ transform: translateY(1px); box-shadow: 0 3px 10px rgba(0,0,0,.08); }
-.tab-btn.active{ outline: 2px solid rgba(107,140,255,.6); }
+dialog::backdrop{background:rgba(0,0,0,.3)}
+dialog{border:0;border-radius:20px;padding:0}
+dialog .card{min-width:320px}
+.hint{color:var(--muted);font-size:14px}
+.msg{margin-top:6px;color:#c24a00}
+.small{color:var(--muted);font-size:13px}
 
-/* Layout */
-main{ padding:16px; }
-.card{
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
-  padding: 18px;
-  margin: 14px 0;
-}
-.card h3{ margin:0 0 10px; font-family:'Jua', cursive; }
+.weekbar{display:flex;gap:10px;align-items:center;justify-content:flex-start;margin:8px 0}
+.weekbar .datepill{flex:1;text-align:center}
 
-/* Controls */
-.row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.controls{ display:flex; align-items:center; gap:10px; margin:8px 0; }
-
-.btn{
-  border:0; border-radius:12px; padding:10px 16px; background:#f4f4f4; color:var(--ink);
-}
-.btn.primary{ background: var(--good); }
-.btn.ghost{ background: transparent; outline:1px solid rgba(0,0,0,.18); }
-.btn.pill{ border-radius:999px; }
-.btn.sm{ padding:6px 12px; }
-.btn.icon{ width:44px; height:44px; display:inline-grid; place-items:center; }
-
-.hint{ color: var(--muted); margin: 8px 0; font-size: 0.95rem; }
-
-/* Inputs */
-input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea{
-  width:100%; border:1px solid rgba(0,0,0,.16);
-  border-radius:12px; padding:12px; background:#fff;
-  font-family: inherit;
-}
-textarea{ min-height:110px; resize:vertical; }
-
-/* Date / Week line */
-.date-nav{ display:flex; align-items:center; gap:12px; margin:6px 0; }
-.date-nav .btn{ width:48px; }
-.date-display{
-  flex:1; text-align:center; padding:12px;
-  border-radius:999px; background:#fff; box-shadow: var(--shadow);
-}
-.weekline{ display:flex; gap:12px; align-items:center; justify-content:flex-end; }
-.weekline .badge{ color:#5b63ff; }
-
-.badge{
-  padding:4px 10px; background:#f3f5ff; border-radius:999px;
-  font-weight:600; letter-spacing:.2px;
-}
-
-/* Login Modal */
-dialog{ border:0; border-radius:18px; padding:0; width:min(520px,92vw); }
-.modal-card{ padding: 20px; }
-.modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; } /* spacing restored */
-
-/* Footer */
-.app-footer{ padding: 32px 0; color: var(--muted); text-align:center; }
-
-/* Icons / section titles */
-.section-title{ display:flex; align-items:center; gap:8px; }
-.section-title .emoji{ font-size:20px; }
-
-/* Today quote / copy */
-.copy-area{ background:#fffdf5; border:1px dashed rgba(0,0,0,.12); padding:12px; border-radius:12px; }
-.copy-actions{ display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top:8px; }
-
-/* Mission add button one-line */
-.mission-line{ display:flex; gap:10px; align-items:center; }
-.mission-add{ margin-left:auto; }
+.mission-line{display:flex;gap:10px;align-items:center}
+.mission-add{display:flex;align-items:center;justify-content:center;width:56px}
+.icon{filter:drop-shadow(0 1px 0 rgba(0,0,0,.06))}
