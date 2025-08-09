@@ -7,16 +7,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#fff6c9">
   <title>지니짱 감사일기</title>
-
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png" sizes="192x192">
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="styles.css?v=235">
+  <link rel="stylesheet" href="styles.css?v=236">
   <style>.page{display:none}.page.active{display:block}</style>
 </head>
 <body>
@@ -26,7 +22,8 @@
       <div class="header-right">
         <div class="header-auth">
           <span id="authMiniState" class="muted">로그아웃 상태</span>
-          <button id="authMiniLogin" class="mini-btn" onclick="window.TD_openLogin && window.TD_openLogin()">로그인</button>
+          <button id="authMiniLogin" class="mini-btn"
+                  onclick="window.TD_openLogin && window.TD_openLogin()">로그인</button>
           <button id="authMiniLogout" class="mini-btn hidden">로그아웃</button>
         </div>
         <nav class="tabs">
@@ -38,7 +35,6 @@
       </div>
     </div>
   </header>
-
   <main id="app-main">
     <section id="page-daily" class="page">
       <div class="date-row">
@@ -48,11 +44,10 @@
         <button id="todayBtn" class="btn outline">오늘</button>
         <span id="dailyDateText" class="date-text"></span>
       </div>
-
       <div class="card">
         <h2>🪞 오늘의 질문</h2>
         <div class="qbox">
-          <textarea id="questionText" class="auto" readonly></textarea>
+          <textarea id="questionText" class="auto" readonly placeholder="질문이 준비되는 중입니다…"></textarea>
           <div class="q-actions actions-spaced">
             <button id="btnAnotherQ" class="btn">다른 질문</button>
           </div>
@@ -60,7 +55,6 @@
         <label class="lbl">답변</label>
         <textarea id="answerText" class="auto" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
       </div>
-
       <div class="card">
         <h2>🧠 감정일기</h2>
         <p class="muted">사건을 사실대로 적고, 그때의 생각과 감정을 구분해 본 뒤 결과를 간단히 남겨보세요.</p>
@@ -73,7 +67,6 @@
         <label class="lbl">결과</label>
         <textarea id="resultField" class="auto" placeholder="그 결과 나는 어떻게 행동했나요?"></textarea>
       </div>
-
       <div class="card">
         <h2>🌼 감사일기</h2>
         <ol class="gratitude-list">
@@ -82,17 +75,14 @@
           <li><input type="text" id="grat3" placeholder="오늘을 좋게 만든 것."></li>
         </ol>
       </div>
-
       <div class="card">
         <h2>📔 일상일기</h2>
         <textarea id="dailyNote" class="auto" placeholder="짧게 요약하거나, 길게 자유롭게 적어도 좋아요."></textarea>
       </div>
-
       <div class="card">
         <h2>🏷️ 태그</h2>
         <input type="text" id="tagsField" placeholder="#가족, #업무 처럼 쉼표로 구분">
       </div>
-
       <div class="btn-row end actions-spaced" id="dailyActions">
         <button id="saveDaily" class="btn primary">저장</button>
         <button id="clearDaily" class="btn danger">지우기</button>
@@ -107,9 +97,8 @@
         <button id="nextWeek" class="btn">&gt;</button>
         <button id="thisWeekBtn" class="btn outline">이번 주</button>
         <span id="weekText" class="date-text"></span>
-        <span id="weekTextNice" class="date-text" style="margin-left:.5rem;color:#7c3aed"></span>
+        <span id="weekTextNice" class="date-text nice"></span>
       </div>
-
       <div class="card">
         <h2>✅ 미션 (체크박스)</h2>
         <div id="missionList"></div>
@@ -118,7 +107,6 @@
           <button id="addMission" class="btn">+ 추가</button>
         </div>
       </div>
-
       <div class="card">
         <h2>🫶 오늘의 문구</h2>
         <textarea id="healingText" class="auto" placeholder="오늘의 문구"></textarea>
@@ -151,7 +139,8 @@
       <div class="card">
         <h2>🔐 로그인</h2>
         <div class="btn-row actions-spaced">
-          <button id="openLogin" class="btn" onclick="window.TD_openLogin && window.TD_openLogin()">로그인</button>
+          <button id="openLogin" class="btn"
+                  onclick="window.TD_openLogin && window.TD_openLogin()">로그인</button>
           <button id="btnSignOut" class="btn outline">로그아웃</button>
         </div>
         <p class="muted" id="authState">로그아웃 상태</p>
@@ -175,7 +164,7 @@
   </main>
 
   <footer class="app-footer">
-    <small>오프라인 + 클라우드 동기화 · v2.3.5</small>
+    <small>오프라인 + 클라우드 동기화 · v2.3.6</small>
   </footer>
 
   <div id="loginModal" class="modal">
@@ -186,9 +175,12 @@
       <label class="lbl">비밀번호</label>
       <input type="password" id="loginPwd" placeholder="••••••••">
       <div class="btn-row actions-spaced modal-actions">
-        <button id="modalSignIn" class="btn primary" onclick="window.TD_signIn && window.TD_signIn()">로그인</button>
-        <button id="modalSignUp" class="btn" onclick="window.TD_signUp && window.TD_signUp()">회원가입</button>
-        <button id="modalClose" class="btn" onclick="window.TD_closeLogin && window.TD_closeLogin()">닫기</button>
+        <button id="modalSignIn" class="btn primary"
+                onclick="window.TD_signIn && window.TD_signIn()">로그인</button>
+        <button id="modalSignUp" class="btn"
+                onclick="window.TD_signUp && window.TD_signUp()">회원가입</button>
+        <button id="modalClose" class="btn"
+                onclick="window.TD_closeLogin && window.TD_closeLogin()">닫기</button>
       </div>
       <p id="loginMsg" class="muted"></p>
     </div>
@@ -197,17 +189,20 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=235" defer></script>
+
+  <script src="app.js?v=236" defer></script>
 
   <script>
     (function(){
       function show(name){
-        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+        var pages=document.querySelectorAll('.page');
+        for(var i=0;i<pages.length;i++){ pages[i].classList.remove('active'); }
         var p=document.querySelector('#page-'+(name||'daily')); if(p) p.classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+        var tabs=document.querySelectorAll('.tab-btn');
+        for(var j=0;j<tabs.length;j++){ tabs[j].classList.remove('active'); }
         var t=document.querySelector('#tab-'+(name||'daily')); if(t) t.classList.add('active');
       }
-      function onHash(){var h=location.hash.replace(/^#\/?/,'')||'daily'; show(h); if(h==='weekly' && !document.getElementById('weekPicker').value){ window.setTimeout(()=>{ if(window.TD_setWeekToday) window.TD_setWeekToday();},0);}}
+      function onHash(){ var h=(location.hash.replace(/^#\/?/,'')||'daily'); show(h); }
       window.addEventListener('hashchange', onHash);
       if(!location.hash) location.hash = '#/daily'; onHash();
 
@@ -215,7 +210,7 @@
       function open(){ lm && lm.classList.add('open'); }
       function close(){ lm && lm.classList.remove('open'); }
       document.addEventListener('click', function(e){
-        var id=e.target && e.target.id;
+        var id=e && e.target && e.target.id;
         if(id==='authMiniLogin' || id==='openLogin') open();
         if(id==='modalClose') close();
       });
@@ -228,8 +223,8 @@
       }catch(e){}
 
       if('serviceWorker' in navigator){
-        navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
-        if(window.caches && caches.keys) caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+        navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); });
+        if(window.caches && caches.keys) caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); });
       }
     })();
   </script>
