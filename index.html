@@ -243,13 +243,30 @@ textarea{min-height:96px;resize:vertical}
     <label class="lbl">비밀번호</label>
     <input type="password" id="loginPwd" placeholder="••••••••">
     <div class="btn-row actions-spaced modal-actions">
-      <button id="modalSignIn" class="btn primary">로그인</button>
-      <button id="modalSignUp" class="btn">회원가입</button>
-      <button id="modalClose" class="btn">닫기</button>
+      <button id="modalSignIn" class="btn primary" onclick="(window.TD_signIn?TD_signIn():alert('Firebase 준비중입니다. 설정/백업에서 캐시 새로고침 후 다시 시도해주세요.'))">로그인</button>
+      <button id="modalSignUp" class="btn" onclick="(window.TD_signUp?TD_signUp():alert('Firebase 준비중입니다. 설정/백업에서 캐시 새로고침 후 다시 시도해주세요.'))">회원가입</button>
+      <button id="modalClose" class="btn" onclick="document.getElementById('loginModal').classList.remove('open')">닫기</button>
     </div>
     <p id="loginMsg" class="muted"></p>
   </div>
 </div>
+
+
+<script>
+(function(){
+  function show(id){
+    var pages=document.querySelectorAll('.page'); for(var i=0;i<pages.length;i++){pages[i].classList.remove('active')}
+    var el=document.getElementById('page-'+id); if(el){el.classList.add('active')}
+    var tabs=document.querySelectorAll('.tab-btn'); for(var j=0;j<tabs.length;j++){tabs[j].classList.remove('active')}
+    var tb=document.getElementById('tab-'+id); if(tb){tb.classList.add('active')}
+  }
+  function onhash(){
+    var h=location.hash||'#/daily'; var id=h.replace('#/',''); if(!/^daily|weekly|search|settings$/.test(id)) id='daily'; show(id);
+  }
+  window.addEventListener('hashchange', onhash);
+  document.addEventListener('DOMContentLoaded', onhash);
+})();
+</script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
