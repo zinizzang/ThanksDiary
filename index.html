@@ -66,6 +66,10 @@ textarea{min-height:96px;resize:vertical}
 .file-wrap{position:relative;overflow:hidden;display:inline-block;text-align:center}
 .file-wrap input[type=file]{position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer}
 #fileName{margin-top:.3rem}
+
+/* one-line-week helper; add class 'one-line-week' to body to hide nice line */
+body.one-line-week #weekTextNice{display:none}
+
 </style>
 <!-- Firebase compat (간단 연결) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -215,7 +219,7 @@ textarea{min-height:96px;resize:vertical}
 </main>
 
 <footer class="app-footer">
-  <small>오프라인 + 로그인 연결 · v2.6.2</small>
+  <small>오프라인 + 로그인 연결 · v2.6.3</small>
 </footer>
 
 <div id="loginModal" class="modal"><div class="modal-panel">
@@ -274,10 +278,13 @@ function anotherQ(){ const cur=$('#questionText').value; let cand; let tries=0; 
 
 // ---------- weekly
 let _weekAnchor = new Date(); // state anchor for weekly view (any day within target week)
-function updateWeekTexts(){ 
+function updateWeekTexts(){
   const d = _weekAnchor;
   const wy = weekOfYear(d);
   $('#weekText').textContent = `${d.getFullYear()} ${String(wy)}번째 주`;
+  $('#weekTextNice').textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${weekOfMonth(d)}주`;
+  try{ cloudLoadWeekly(); }catch(e){}
+} ${String(wy)}번째 주`;
   $('#weekTextNice').textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${weekOfMonth(d)}주`;
 }
 function thisWeek(){ _weekAnchor = new Date(); updateWeekTexts(); }
