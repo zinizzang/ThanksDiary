@@ -1,257 +1,261 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#fff6c9">
-  <title>지니짱 감사일기</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
-  <style>
-  
-:root{
-  --bg:#fffaf0; --header1:#ffefad; --header2:#fff6c9; --card:#ffffff;
-  --ink:#3a2e39; --muted:#8b7f86; --brand:#f5d76e; --danger:#ff88a3; --line:#f1e7d7;
-}
-*{box-sizing:border-box}
-html{ -webkit-text-size-adjust:100%; }
-body{ margin:0;padding:0; background:linear-gradient(180deg,#fff7ee,var(--bg) 35%); color:var(--ink);
-  font-family:'Gowun Dodum', system-ui, -apple-system, 'Noto Sans KR', sans-serif; }
-h1,h2,h3{ font-family:'Jua','Gowun Dodum',sans-serif; letter-spacing:.2px; margin:.2rem 0 .6rem }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#fff6c9">
+<title>지니짱 감사일기</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fffaf0;--header1:#ffefad;--header2:#fff6c9;--card:#ffffff;--ink:#3a2e39;--muted:#8b7f86;--brand:#f5d76e;--danger:#ff88a3;--line:#f1e7d7}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:linear-gradient(180deg,#fff7ee,var(--bg) 35%);color:var(--ink);font-family:'Gowun Dodum',system-ui,-apple-system,'Noto Sans KR',sans-serif}
+h1,h2,h3{font-family:'Jua','Gowun Dodum',sans-serif;letter-spacing:.2px;margin:.2rem 0 .6rem}
 .hidden{display:none}
-.app-header{ position:sticky; top:0; z-index:10; background:linear-gradient(90deg,var(--header1),var(--header2) 60%);
-  border-bottom:1px solid rgba(0,0,0,.05); padding:.8rem .9rem; }
-.title-area{max-width:900px;margin:0 auto; display:flex; align-items:flex-end; justify-content:space-between; gap:.75rem; flex-wrap:wrap;}
-.logo{display:flex; align-items:center; gap:.55rem; font-size: clamp(1.15rem, 4.2vw, 1.6rem); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.logo:before{ content:'✶'; font-size:1.1rem; color:#f5c518; filter:drop-shadow(0 1px 0 rgba(0,0,0,.12)); }
-.header-right{display:flex; flex-direction:column; gap:.55rem; align-items:flex-end}
-.header-auth{ display:flex; align-items:center; gap:.55rem; }
-.mini-btn{ padding:.35rem .6rem; border:1px solid var(--line); border-radius:.65rem; background:#fff; font-weight:700; }
-.tabs{display:flex; gap:.75rem; flex-wrap:wrap}
-.tab-btn{ flex:1 1 120px; text-align:center; text-decoration:none; color:inherit; padding:.65rem .9rem; border:1px solid var(--line); background:#fff; border-radius:.9rem; font-weight:700;}
-.tab-btn.active{ border-color:var(--brand); box-shadow:0 0 0 3px rgba(245,215,110,.24); }
+.app-header{position:sticky;top:0;z-index:10;background:linear-gradient(90deg,var(--header1),var(--header2) 60%);border-bottom:1px solid rgba(0,0,0,.05);padding:.8rem .9rem}
+.title-area{max-width:900px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.55rem;font-size:clamp(1.15rem,4.2vw,1.6rem);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo:before{content:'✶';font-size:1.1rem;color:#f5c518;filter:drop-shadow(0 1px 0 rgba(0,0,0,.12))}
+.header-right{display:flex;flex-direction:column;gap:.55rem;align-items:flex-end}
+.header-auth{display:flex;align-items:center;gap:.55rem}
+.mini-btn{padding:.35rem .6rem;border:1px solid var(--line);border-radius:.65rem;background:#fff;font-weight:700}
+.tabs{display:flex;gap:.75rem;flex-wrap:wrap}
+.tab-btn{flex:1 1 120px;text-align:center;text-decoration:none;color:inherit;padding:.65rem .9rem;border:1px solid var(--line);background:#fff;border-radius:.9rem;font-weight:700}
+.tab-btn.active{border-color:var(--brand);box-shadow:0 0 0 3px rgba(245,215,110,.24)}
 main{padding:1rem;max-width:900px;margin:0 auto}
-.page{ display:none } .page.active, .page.default{ display:block }
-.date-row{display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:.6rem}
-.date-text{margin-left:auto; font-weight:700; color:#2563eb}
-.date-text.nice{ color:#7c3aed; }
-.card{ background:var(--card); border:1px solid var(--line); border-radius:1rem; padding:1rem; margin:1rem 0; box-shadow:0 6px 18px rgba(0,0,0,.06) }
-.lbl{display:block; font-weight:700; margin:.5rem 0 .25rem}
-textarea, input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="week"]{ width:100%; padding:.85rem; border:1px solid var(--line);
-  border-radius:.75rem; font-size:1.02rem; background:#fff; font-family:'Gowun Dodum','Jua',sans-serif; }
-::placeholder{opacity:.6; font-family:'Gowun Dodum','Jua',sans-serif}
-textarea{min-height:96px; resize:vertical}
+.page{display:none}.page.active,.page.default{display:block}
+.date-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem}
+.date-text{margin-left:auto;font-weight:700;color:#2563eb}
+.date-text.nice{color:#7c3aed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:1rem;padding:1rem;margin:1rem 0;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.lbl{display:block;font-weight:700;margin:.5rem 0 .25rem}
+textarea,input[type=text],input[type=email],input[type=password],input[type=date],input[type=week]{width:100%;padding:.85rem;border:1px solid var(--line);border-radius:.75rem;font-size:1.02rem;background:#fff;font-family:'Gowun Dodum','Jua',sans-serif}
+::placeholder{opacity:.6;font-family:'Gowun Dodum','Jua',sans-serif}
+textarea{min-height:96px;resize:vertical}
 .qbox textarea[readonly]{background:#fffdf5}
 .gratitude-list{margin:.25rem 0 .5rem 1rem}
-.btn-row{display:flex; gap:1rem; flex-wrap:wrap}
-.actions-spaced{gap:1rem; row-gap:1rem}
-.btn{ padding:.65rem .95rem; border:1px solid var(--line); border-radius:.9rem; background:#fff; font-weight:700; cursor:pointer; }
-.btn.primary{background:var(--brand); color:#000; border-color:var(--brand)}
-.btn.danger{background:var(--danger); color:#fff; border-color:var(--danger)}
+.btn-row{display:flex;gap:1rem;flex-wrap:wrap}
+.actions-spaced{gap:1rem;row-gap:1rem}
+.btn{padding:.65rem .95rem;border:1px solid var(--line);border-radius:.9rem;background:#fff;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--brand);color:#000;border-color:var(--brand)}
+.btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
 .btn.outline{background:#fff}
-.btn.link{background:transparent; border:none; padding:.2rem 0; text-decoration:underline; cursor:pointer}
-.add-mission{display:flex; gap:.5rem; margin-top:.5rem}
-.mission-item{display:flex; gap:.5rem; align-items:center; border:1px solid var(--line); padding:.5rem; border-radius:.75rem; margin:.25rem 0; background:#fff}
-.mission-item input[type="text"]{flex:1; border:none; padding:.5rem; background:transparent}
-.mission-item input[type="checkbox"]{transform:scale(1.2)}
-.app-footer{padding:1.2rem; text-align:center; color:var(--muted)}
-.row{display:flex; gap:.5rem; align-items:center; margin:.5rem 0}
+.btn.link{background:transparent;border:none;padding:.2rem 0;text-decoration:underline;cursor:pointer}
+.add-mission{display:flex;gap:.5rem;margin-top:.5rem}
+.mission-item{display:flex;gap:.5rem;align-items:center;border:1px solid var(--line);padding:.5rem;border-radius:.75rem;margin:.25rem 0;background:#fff}
+.mission-item input[type=text]{flex:1;border:none;padding:.5rem;background:transparent}
+.mission-item input[type=checkbox]{transform:scale(1.2)}
+.app-footer{padding:1.2rem;text-align:center;color:var(--muted)}
+.row{display:flex;gap:.5rem;align-items:center;margin:.5rem 0}
 .muted{color:var(--muted)}
-.modal{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50; padding:1rem; }
-.modal.open{ display:flex; }
-.modal-panel{ width:min(520px, 95vw); background:#fff; border-radius:1rem; padding:1rem; box-shadow:0 10px 30px rgba(0,0,0,.25); }
-.modal-panel h3{ margin:.25rem 0 1rem; font-size:1.25rem; }
-.modal-actions{ gap:12px; }
-@media (max-width: 380px){
-  .modal-actions{ flex-direction:column; }
-  .modal-actions .btn{ width:100%; }
-}
-#loginMsg{ margin-top:.5rem; color:#d02; font-weight:700; }
-.settings-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:.8rem; }
-.file-wrap{ position:relative; overflow:hidden; display:inline-block; text-align:center; }
-.file-wrap input[type="file"]{ position:absolute; left:0; top:0; opacity:0; width:100%; height:100%; cursor:pointer; }
-#fileName{ margin-top:.3rem; }
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:50;padding:1rem}
+.modal.open{display:flex}
+.modal-panel{width:min(520px,95vw);background:#fff;border-radius:1rem;padding:1rem;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.modal-panel h3{margin:.25rem 0 1rem;font-size:1.25rem}
+.modal-actions{gap:12px}
+@media (max-width:380px){.modal-actions{flex-direction:column}.modal-actions .btn{width:100%}}
+#loginMsg{margin-top:.5rem;color:#d02;font-weight:700}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+.file-wrap{position:relative;overflow:hidden;display:inline-block;text-align:center}
+.file-wrap input[type=file]{position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer}
+#fileName{margin-top:.3rem}
+</style>
 
-  </style>
+<script>
+(function(){
+  // ultra-safe micro init: set date & fallback question even if main JS fails
+  function ymd(d){var tz=d.getTimezoneOffset()*60000;return new Date(d.getTime()-tz).toISOString().slice(0,10);}
+  function pretty(d){return d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.';}
+  var qpool=['오늘 나는 무엇을 잘했나요?','사람들에게 어떤 사람으로 기억되고 싶나요?','오늘 나를 웃게 만든 순간은 무엇이었나요?','요즘 나를 설레게 하는 작은 일은?','지금의 나에게 필요한 한 문장은?','오늘 배운 것 하나는 무엇인가요?'];
+  document.addEventListener('DOMContentLoaded', function(){
+    try{
+      var now=new Date(); var dv=document.getElementById('dailyDate'); if(dv && !dv.value) dv.value = ymd(now);
+      var dt=document.getElementById('dailyDateText'); if(dt && !dt.textContent) dt.textContent = pretty(now);
+      var q=document.getElementById('questionText'); if(q && (!q.value || q.value.trim()=='')) q.value=qpool[Math.floor(Math.random()*qpool.length)];
+      // show daily page just in case
+      var pd=document.getElementById('page-daily'); if(pd) pd.classList.add('default');
+    }catch(e){}
+  });
+})();
+</script>
+
 </head>
 <body>
-  <header class="app-header">
-    <div class="title-area">
-      <h1 class="logo">지니짱 감사일기</h1>
-      <div class="header-right">
-        <div class="header-auth">
-          <span id="authMiniState" class="muted">로그아웃 상태</span>
-          <button id="authMiniLogin" class="mini-btn">로그인</button>
-          <button id="authMiniLogout" class="mini-btn hidden">로그아웃</button>
-        </div>
-        <nav class="tabs">
-          <a href="#/daily" class="tab-btn" id="tab-daily">데일리</a>
-          <a href="#/weekly" class="tab-btn" id="tab-weekly">위클리</a>
-          <a href="#/search" class="tab-btn" id="tab-search">검색</a>
-          <a href="#/settings" class="tab-btn" id="tab-settings">설정/백업</a>
-        </nav>
+<header class="app-header">
+  <div class="title-area">
+    <h1 class="logo">지니짱 감사일기</h1>
+    <div class="header-right">
+      <div class="header-auth">
+        <span id="authMiniState" class="muted">로그아웃 상태</span>
+        <button id="authMiniLogin" class="mini-btn" onclick="(window.TD_openLogin||function(){document.getElementById('loginModal').classList.add('open')})()">로그인</button>
+        <button id="authMiniLogout" class="mini-btn hidden" onclick="if(window.firebase&&firebase.auth)firebase.auth().signOut()">로그아웃</button>
       </div>
-    </div>
-  </header>
-
-  <main id="app-main">
-    <section id="page-daily" class="page default">
-      <div class="date-row">
-        <button id="prevDay" class="btn">&lt;</button>
-        <input type="date" id="dailyDate">
-        <button id="nextDay" class="btn">&gt;</button>
-        <button id="todayBtn" class="btn outline">오늘</button>
-        <span id="dailyDateText" class="date-text"></span>
-      </div>
-      <div class="card">
-        <h2>🪞 오늘의 질문</h2>
-        <div class="qbox">
-          <textarea id="questionText" class="auto" readonly placeholder="질문이 준비되는 중입니다…"></textarea>
-          <div class="q-actions actions-spaced">
-            <button id="btnAnotherQ" class="btn">다른 질문</button>
-          </div>
-        </div>
-        <label class="lbl">답변</label>
-        <textarea id="answerText" class="auto" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
-      </div>
-      <div class="card">
-        <h2>🧠 감정일기</h2>
-        <p class="muted">사건을 사실대로 적고, 그때의 생각과 감정을 구분해 본 뒤 결과를 간단히 남겨보세요.</p>
-        <label class="lbl">사건</label>
-        <textarea id="eventField" class="auto" placeholder="오늘 무슨 일이 있었나요?"></textarea>
-        <label class="lbl">생각</label>
-        <textarea id="thoughtField" class="auto" placeholder="그때 어떤 생각이 들었나요?"></textarea>
-        <label class="lbl">감정</label>
-        <textarea id="feelingField" class="auto" placeholder="감정의 강도/이유를 함께 적어보세요."></textarea>
-        <label class="lbl">결과</label>
-        <textarea id="resultField" class="auto" placeholder="그 결과 나는 어떻게 행동했나요?"></textarea>
-      </div>
-      <div class="card">
-        <h2>🌼 감사일기</h2>
-        <ol class="gratitude-list">
-          <li><input type="text" id="grat1" placeholder="작은 것도 좋아요."></li>
-          <li><input type="text" id="grat2" placeholder="사람/행동/행운 등 무엇이든."></li>
-          <li><input type="text" id="grat3" placeholder="오늘을 좋게 만든 것."></li>
-        </ol>
-      </div>
-      <div class="card">
-        <h2>📔 일상일기</h2>
-        <textarea id="dailyNote" class="auto" placeholder="짧게 요약하거나, 길게 자유롭게 적어도 좋아요."></textarea>
-      </div>
-      <div class="card">
-        <h2>🏷️ 태그</h2>
-        <input type="text" id="tagsField" placeholder="#가족, #업무 처럼 쉼표로 구분">
-      </div>
-      <div class="btn-row end actions-spaced" id="dailyActions">
-        <button id="saveDaily" class="btn primary">저장</button>
-        <button id="clearDaily" class="btn danger">지우기</button>
-        <span id="statusDaily" class="muted">불러옴</span>
-      </div>
-    </section>
-
-    <section id="page-weekly" class="page">
-      <div class="date-row">
-        <button id="prevWeek" class="btn">&lt;</button>
-        <input type="week" id="weekPicker">
-        <button id="nextWeek" class="btn">&gt;</button>
-        <button id="thisWeekBtn" class="btn outline">이번 주</button>
-        <span id="weekText" class="date-text"></span>
-        <span id="weekTextNice" class="date-text nice"></span>
-      </div>
-      <div class="card">
-        <h2>✅ 미션 (체크박스)</h2>
-        <div id="missionList"></div>
-        <div class="add-mission">
-          <input type="text" id="newMission" placeholder="미션 추가">
-          <button id="addMission" class="btn">+ 추가</button>
-        </div>
-      </div>
-      <div class="card">
-        <h2>🫶 오늘의 문구</h2>
-        <textarea id="healingText" class="auto" placeholder="오늘의 문구"></textarea>
-        <div class="btn-row actions-spaced">
-          <button id="randomHealing" class="btn">랜덤</button>
-          <button id="saveWeekly" class="btn primary">저장</button>
-          <button id="clearWeekly" class="btn danger">지우기</button>
-        </div>
-        <button id="startCopy" class="btn link">✍️ 필사 시작</button>
-        <textarea id="copyArea" class="auto hidden" placeholder="문구를 따라 적어보세요."></textarea>
-      </div>
-    </section>
-
-    <section id="page-search" class="page">
-      <div class="card">
-        <h2>🔎 검색</h2>
-        <input type="text" id="searchInput" placeholder="키워드 또는 #태그 (예: 보고서, #업무)">
-        <div class="btn-row actions-spaced">
-          <button id="searchBtn" class="btn">검색</button>
-          <button id="searchClear" class="btn">지우기</button>
-        </div>
-      </div>
-      <div class="card">
-        <h3>결과</h3>
-        <div id="searchResults"></div>
-      </div>
-    </section>
-
-    <section id="page-settings" class="page">
-      <div class="card">
-        <h2>🔐 로그인</h2>
-        <div class="btn-row actions-spaced">
-          <button id="openLogin" class="btn">로그인</button>
-          <button id="btnSignOut" class="btn outline">로그아웃</button>
-        </div>
-        <p class="muted" id="authState">로그아웃 상태</p>
-      </div>
-
-      <div class="card">
-        <h2>📦 백업/복원</h2>
-        <div class="settings-grid">
-          <button id="exportJSON" class="btn">JSON 파일로 저장</button>
-          <button id="shareJSON" class="btn">JSON 공유(카톡 등)</button>
-          <label class="file-wrap btn">
-            <input type="file" id="importFile" accept=".json"/>파일 선택
-          </label>
-          <button id="importJSON" class="btn">JSON 가져오기</button>
-          <button id="refreshCache" class="btn outline">캐시 새로고침(업데이트)</button>
-          <button id="resetLocal" class="btn danger">로컬 데이터 초기화</button>
-        </div>
-        <p id="fileName" class="muted"></p>
-      </div>
-    </section>
-  </main>
-
-  <footer class="app-footer">
-    <small>오프라인 + 클라우드 동기화 · v2.4.0</small>
-  </footer>
-
-  <div id="loginModal" class="modal">
-    <div class="modal-panel">
-      <h3>로그인</h3>
-      <label class="lbl">이메일</label>
-      <input type="email" id="loginEmail" placeholder="you@example.com">
-      <label class="lbl">비밀번호</label>
-      <input type="password" id="loginPwd" placeholder="••••••••">
-      <div class="btn-row actions-spaced modal-actions">
-        <button id="modalSignIn" class="btn primary">로그인</button>
-        <button id="modalSignUp" class="btn">회원가입</button>
-        <button id="modalClose" class="btn">닫기</button>
-      </div>
-      <p id="loginMsg" class="muted"></p>
+      <nav class="tabs">
+        <a href="#/daily" class="tab-btn" id="tab-daily">데일리</a>
+        <a href="#/weekly" class="tab-btn" id="tab-weekly">위클리</a>
+        <a href="#/search" class="tab-btn" id="tab-search">검색</a>
+        <a href="#/settings" class="tab-btn" id="tab-settings">설정/백업</a>
+      </nav>
     </div>
   </div>
+</header>
+<main id="app-main">
+  <section id="page-daily" class="page default">
+    <div class="date-row">
+      <button id="prevDay" class="btn">&lt;</button>
+      <input type="date" id="dailyDate">
+      <button id="nextDay" class="btn">&gt;</button>
+      <button id="todayBtn" class="btn outline">오늘</button>
+      <span id="dailyDateText" class="date-text"></span>
+    </div>
+    <div class="card">
+      <h2>🪞 오늘의 질문</h2>
+      <div class="qbox">
+        <textarea id="questionText" class="auto" readonly placeholder="질문이 준비되는 중입니다…"></textarea>
+        <div class="q-actions actions-spaced">
+          <button id="btnAnotherQ" class="btn">다른 질문</button>
+        </div>
+      </div>
+      <label class="lbl">답변</label>
+      <textarea id="answerText" class="auto" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+    </div>
+    <div class="card">
+      <h2>🧠 감정일기</h2>
+      <p class="muted">사건을 사실대로 적고, 그때의 생각과 감정을 구분해 본 뒤 결과를 간단히 남겨보세요.</p>
+      <label class="lbl">사건</label>
+      <textarea id="eventField" class="auto" placeholder="오늘 무슨 일이 있었나요?"></textarea>
+      <label class="lbl">생각</label>
+      <textarea id="thoughtField" class="auto" placeholder="그때 어떤 생각이 들었나요?"></textarea>
+      <label class="lbl">감정</label>
+      <textarea id="feelingField" class="auto" placeholder="감정의 강도/이유를 함께 적어보세요."></textarea>
+      <label class="lbl">결과</label>
+      <textarea id="resultField" class="auto" placeholder="그 결과 나는 어떻게 행동했나요?"></textarea>
+    </div>
+    <div class="card">
+      <h2>🌼 감사일기</h2>
+      <ol class="gratitude-list">
+        <li><input type="text" id="grat1" placeholder="작은 것도 좋아요."></li>
+        <li><input type="text" id="grat2" placeholder="사람/행동/행운 등 무엇이든."></li>
+        <li><input type="text" id="grat3" placeholder="오늘을 좋게 만든 것."></li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>📔 일상일기</h2>
+      <textarea id="dailyNote" class="auto" placeholder="짧게 요약하거나, 길게 자유롭게 적어도 좋아요."></textarea>
+    </div>
+    <div class="card">
+      <h2>🏷️ 태그</h2>
+      <input type="text" id="tagsField" placeholder="#가족, #업무 처럼 쉼표로 구분">
+    </div>
+    <div class="btn-row end actions-spaced" id="dailyActions">
+      <button id="saveDaily" class="btn primary">저장</button>
+      <button id="clearDaily" class="btn danger">지우기</button>
+      <span id="statusDaily" class="muted">불러옴</span>
+    </div>
+  </section>
 
-  <!-- Firebase compat (필요 시 로드됨) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <section id="page-weekly" class="page">
+    <div class="date-row">
+      <button id="prevWeek" class="btn">&lt;</button>
+      <input type="week" id="weekPicker">
+      <button id="nextWeek" class="btn">&gt;</button>
+      <button id="thisWeekBtn" class="btn outline">이번 주</button>
+      <span id="weekText" class="date-text"></span>
+      <span id="weekTextNice" class="date-text nice"></span>
+    </div>
+    <div class="card">
+      <h2>✅ 미션 (체크박스)</h2>
+      <div id="missionList"></div>
+      <div class="add-mission">
+        <input type="text" id="newMission" placeholder="미션 추가">
+        <button id="addMission" class="btn">+ 추가</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🫶 오늘의 문구</h2>
+      <textarea id="healingText" class="auto" placeholder="오늘의 문구"></textarea>
+      <div class="btn-row actions-spaced">
+        <button id="randomHealing" class="btn">랜덤</button>
+        <button id="saveWeekly" class="btn primary">저장</button>
+        <button id="clearWeekly" class="btn danger">지우기</button>
+      </div>
+      <button id="startCopy" class="btn link">✍️ 필사 시작</button>
+      <textarea id="copyArea" class="auto hidden" placeholder="문구를 따라 적어보세요."></textarea>
+    </div>
+  </section>
 
-  <script>
+  <section id="page-search" class="page">
+    <div class="card">
+      <h2>🔎 검색</h2>
+      <input type="text" id="searchInput" placeholder="키워드 또는 #태그 (예: 보고서, #업무)">
+      <div class="btn-row actions-spaced">
+        <button id="searchBtn" class="btn">검색</button>
+        <button id="searchClear" class="btn">지우기</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>결과</h3>
+      <div id="searchResults"></div>
+    </div>
+  </section>
+
+  <section id="page-settings" class="page">
+    <div class="card">
+      <h2>🔐 로그인</h2>
+      <div class="btn-row actions-spaced">
+        <button id="openLogin" class="btn" onclick="(window.TD_openLogin||function(){document.getElementById('loginModal').classList.add('open')})()">로그인</button>
+        <button id="btnSignOut" class="btn outline" onclick="if(window.firebase&&firebase.auth)firebase.auth().signOut()">로그아웃</button>
+      </div>
+      <p class="muted" id="authState">로그아웃 상태</p>
+    </div>
+    <div class="card">
+      <h2>📦 백업/복원</h2>
+      <div class="settings-grid">
+        <button id="exportJSON" class="btn">JSON 파일로 저장</button>
+        <button id="shareJSON" class="btn">JSON 공유(카톡 등)</button>
+        <label class="file-wrap btn">
+          <input type="file" id="importFile" accept=".json"/>파일 선택
+        </label>
+        <button id="importJSON" class="btn">JSON 가져오기</button>
+        <button id="refreshCache" class="btn outline">캐시 새로고침(업데이트)</button>
+        <button id="resetLocal" class="btn danger">로컬 데이터 초기화</button>
+      </div>
+      <p id="fileName" class="muted"></p>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <small>오프라인 + 클라우드 동기화 · v2.4.2</small>
+</footer>
+
+<div id="loginModal" class="modal">
+  <div class="modal-panel">
+    <h3>로그인</h3>
+    <label class="lbl">이메일</label>
+    <input type="email" id="loginEmail" placeholder="you@example.com">
+    <label class="lbl">비밀번호</label>
+    <input type="password" id="loginPwd" placeholder="••••••••">
+    <div class="btn-row actions-spaced modal-actions">
+      <button id="modalSignIn" class="btn primary">로그인</button>
+      <button id="modalSignUp" class="btn">회원가입</button>
+      <button id="modalClose" class="btn">닫기</button>
+    </div>
+    <p id="loginMsg" class="muted"></p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+
   
 // v2.4.0 single-file build – robust init
 (function(){
@@ -510,6 +514,7 @@ textarea{min-height:96px; resize:vertical}
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();
 
-  </script>
+  
+</script>
 </body>
 </html>
