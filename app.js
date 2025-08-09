@@ -1,9 +1,8 @@
-// ===== Firebase =====
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+// app.js (module)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// >>> 여기에 본인 프로젝트 값으로 바꾸기 <<<
 const firebaseConfig = {
   apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
   authDomain: "thanksdiary-dca35.firebaseapp.com",
@@ -13,310 +12,151 @@ const firebaseConfig = {
   appId: "1:250477396044:web:aa1cf155f01263e08834e9",
   measurementId: "G-J0Z03LHYYC"
 };
-// ---------------------------------------------
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
-enableIndexedDbPersistence(db).catch(()=>{}); // 오프라인 쓰기/읽기
+const db   = getFirestore(app);
 
-// ====== 전역 ======
-const $ = sel => document.querySelector(sel);
+const $ = (s,r=document)=>r.querySelector(s);
+const $$= (s,r=document)=>Array.from(r.querySelectorAll(s));
 const view = $("#view");
-const toast = document.createElement('div'); toast.className='toast'; document.body.appendChild(toast);
-const routes = ["daily","weekly","search","settings"];
-let currentRoute = "daily";
-let user = null;
+let user=null, currentTab="daily";
 
-// ====== 질문 50 ======
-const QUESTIONS = [
- "오늘 하루 중 가장 감사했던 순간은 무엇인가요?",
- "오늘 나를 웃게 만든 일은 무엇인가요?",
- "오늘의 기분을 한 단어로 표현한다면?",
- "내가 오늘 배운 새로운 것은 무엇인가요?",
- "오늘의 나에게 가장 자랑스러운 점은?",
- "오늘 내가 다른 사람에게 준 긍정적인 영향은?",
- "오늘 하루 중 가장 평온했던 시간은 언제인가요?",
- "오늘 나를 힘들게 했지만 극복한 일은?",
- "오늘의 나를 1~10으로 점수 매긴다면? 이유는?",
- "오늘 내가 가장 집중했던 일은 무엇인가요?",
- "오늘을 떠올리면 가장 먼저 생각나는 장면은?",
- "오늘 나를 성장시킨 경험은 무엇인가요?",
- "오늘 느낀 감정 중 가장 강렬했던 것은?",
- "오늘 내가 놓친 기회는 무엇이었나요?",
- "오늘의 내가 어제보다 나아진 점은?",
- "오늘 내가 다른 사람에게 한 친절은?",
- "오늘 내 마음이 따뜻해진 순간은?",
- "오늘 내가 한 선택 중 가장 잘한 것은?",
- "오늘 내가 미루지 않고 끝낸 일은?",
- "오늘 나를 도와준 사람과 그 이유는?",
- "오늘 내가 스스로를 돌본 방법은?",
- "오늘 가장 용기 냈던 순간은?",
- "오늘 내가 배운 교훈은?",
- "오늘의 감사 세 가지는?",
- "오늘 내가 놓친 감사는 무엇일까요?",
- "오늘 누군가에게 전하고 싶은 말은?",
- "오늘을 더 행복하게 만들 수 있었던 방법은?",
- "오늘 의도적으로 멈춘 순간은?",
- "오늘 불편했지만 성장시킨 일은?",
- "오늘 조금 더 친절할 수 있었던 순간은?",
- "오늘 실천한 자기계발 행동은?",
- "오늘 주변에서 발견한 작은 아름다움은?",
- "오늘 내가 웃었던 이유는?",
- "오늘 놓친 작은 기쁨은?",
- "오늘 나를 놀라게 한 일은?",
- "오늘 집중해서 들었던 말/대화는?",
- "오늘 더 잘할 수 있었던 일은?",
- "오늘 나를 안정시킨 루틴은?",
- "오늘 새로운 시각으로 본 것은?",
- "오늘 나를 지치게 한 일은?",
- "오늘 ‘잘했다’고 느낀 순간은?",
- "오늘 의도적으로 멀리한 일/사람은?",
- "오늘 내 마음을 울린 장면은?",
- "오늘 잠시 멈춰 생각하게 된 이유는?",
- "오늘 다른 사람에게 배운 점은?",
- "오늘 스스로에게 준 선물은?",
- "오늘 마음속으로 ‘고마워’라 한 대상은?",
- "오늘 계획 없던데 하게 된 일은?",
- "오늘 나를 더 이해하게 된 계기는?",
- "오늘 하루를 한 문장으로 정리한다면?"
+const questions = [
+  "사람들에게 어떤 사람으로 기억되고 싶나요?","오늘 나를 웃게 만든 순간은 무엇이었나요?","최근에 배운 것 중 가장 마음에 남는 건?","지금 나에게 필요한 한 가지는?","오늘 스스로에게 고마운 점은?","내가 소중히 여기는 가치는?","요즘 가장 집중하고 싶은 건?","오늘 나를 어렵게 한 감정은 무엇이었고, 이유는?","내가 편안함을 느끼는 장소는 어디인가요?","최근에 나를 성장시킨 작은 용기는?","‘이건 나답다’고 느낀 순간은?","감사함을 더 자주 느끼기 위해 바꾸고 싶은 습관은?","나를 응원해주는 문장은 무엇인가요?","오늘 놓아주고 싶은 걱정은?","내가 사랑을 표현하는 방식은?","과거의 나에게 해주고 싶은 말은?","오늘의 나에게 칭찬 한마디를 한다면?","아침에 눈 떴을 때 가장 먼저 떠오른 생각은?","요즘 내 마음을 가볍게 해주는 행동은?","이번 주 나의 핵심 한 가지는?"
 ];
+const healingQuotes=["부러움 대신 배움을 고르면 마음이 한결 가벼워진다.","천천히 가도 멈추지 않으면 도착한다.","작은 친절이 하루의 온도를 바꾼다.","어제의 나보다 한 걸음만 앞으로.","완벽보다 지속이 더 멀리 간다.","마음이 머무는 곳이 나의 집이다.","기대 대신 관찰을, 판단 대신 이해를.","나를 돌보는 일은 주변을 돌보는 일의 시작이다."];
 
-// ====== 유틸 ======
-const fmtDate = (d=new Date()) => `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')}.`;
-const weekInfo = (d=new Date())=>{
-  const target = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const jan1 = new Date(Date.UTC(target.getUTCFullYear(),0,1));
-  const diff = Math.floor((target-jan1)/86400000);
-  const week = Math.floor((diff + jan1.getUTCDay()+6)/7)+1; // ISO-ish
-  return {year:d.getFullYear(), month:d.getMonth()+1, week};
-};
-const showToast = (msg)=>{ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 1500); }
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.remove("hidden"); t.classList.add("show"); setTimeout(()=>{t.classList.remove("show"); t.classList.add("hidden");},1600); }
+function fmtDate(d){ return `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`; }
+function dateKey(d){ return d.toISOString().slice(0,10); }
+function weekInfo(d){ const tmp=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=(tmp.getUTCDay()+6)%7;tmp.setUTCDate(tmp.getUTCDate()-day+3);const firstThu=new Date(Date.UTC(tmp.getUTCFullYear(),0,4));const w=1+Math.round(((tmp-firstThu)/86400000-3+((firstThu.getUTCDay()+6)%7))/7);return {y:tmp.getUTCFullYear(),w}; }
+function weekLabel(d){ const month=d.getMonth()+1; const wkInMonth=Math.ceil(d.getDate()/7); const wi=weekInfo(d); return {a:`${wi.y} ${wi.w}번째 주`, b:`${d.getFullYear()}년 ${month}월 ${wkInMonth}주`}; }
 
-// ====== 질문 배정(중복방지+클라우드) ======
-async function getOrAssignQuestion(dateKey){
-  if(!user) return QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)]; // 비로그인: 로컬 랜덤
+function tplDaily(dateStr, weekStr){
+  return `<section class="card">
+    <div class="date-wrap">
+      <button class="btn pill" id="prevDay">&lt;</button>
+      <div class="pill mono" id="dateLabel">${dateStr}</div>
+      <button class="btn pill" id="todayBtn">오늘</button>
+      <div class="pill blue mono" id="weekLabel">${weekStr}</div>
+    </div>
+    <div class="card">
+      <div class="section-title"><span class="ico">🪞</span>오늘의 질문</div>
+      <div id="questionBox" class="card" style="background:#fffaf7">질문이 준비되는 중입니다...</div>
+      <div class="actions"><button class="btn" id="btnNewQ">다른 질문</button></div>
+      <label>답변</label><textarea id="answer" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+    </div>
+    <div class="card">
+      <div class="section-title"><span class="ico">🧠</span>감정일기</div>
+      <label>사건</label><input id="ev"><label>생각</label><input id="th"><label>감정</label><input id="fe"><label>결과</label><input id="rs">
+    </div>
+    <div class="card">
+      <div class="section-title"><span class="ico">🙏</span>감사일기</div>
+      <div class="grid4"><input id="g1" placeholder="감사 1"><input id="g2" placeholder="감사 2"><input id="g3" placeholder="감사 3"><div></div></div>
+    </div>
+    <div class="actions"><button class="btn primary" id="btnSaveDaily">저장</button><button class="btn" id="btnClearDaily">지우기</button></div>
+    <p class="muted">저장 시 로그인 상태면 클라우드에도 동기화됩니다.</p>
+  </section>`;
+}
+function tplWeekly(weekStr){
+  return `<section class="card">
+    <div class="date-wrap">
+      <button class="btn pill" id="prevWeek">&lt;</button>
+      <div class="pill mono" id="weekNow">${weekStr}</div>
+      <button class="btn pill" id="thisWeek">이번 주</button>
+    </div>
+    <div class="card">
+      <div class="section-title"><span class="ico">✅</span>미션 (체크박스)</div>
+      <div id="missions"></div><div class="actions"><button class="btn" id="addMission">+ 추가</button></div>
+    </div>
+    <div class="card">
+      <div class="section-title"><span class="ico">💛</span>오늘의 문구</div>
+      <textarea id="healing" placeholder="오늘의 문구"></textarea>
+      <div class="actions"><button class="btn" id="randQuote">랜덤</button><button class="btn primary" id="saveWeekly">저장</button></div>
+    </div>
+  </section>`;
+}
+function tplSearch(){ return `<section class="card"><div class="section-title"><span class="ico">🔎</span>검색</div><input id="keyword" placeholder="#태그, 키워드"><div class="actions"><button class="btn">검색</button></div></section>`; }
+function tplSettings(){ return `<section class="card"><div class="section-title"><span class="ico">🔐</span>로그인</div><div class="actions"><button class="btn" id="openLogin2">로그인</button><button class="btn" id="btnLogout">로그아웃</button></div></section><section class="card"><div class="section-title"><span class="ico">📦</span>백업/복원</div><div class="actions"><button class="btn" id="exportJson">JSON 파일로 저장</button><input type="file" id="importFile" accept="application/json" style="display:none"><button class="btn" id="importJson">JSON 가져오기</button><button class="btn danger" id="clearLocal">로컬 데이터 초기화</button></div></section>`; }
 
-  const stateRef = doc(db, "users", user.uid);
-  const snap = await getDoc(stateRef);
-  let state = snap.exists() ? snap.data() : { usedIndexes: [], daily: {} };
+async function loadDailyFromCloud(key){ if(!user) return null; const s=await getDoc(doc(db,"users",user.uid,"daily",key)); return s.exists()?s.data():null; }
+async function loadEmotionFromCloud(key){ if(!user) return null; const s=await getDoc(doc(db,"users",user.uid,"emotion",key)); return s.exists()?s.data():null; }
+async function loadThanksFromCloud(key){ if(!user) return null; const s=await getDoc(doc(db,"users",user.uid,"thanks",key)); return s.exists()?s.data():null; }
 
-  // 이미 배정된 질문?
-  if(state.daily && state.daily[dateKey] != null){
-    return QUESTIONS[state.daily[dateKey]];
+async function saveDailyAll(d){
+  if(!user){ toast("로그인 후 클라우드 동기화됩니다."); return; }
+  const key=dateKey(d);
+  await setDoc(doc(db,"users",user.uid,"daily",key), { question: $("#questionBox").textContent.trim(), answer: $("#answer").value||"" }, {merge:true});
+  await setDoc(doc(db,"users",user.uid,"emotion",key), { ev:$("#ev").value||"", th:$("#th").value||"", fe:$("#fe").value||"", rs:$("#rs").value||"" }, {merge:true});
+  await setDoc(doc(db,"users",user.uid,"thanks",key), { list: [$("#g1").value||"", $("#g2").value||"", $("#g3").value||""] }, {merge:true});
+  toast("저장 완료!");
+}
+
+async function getOrAssignQuestion(key){
+  if(!user){ const idx=Math.floor(Math.random()*questions.length); $("#questionBox").textContent=questions[idx]; return; }
+  const uref=doc(db,"users",user.uid); const usnap=await getDoc(uref);
+  let daily=usnap.exists()&&usnap.data().daily?usnap.data().daily:{};
+  let used=usnap.exists()&&Array.isArray(usnap.data().usedIndexes)?usnap.data().usedIndexes:[];
+  if(daily[key]?.qIdx!=null){ $("#questionBox").textContent=questions[daily[key].qIdx]; return; }
+  const remain=questions.map((_,i)=>i).filter(i=>!used.includes(i));
+  const idx = remain.length? remain[Math.floor(Math.random()*remain.length)] : Math.floor(Math.random()*questions.length);
+  daily[key]={qIdx:idx}; used.push(idx); if(used.length>questions.length) used=used.slice(-questions.length);
+  await setDoc(uref, { daily, usedIndexes:used }, {merge:true});
+  $("#questionBox").textContent=questions[idx];
+}
+
+async function render(){ if(currentTab==="daily") await renderDaily(); else if(currentTab==="weekly") await renderWeekly(); else if(currentTab==="search") view.innerHTML=tplSearch(); else if(currentTab==="settings"){ view.innerHTML=tplSettings(); bindSettings(); } }
+function weekLbl(d){ const wl=weekLabel(d); return wl.a; }
+
+async function renderDaily(base){
+  const d=base||new Date(); const key=dateKey(d); const wL=weekLbl(d);
+  view.innerHTML = tplDaily(fmtDate(d), wL);
+  await getOrAssignQuestion(key);
+  if(user){ const daily=await loadDailyFromCloud(key); const emo=await loadEmotionFromCloud(key); const tk=await loadThanksFromCloud(key);
+    if(daily?.answer) $("#answer").value=daily.answer; if(emo){ $("#ev").value=emo.ev||""; $("#th").value=emo.th||""; $("#fe").value=emo.fe||""; $("#rs").value=emo.rs||""; } if(tk?.list){ $("#g1").value=tk.list[0]||""; $("#g2").value=tk.list[1]||""; $("#g3").value=tk.list[2]||""; }
   }
-  // 사용하지 않은 인덱스 풀에서 하나
-  let pool = [...Array(QUESTIONS.length).keys()].filter(i=>!state.usedIndexes?.includes(i));
-  if(pool.length===0){ state.usedIndexes=[]; pool=[...Array(QUESTIONS.length).keys()]; }
-  const pick = pool[Math.floor(Math.random()*pool.length)];
-
-  state.usedIndexes.push(pick);
-  state.daily = {...(state.daily||{}), [dateKey]: pick};
-  if(snap.exists()) await updateDoc(stateRef, state);
-  else await setDoc(stateRef, state);
-
-  return QUESTIONS[pick];
+  $("#prevDay").onclick = ()=>{ const nd=new Date(d); nd.setDate(nd.getDate()-1); renderDaily(nd); };
+  $("#todayBtn").onclick= ()=> renderDaily(new Date());
+  $("#btnNewQ").onclick = ()=> getOrAssignQuestion(key);
+  $("#btnSaveDaily").onclick = ()=> saveDailyAll(d);
+  $("#btnClearDaily").onclick= ()=>{["answer","ev","th","fe","rs","g1","g2","g3"].forEach(id=>$("#"+id).value=""); toast("비움");};
 }
 
-// ====== 라우팅 ======
-function setActiveTab(route){
-  currentRoute = route;
-  document.querySelectorAll('.tab-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.route===route);
-  });
-  render();
+async function renderWeekly(base){
+  const d=base||new Date(); const labels=weekLabel(d);
+  view.innerHTML = tplWeekly(labels.a);
+  const wrap=$("#missions");
+  const add=(t="")=>{ const line=document.createElement("div"); line.className="grid2"; line.innerHTML=`<input class="ms" value="${t}"><button class="btn">삭제</button>`; line.querySelector("button").onclick=()=>line.remove(); wrap.appendChild(line); };
+  $("#addMission").onclick=()=>add("");
+  $("#randQuote").onclick=()=>{ $("#healing").value = healingQuotes[Math.floor(Math.random()*healingQuotes.length)]; };
+  $("#saveWeekly").onclick=async()=>{ if(!user){ toast("로그인 후 저장됩니다."); return; } const inf=weekInfo(d); const list=$$(".ms").map(i=>i.value).filter(v=>v.trim()!==""); await setDoc(doc(db,"users",user.uid,"weekly",`${inf.y}-${inf.w}`),{missions:list,healing:$("#healing").value||""},{merge:true}); toast("주간 저장 완료!"); };
+  $("#prevWeek").onclick=()=>{ const nd=new Date(d); nd.setDate(nd.getDate()-7); renderWeekly(nd); };
+  $("#thisWeek").onclick=()=>renderWeekly(new Date());
 }
 
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=> setActiveTab(btn.dataset.route));
-});
-
-// ====== 화면들 ======
-async function render(){
-  if(currentRoute==="daily") await renderDaily();
-  if(currentRoute==="weekly") renderWeekly();
-  if(currentRoute==="search") renderSearch();
-  if(currentRoute==="settings") renderSettings();
-}
-
-async function renderDaily(){
-  const dateKey = new Date().toISOString().slice(0,10); // yyyy-mm-dd
-  const q = await getOrAssignQuestion(dateKey);
-
-  view.innerHTML = `
-    <section class="card">
-      <div class="spread">
-        <div class="h2">오늘의 질문</div>
-        <div class="row">
-          <span class="kbd">${fmtDate()}</span>
-        </div>
-      </div>
-      <p id="todayQ" class="hint" style="font-size:1.05rem">${q}</p>
-      <label class="mt12">답변
-        <textarea id="answer" rows="5" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
-      </label>
-      <div class="row mt12">
-        <button id="btnDailySave" class="btn primary">저장</button>
-        <button id="btnDailyClear" class="btn danger">지우기</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="h2">감정일기</div>
-      <label>사건<input id="ev" class="input" placeholder="오늘 무슨 일이 있었나요?"></label>
-      <label class="mt8">생각<input id="th" class="input" placeholder="그때 어떤 생각이 들었나요?"></label>
-      <label class="mt8">감정<input id="fe" class="input" placeholder="어떤 감정이 올라왔나요?"></label>
-      <label class="mt8">결과<input id="rs" class="input" placeholder="그 결과는 어땠나요?"></label>
-      <div class="row mt12">
-        <button id="btnEmoSave" class="btn primary">저장</button>
-        <button id="btnEmoClear" class="btn danger">지우기</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="h2">감사일기 (3개)</div>
-      <label><input id="g1" class="input" placeholder="감사 한 가지"/></label>
-      <label class="mt8"><input id="g2" class="input" placeholder="감사 한 가지"/></label>
-      <label class="mt8"><input id="g3" class="input" placeholder="감사 한 가지"/></label>
-      <div class="row mt12">
-        <button id="btnThanksSave" class="btn primary">저장</button>
-      </div>
-    </section>
-  `;
-
-  // 저장 핸들러 (로그인 시 Firestore 동기화)
-  $("#btnDailySave").onclick = async ()=>{
-    const payload = { date: dateKey, question: $("#todayQ").textContent, answer: $("#answer").value, ts: Date.now() };
-    localStorage.setItem(`daily:${dateKey}`, JSON.stringify(payload));
-    if(user){
-      await setDoc(doc(db, "users", user.uid, "daily", dateKey), payload, { merge:true });
-    }
-    showToast("저장 완료!");
+function bindSettings(){
+  $("#openLogin2").onclick=()=>openLogin();
+  $("#btnLogout").onclick =()=>signOut(auth);
+  $("#exportJson").onclick=async()=>{
+    if(!user){ toast("로그인 후 가능합니다."); return; }
+    const out={}; for(const s of ["daily","emotion","thanks","weekly"]){ out[s]={}; const qs=await getDocs(collection(db,"users",user.uid,s)); qs.forEach(d=>out[s][d.id]=d.data()); }
+    const blob=new Blob([JSON.stringify(out,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="thanksdiary-backup.json"; a.click(); toast("JSON 내보내기 완료");
   };
-  $("#btnDailyClear").onclick = ()=>{ $("#answer").value=""; };
-
-  $("#btnEmoSave").onclick = async ()=>{
-    const payload = { date: dateKey, ev:$("#ev").value, th:$("#th").value, fe:$("#fe").value, rs:$("#rs").value, ts:Date.now() };
-    localStorage.setItem(`emo:${dateKey}`, JSON.stringify(payload));
-    if(user) await setDoc(doc(db,"users",user.uid,"emotion",dateKey), payload, {merge:true});
-    showToast("감정일기 저장 완료!");
-  };
-  $("#btnEmoClear").onclick = ()=>["#ev","#th","#fe","#rs"].forEach(s=>$(s).value="");
-
-  $("#btnThanksSave").onclick = async ()=>{
-    const payload = { date: dateKey, list:[ $("#g1").value, $("#g2").value, $("#g3").value ], ts:Date.now() };
-    localStorage.setItem(`thanks:${dateKey}`, JSON.stringify(payload));
-    if(user) await setDoc(doc(db,"users",user.uid,"thanks",dateKey), payload, {merge:true});
-    showToast("감사일기 저장 완료!");
-  };
+  $("#importJson").onclick=()=>$("#importFile").click();
+  $("#importFile").onchange=async(e)=>{ const f=e.target.files[0]; if(!f||!user) return; const data=JSON.parse(await f.text()); for(const [k,docs] of Object.entries(data)){ for(const [id,val] of Object.entries(docs)){ await setDoc(doc(db,"users",user.uid,k,id),val,{merge:true}); } } toast("가져오기 완료"); };
+  $("#clearLocal").onclick=()=>{ localStorage.clear(); toast("로컬 데이터 삭제"); };
 }
 
-function renderWeekly(){
-  const {year,month,week} = weekInfo();
-  view.innerHTML = `
-    <section class="card">
-      <div class="h2">이번 주</div>
-      <div class="row">
-        <div class="week-line">${year}년 ${week}번째 주</div>
-        <div class="week-sub">(${year}년 ${month}월)</div>
-      </div>
-      <div class="row inline-end mt12">
-        <input id="newMission" class="input" placeholder="미션 추가" />
-        <button id="btnAddMission" class="btn primary">+ 추가</button>
-      </div>
-      <ul id="missionList" class="mt12"></ul>
-    </section>
+function openLogin(){ $("#loginModal").classList.remove("hidden"); }
+function closeLogin(){ $("#loginModal").classList.add("hidden"); }
+$("#openLogin").onclick=openLogin; $("#btnCloseLogin").onclick=closeLogin;
+$("#btnSignIn").onclick=async()=>{ try{ await signInWithEmailAndPassword(auth,$("#loginEmail").value.trim(),$("#loginPw").value); $("#loginMsg").textContent="로그인 성공!"; setTimeout(closeLogin,600);}catch(e){ $("#loginMsg").textContent="실패: "+e.message; }};
+$("#btnSignUp").onclick=async()=>{ try{ await createUserWithEmailAndPassword(auth,$("#loginEmail").value.trim(),$("#loginPw").value); $("#loginMsg").textContent="회원가입 성공!"; setTimeout(closeLogin,800);}catch(e){ $("#loginMsg").textContent="실패: "+e.message; }};
 
-    <section class="card">
-      <div class="h2">힐링문구</div>
-      <p class="hint">부러움 대신 배움을 고르면 마음은 가벼워진다</p>
-      <button class="btn">필사 시작</button>
-    </section>
-  `;
-  $("#btnAddMission").onclick = ()=>{
-    const v = $("#newMission").value.trim();
-    if(!v) return;
-    const li = document.createElement('li');
-    li.textContent = v;
-    $("#missionList").appendChild(li);
-    $("#newMission").value="";
-  };
-}
+$$(".tab-btn").forEach(b=> b.onclick=()=>{ currentTab=b.dataset.tab; render(); window.scrollTo(0,0); });
 
-function renderSearch(){
-  view.innerHTML = `
-    <section class="card">
-      <div class="h2">검색</div>
-      <input id="kw" class="input" placeholder="키워드를 입력하세요"/>
-      <div class="mt12" id="result" class="hint"></div>
-    </section>
-  `;
-}
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"; // (not used but keeps module split simple)
 
-function renderSettings(){
-  view.innerHTML = `
-    <section class="card">
-      <div class="h2">백업/복원</div>
-      <div class="row">
-        <button id="btnExport" class="btn">JSON 파일로 저장</button>
-        <input id="imp" type="file" accept="application/json" />
-      </div>
-      <p class="hint mt8">로그인 상태라면 클라우드에도 자동 동기화됩니다.</p>
-    </section>
-  `;
-  $("#btnExport").onclick = ()=>{
-    const dump = JSON.stringify(localStorage);
-    const blob = new Blob([dump],{type:"application/json"});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = "thanks-diary-backup.json"; a.click();
-  };
-  $("#imp").onchange = e=>{
-    const file = e.target.files?.[0]; if(!file) return;
-    const fr = new FileReader();
-    fr.onload = ()=>{ try{
-      const data = JSON.parse(fr.result);
-      Object.entries(data).forEach(([k,v])=> localStorage.setItem(k,v));
-      showToast("가져오기 완료!");
-    }catch{ showToast("JSON 형식 오류"); } };
-    fr.readAsText(file);
-  };
-}
-
-// ====== 로그인 모달 ======
-const dlg = $("#loginModal");
-$("#btnOpenLogin").onclick = ()=> dlg.showModal();
-$("#btnCloseLogin").onclick = ()=> dlg.close();
-
-$("#btnDoLogin").onclick = async (e)=>{
-  e.preventDefault();
-  try{
-    const email = $("#loginEmail").value.trim();
-    const pass = $("#loginPass").value;
-    await signInWithEmailAndPassword(auth,email,pass);
-    $("#loginMsg").textContent = "로그인 성공!";
-    setTimeout(()=>dlg.close(), 300);
-  }catch(err){
-    $("#loginMsg").textContent = "로그인 실패: " + (err.code||"");
-  }
-};
-$("#btnDoSignup").onclick = async (e)=>{
-  e.preventDefault();
-  try{
-    const email = $("#loginEmail").value.trim();
-    const pass = $("#loginPass").value;
-    await createUserWithEmailAndPassword(auth,email,pass);
-    $("#loginMsg").textContent = "회원가입/로그인 완료!";
-    setTimeout(()=>dlg.close(), 300);
-  }catch(err){
-    $("#loginMsg").textContent = "회원가입 실패: " + (err.code||"");
-  }
-};
-
-// ====== Auth 상태 ======
-onAuthStateChanged(auth, async (u)=>{
-  user = u||null;
-  $("#authState").textContent = user ? `${user.email} 로그인됨` : "로그아웃 상태";
-});
-
-// 초기 라우트
-setActiveTab("daily");
+onAuthStateChanged(auth, async(u)=>{ user=u||null; $("#authState").textContent=user?`${user.email} 로그인됨`:"로그아웃 상태"; await render(); });
+render();
