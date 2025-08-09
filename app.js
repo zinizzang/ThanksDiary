@@ -1,4 +1,5 @@
 
+// v2.3.5 – compat SDK + onClick fallbacks + weekly nice text + save alerts
 (function(){
   const firebaseConfig = {
     apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
@@ -15,7 +16,6 @@
   const $ = s=>document.querySelector(s);
   const pages = { daily:$('#page-daily'), weekly:$('#page-weekly'), search:$('#page-search'), settings:$('#page-settings') };
   const tabs = { daily:$('#tab-daily'), weekly:$('#tab-weekly'), search:$('#tab-search'), settings:$('#tab-settings') };
-
   function showPage(name){
     Object.values(pages).forEach(p=>p.classList.remove('active'));
     Object.values(tabs).forEach(t=>t.classList.remove('active'));
@@ -24,25 +24,36 @@
     if(name==='daily') loadDaily();
     if(name==='weekly') loadWeekly();
   }
-  function handleHash(){ const h=(location.hash.replace(/^#\\/?/,'')||'daily'); showPage(h); }
+  function handleHash(){ const h=(location.hash.replace(/^#\\/?/,'')||'daily'); showPage(h); if(h==='weekly' && !$('#weekPicker').value) setWeekByDate(new Date()); }
   window.addEventListener('hashchange', handleHash);
 
   function ymd(date){ const d=new Date(date); const tz=d.getTimezoneOffset()*60000; return new Date(d.getTime()-tz).toISOString().slice(0,10); }
   function formatDatePretty(dateStr){ const d=new Date(dateStr); return `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`; }
   function getWeekId(date){ const d=new Date(date); const t=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const n=(t.getUTCDay()+6)%7; t.setUTCDate(t.getUTCDate()-n+3); const ft=new Date(Date.UTC(t.getUTCFullYear(),0,4)); const w=1+Math.round(((t-ft)/86400000-3+((ft.getUTCDay()+6)%7))/7); const y=t.getUTCFullYear(); return `${y}-W${String(w).padStart(2,'0')}`;}
   function weekPretty(weekId){ const [y,w]=weekId.split('-W'); return `${y} ${parseInt(w)}번째 주`; }
+  function weekOfMonthStr(date){
+    const d = new Date(date);
+    const first = new Date(d.getFullYear(), d.getMonth(), 1);
+    const firstDay = (first.getDay()===0?7:first.getDay()); // Mon=1..Sun=7
+    const week = Math.floor((firstDay - 1 + d.getDate() + 6) / 7);
+    return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${week}주`;
+  }
   function parseTags(s){ if(!s) return []; return s.split(',').map(t=>t.trim()).filter(Boolean).map(t=>t.startsWith('#')?t:'#'+t); }
   function autoResize(el){ el.style.height='auto'; el.style.height=(el.scrollHeight+2)+'px'; }
   function bindAuto(el){ if(!el) return; autoResize(el); el.addEventListener('input', ()=>autoResize(el)); }
 
-  const storeKey='td-v234-data', settingsKey='td-v234-settings';
+  const storeKey='td-v235-data', settingsKey='td-v235-settings';
   const loadAll=()=>{ try{ return JSON.parse(localStorage.getItem(storeKey)) || {daily:{},weekly:{}} }catch{ return {daily:{},weekly:{}}; };
   const saveAll=(d)=>localStorage.setItem(storeKey, JSON.stringify(d));
   const loadSettings=()=>{ try{ return JSON.parse(localStorage.getItem(settingsKey)) || {} }catch{ return {}; } };
   const saveSettings=(s)=>localStorage.setItem(settingsKey, JSON.stringify(s));
 
-  const questionPool=['오늘 나는 무엇을 잘했나요?','사람들에게 어떤 사람으로 기억되고 싶나요?','오늘 나를 웃게 만든 순간은 무엇이었나요?','요즘 나를 설레게 하는 작은 일은?','지금의 나에게 필요한 한 문장은?','오늘 배운 것 하나는 무엇인가요?','나는 무엇을 포기하지 않았나요?','최근 나를 힘들게 한 일, 거기서 배운 점은?','오늘 나에게 가장 고마운 사람은 누구였나요?','앞으로의 나에게 전하고 싶은 말은?','나의 강점 한 가지를 적어보세요.','오늘 놓치지 않은 작은 친절은?','오늘 내 마음의 날씨는 어땠나요?'];
-  const healingPool=['부러움 대신 배움을 고르면 마음은 가벼워진다','완벽보다 꾸준함이 조용히 이긴다','오늘의 나를 어제의 나와만 비교하면 삶이 단단해진다','불안은 계획을 좋아한다 작은 계획 하나면 충분하다','한 번의 깊은 호흡이 마음의 재부팅이다','사랑받는 것보다 믿을 만한 사람이 되는 게 오래간다','상처를 말로 꺼내면 무게가 나눠진다','작은 친절은 돌아오지 않아도 흔적을 남긴다','내 속도가 느려 보여도 멈추지 않으면 결국 닿는다','인정은 포기가 아니다 받아들임은 시작이다','해야 할 일 앞에서 숨고 싶을 땐 아주 작은 시작부터','오늘의 수고를 내일의 나에게 친절로 남긴다'];
+  const questionPool=[
+    '오늘 나는 무엇을 잘했나요?','사람들에게 어떤 사람으로 기억되고 싶나요?','오늘 나를 웃게 만든 순간은 무엇이었나요?','요즘 나를 설레게 하는 작은 일은?','지금의 나에게 필요한 한 문장은?','오늘 배운 것 하나는 무엇인가요?','나는 무엇을 포기하지 않았나요?','최근 나를 힘들게 한 일, 거기서 배운 점은?','오늘 나에게 가장 고마운 사람은 누구였나요?','앞으로의 나에게 전하고 싶은 말은?','나의 강점 한 가지를 적어보세요.','오늘 놓치지 않은 작은 친절은?','오늘 내 마음의 날씨는 어땠나요?'
+  ];
+  const healingPool=[
+    '부러움 대신 배움을 고르면 마음은 가벼워진다','완벽보다 꾸준함이 조용히 이긴다','오늘의 나를 어제의 나와만 비교하면 삶이 단단해진다','불안은 계획을 좋아한다 작은 계획 하나면 충분하다','한 번의 깊은 호흡이 마음의 재부팅이다','사랑받는 것보다 믿을 만한 사람이 되는 게 오래간다','상처를 말로 꺼내면 무게가 나눠진다','작은 친절은 돌아오지 않아도 흔적을 남긴다','내 속도가 느려 보여도 멈추지 않으면 결국 닿는다','인정은 포기가 아니다 받아들임은 시작이다','해야 할 일 앞에서 숨고 싶을 땐 아주 작은 시작부터','오늘의 수고를 내일의 나에게 친절로 남긴다'
+  ];
   function nextFromPool(key, pool){
     const s=loadSettings(); if(!s._cursor) s._cursor={}; if(!s._order) s._order={};
     if(!s._order[key] || s._order[key].length!==pool.length){ s._order[key]=pool.map((_,i)=>i).sort(()=>Math.random()-0.5); s._cursor[key]=0; }
@@ -66,14 +77,14 @@
     if(id==='todayBtn') setDailyDate(new Date());
     if(id==='btnAnotherQ'){ questionText.value=nextFromPool('q',questionPool); autoResize(questionText); }
 
-    if(id==='addMission'){ const txt=$('#newMission')?.value?.trim(); if(!txt) return; const data=loadAll(); const key=currentWeekKey(); const w=data.weekly[key]||{missions:[],healing:''}; w.missions.push({text:txt,done:false}); data.weekly[key]=w; saveAll(data); $('#newMission').value=''; renderMissions(w.missions); saveWeeklyData(); }
-    if(id==='saveWeekly'){ saveWeeklyData(); alert('주간 데이터 저장 완료'); }
-    if(id==='clearWeekly'){ if(!confirm('이 주차의 주간 데이터를 모두 지울까요?')) return; const data=loadAll(); const key=currentWeekKey(); delete data.weekly[key]; saveAll(data); const user=auth.currentUser; if(user){ db.collection('users').doc(user.uid).collection('weekly').doc(key).delete().catch(()=>{}); } loadWeekly(); }
+    if(id==='addMission'){ const txt=$('#newMission')?.value?.trim(); if(!txt) return; const data=loadAll(); const key=currentWeekKey(); const w=data.weekly[key]||{missions:[],healing:''}; w.missions.push({text:txt,done:false}); data.weekly[key]=w; saveAll(data); $('#newMission').value=''; renderMissions(w.missions); saveWeeklyData(true); }
+    if(id==='saveWeekly'){ saveWeeklyData(true); }
+    if(id==='clearWeekly'){ if(!confirm('이 주차의 주간 데이터를 모두 지울까요?')) return; const data=loadAll(); const key=currentWeekKey(); delete data.weekly[key]; saveAll(data); const user=auth.currentUser; if(user){ db.collection('users').doc(user.uid).collection('weekly').doc(key).delete().catch(()=>{}); } loadWeekly(); alert('삭제 완료'); }
     if(id==='randomHealing'){ $('#healingText').value=nextFromPool('h',healingPool); autoResize($('#healingText')); }
     if(id==='startCopy'){ const c=$('#copyArea'); c.classList.toggle('hidden'); if(!c.classList.contains('hidden')){ c.value=$('#healingText').value; autoResize(c); } }
 
-    if(id==='saveDaily') saveDailyNow();
-    if(id==='clearDaily') clearDailyNow();
+    if(id==='saveDaily'){ saveDailyNow(); }
+    if(id==='clearDaily'){ clearDailyNow(); }
 
     if(id==='searchBtn') doSearch();
     if(id==='searchClear'){ $('#searchInput').value=''; $('#searchResults').innerHTML=''; }
@@ -84,9 +95,9 @@
     if(id==='refreshCache'){ alert('서비스워커 없이 동작합니다. 새로고침하면 최신 적용됩니다.'); }
     if(id==='resetLocal'){ if(!confirm('로컬 데이터를 모두 삭제할까요?')) return; localStorage.removeItem(storeKey); alert('로컬 데이터 삭제 완료'); }
 
-    if(id==='openLogin' || id==='authMiniLogin') openModal();
-    if(id==='authMiniLogout' || id==='btnSignOut') auth.signOut();
-    if(id==='modalClose') closeModal();
+    if(id==='authMiniLogin' || id==='openLogin'){ openModal(); }
+    if(id==='authMiniLogout' || id==='btnSignOut'){ auth.signOut(); }
+    if(id==='modalClose'){ closeModal(); }
     if(id==='modalSignIn') signIn();
     if(id==='modalSignUp') signUp();
   });
@@ -109,20 +120,28 @@
     data.daily[key]={ question:questionText.value, answer:answerText.value.trim(), event:eventField.value.trim(), thought:thoughtField.value.trim(), feeling:feelingField.value.trim(), result:resultField.value.trim(), gratitude:[grat1.value.trim(),grat2.value.trim(),grat3.value.trim()], note:dailyNote.value.trim(), tags:parseTags(tagsField.value), updatedAt:new Date().toISOString() };
     saveAll(data);
     const user=auth.currentUser;
-    if(user){ await db.collection('users').doc(user.uid).collection('daily').doc(key).set(data.daily[key], {merge:true}); statusDaily.textContent='저장됨(클라우드)'; }
-    else{ statusDaily.textContent='저장됨(로컬)'; }
+    if(user){ await db.collection('users').doc(user.uid).collection('daily').doc(key).set(data.daily[key], {merge:true}); statusDaily.textContent='저장됨(클라우드)'; alert('저장 완료! (클라우드)'); }
+    else{ statusDaily.textContent='저장됨(로컬)'; alert('저장 완료!'); }
   }
   async function clearDailyNow(){
     if(!confirm('이 날짜의 데이터를 모두 지울까요?')) return;
     const data=loadAll(); const key=dailyDate.value||ymd(new Date()); delete data.daily[key]; saveAll(data);
     const user=auth.currentUser; if(user){ await db.collection('users').doc(user.uid).collection('daily').doc(key).delete().catch(()=>{}); }
-    loadDaily(); statusDaily.textContent='삭제됨';
+    loadDaily(); statusDaily.textContent='삭제됨'; alert('삭제 완료');
   }
 
-  const weekPicker=$('#weekPicker'), weekText=$('#weekText');
-  function setWeekByDate(dt){ const id=getWeekId(dt); weekPicker.value=id; weekText.textContent=weekPretty(id); loadWeekly(); }
+  const weekPicker=$('#weekPicker'), weekText=$('#weekText'), weekTextNice=$('#weekTextNice');
+  function setWeekByDate(dt){
+    const id=getWeekId(dt); weekPicker.value=id; weekText.textContent=weekPretty(id);
+    if(weekTextNice) weekTextNice.textContent=weekOfMonthStr(dt);
+    loadWeekly();
+  }
+  window.TD_setWeekToday = ()=>setWeekByDate(new Date());
   function shiftWeek(n){ const val=weekPicker.value||getWeekId(new Date()); const [y,w]=val.split('-W'); const base=new Date(Date.UTC(parseInt(y),0,1+(parseInt(w)-1)*7)); base.setUTCDate(base.getUTCDate()+n*7); setWeekByDate(new Date(base)); }
-  weekPicker.addEventListener('change', ()=>{ weekText.textContent=weekPretty(weekPicker.value); loadWeekly(); });
+  $('#prevWeek')?.addEventListener('click', ()=>shiftWeek(-1));
+  $('#nextWeek')?.addEventListener('click', ()=>shiftWeek(1));
+  $('#thisWeekBtn')?.addEventListener('click', ()=>setWeekByDate(new Date()));
+  weekPicker.addEventListener('change', ()=>{ weekText.textContent=weekPretty(weekPicker.value); const parts=weekPicker.value.split('-W'); const y=parseInt(parts[0]); const w=parseInt(parts[1]); const base=new Date(Date.UTC(y,0,1+(w-1)*7)); if(weekTextNice) weekTextNice.textContent=weekOfMonthStr(base); loadWeekly(); });
 
   function renderMissions(items){
     const missionList=$('#missionList'); missionList.innerHTML='';
@@ -141,12 +160,20 @@
     if(!w){ const data=loadAll(); w=data.weekly[key]||{missions:[],healing:''}; }
     renderMissions(w.missions||[]); $('#healingText').value=w.healing||''; bindAuto($('#healingText'));
   }
-  function collectMissions(){ return Array.from(document.querySelectorAll('#missionList .mission-item')).map(r=>{ const cb=r.querySelector('input[type="checkbox"]'); const txt=r.querySelector('input[type="text"]'); return {text:txt.value.trim(), done:cb.checked}; }).filter(x=>x.text.length>0); }
-  async function saveWeeklyData(){
-    const key=currentWeekKey(); const data=loadAll(); data.weekly[key]={missions:collectMissions(),healing:$('#healingText').value.trim(),updatedAt:new Date().toISOString()}; saveAll(data);
+  async function saveWeeklyData(withAlert){
+    const key=currentWeekKey(); const data=loadAll(); data.weekly[key]={missions:Array.from(document.querySelectorAll('#missionList .mission-item')).map(r=>{ const cb=r.querySelector('input[type=\"checkbox\"]'); const txt=r.querySelector('input[type=\"text\"]'); return {text:txt.value.trim(), done:cb.checked}; }).filter(x=>x.text.length>0),healing:$('#healingText').value.trim(),updatedAt:new Date().toISOString()}; saveAll(data);
     const user=auth.currentUser; if(user){ await db.collection('users').doc(user.uid).collection('weekly').doc(key).set(data.weekly[key], {merge:true}); }
+    if(withAlert) alert('주간 데이터 저장 완료');
   }
 
+  // Search
+  function doSearch(){
+    const q=$('#searchInput').value.trim(); const data=loadAll(); const results=[]; const isTag=q.startsWith('#'); const qn=q.replace(/^#/,'').toLowerCase();
+    Object.keys(data.daily).forEach(date=>{ const d=data.daily[date]; const hay=[d.event,d.thought,d.feeling,d.result,...(d.gratitude||[]),d.note].join(' ').toLowerCase(); const tags=(d.tags||[]).map(t=>t.replace(/^#/,'').toLowerCase()); let match=false; if(isTag) match=tags.includes(qn); else match=hay.includes(qn); if(match) results.push({date,d}); });
+    results.sort((a,b)=>a.date.localeCompare(b.date)); const area=$('#searchResults'); area.innerHTML=''; if(results.length===0){ area.innerHTML='<p class="muted">결과가 없습니다.</p>'; return; } results.forEach(item=>{ const div=document.createElement('div'); div.className='res'; const h4=document.createElement('h4'); h4.textContent=item.date; const p=document.createElement('p'); p.innerHTML=`<strong>사건</strong>: ${item.d.event||''}<br><strong>생각</strong>: ${item.d.thought||''}<br><strong>감정</strong>: ${item.d.feeling||''}<br><strong>결과</strong>: ${item.d.result||''}<br><strong>감사</strong>: ${(item.d.gratitude||[]).filter(Boolean).join(', ')}<br><strong>일상</strong>: ${item.d.note||''}`; div.appendChild(h4); div.appendChild(p); area.appendChild(div); });
+  }
+
+  // Export/Import
   async function exportJSON(){ const data=loadAll(); const a=document.createElement('a'); const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); a.href=URL.createObjectURL(blob); a.download=`thanksdiary_backup_${ymd(new Date())}.json`; a.click(); }
   async function shareJSON(){
     const data=loadAll(); const textPayload=JSON.stringify(data,null,2);
@@ -159,11 +186,15 @@
     const reader=new FileReader(); reader.onload=e=>{ try{ const incoming=JSON.parse(e.target.result); const cur=loadAll(); cur.daily={...cur.daily, ...(incoming.daily||{})}; cur.weekly={...cur.weekly, ...(incoming.weekly||{})}; saveAll(cur); alert('가져오기 완료'); if(pages.daily.classList.contains('active')) loadDaily(); if(pages.weekly.classList.contains('active')) loadWeekly(); }catch(err){ alert('가져오기 실패: 올바른 JSON이 아닙니다.'); } }; reader.readAsText(f);
   }
 
+  // Modal + Auth
   const lm=$('#loginModal'), loginEmail=$('#loginEmail'), loginPwd=$('#loginPwd'), loginMsg=$('#loginMsg');
   function openModal(){ lm.classList.add('open'); loginMsg.textContent=''; }
   function closeModal(){ lm.classList.remove('open'); }
   async function signIn(){ try{ await auth.signInWithEmailAndPassword(loginEmail.value.trim(), loginPwd.value); closeModal(); }catch(e){ const m='로그인 실패: '+(e.message||e); loginMsg.textContent=m; alert(m);} }
   async function signUp(){ try{ await auth.createUserWithEmailAndPassword(loginEmail.value.trim(), loginPwd.value); closeModal(); }catch(e){ const m='회원가입 실패: '+(e.message||e); loginMsg.textContent=m; alert(m);} }
+
+  // expose for inline onClick fallback
+  window.TD_openLogin=openModal; window.TD_closeLogin=closeModal; window.TD_signIn=signIn; window.TD_signUp=signUp;
 
   auth.onAuthStateChanged((user)=>{
     const logged=!!user;
