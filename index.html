@@ -30,6 +30,7 @@ main{padding:1rem;max-width:900px;margin:0 auto}
 .page{display:none}
 .page.active{display:block}
 .date-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem}
+#weekPicker{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 .date-text{margin-left:auto;font-weight:700;color:#2563eb}
 .date-text.nice{color:#7c3aed}
 .card{background:var(--card);border:1px solid var(--line);border-radius:1rem;padding:1rem;margin:1rem 0;box-shadow:0 6px 18px rgba(0,0,0,.06)}
@@ -68,6 +69,7 @@ textarea{min-height:96px;resize:vertical}
 <!-- Firebase compat (간단 연결) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <header class="app-header">
@@ -212,7 +214,7 @@ textarea{min-height:96px;resize:vertical}
 </main>
 
 <footer class="app-footer">
-  <small>오프라인 + 로그인 연결 · v2.6.0</small>
+  <small>오프라인 + 로그인 연결 · v2.6.1</small>
 </footer>
 
 <div id="loginModal" class="modal"><div class="modal-panel">
@@ -260,15 +262,24 @@ document.addEventListener('click', (e)=>{
 const QUESTIONS = ['오늘 나는 무엇을 잘했나요?','사람들에게 어떤 사람으로 기억되고 싶나요?','오늘 나를 웃게 만든 순간은 무엇이었나요?','요즘 나를 설레게 하는 작은 일은?','지금의 나에게 필요한 한 문장은?','오늘 배운 것 하나는 무엇인가요?','오늘 나를 힘나게 한 고마운 사람은?','지금 감사한 것 세 가지는?','오늘 놓아도 되는 걱정은?'];
 const STORE = (key,val)=> val===undefined ? JSON.parse(localStorage.getItem(key)||'null') : localStorage.setItem(key, JSON.stringify(val));
 function currentKey(){ const d=$('#dailyDate').value; return `td:v2:daily:${d}`; }
-function saveDaily(){ const data = {q: $('#questionText').value, a: $('#answerText').value, e: $('#eventField').value, t: $('#thoughtField').value, f: $('#feelingField').value, r: $('#resultField').value, g1: $('#grat1').value, g2: $('#grat2').value, g3: $('#grat3').value, note: $('#dailyNote').value, tags: $('#tagsField').value}; STORE(currentKey(), data); alert('저장 완료!'); }
-function loadDaily(){ const data = STORE(currentKey()); if(!data) return; $('#questionText').value = data.q||''; $('#answerText').value=data.a||''; $('#eventField').value=data.e||''; $('#thoughtField').value=data.t||''; $('#feelingField').value=data.f||''; $('#resultField').value=data.r||''; $('#grat1').value=data.g1||''; $('#grat2').value=data.g2||''; $('#grat3').value=data.g3||''; $('#dailyNote').value=data.note||''; $('#tagsField').value=data.tags||''; $('#statusDaily').textContent='불러옴'; }
+async function saveDaily(){ const data = {q: $('#questionText').value, a: $('#answerText').value, e: $('#eventField').value, t: $('#thoughtField').value, f: $('#feelingField').value, r: $('#resultField').value, g1: $('#grat1').value, g2: $('#grat2').value, g3: $('#grat3').value, note: $('#dailyNote').value, tags: $('#tagsField').value}; STORE(currentKey(), data); let msg='저장 완료!'; try{ const ok=await cloudSaveDaily(); if(ok) msg='저장 완료(클라우드 동기화)!'; }catch(e){} alert(msg); }
+async function loadDaily(){ 
+  if(await cloudLoadDaily()) return;
+  const data = STORE(currentKey()); if(!data) return; 
+  $('#questionText').value = data.q||''; $('#answerText').value=data.a||''; $('#eventField').value=data.e||''; $('#thoughtField').value=data.t||''; $('#feelingField').value=data.f||''; $('#resultField').value=data.r||''; $('#grat1').value=data.g1||''; $('#grat2').value=data.g2||''; $('#grat3').value=data.g3||''; $('#dailyNote').value=data.note||''; $('#tagsField').value=data.tags||''; $('#statusDaily').textContent='불러옴'; }
 function clearDaily(){ if(confirm('이 날짜의 내용을 지울까요?')){ localStorage.removeItem(currentKey()); $$('textarea,input[type=text]').forEach(el=>{ if(el.id.startsWith('grat')||el.id.endsWith('Text')||el.id.endsWith('Field')||el.id==='dailyNote'||el.id==='tagsField') el.value=''; }); } }
 function moveDay(delta){ const d=new Date($('#dailyDate').value||Date.now()); d.setDate(d.getDate()+delta); $('#dailyDate').value=fmtYMD(d); $('#dailyDateText').textContent=`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`; loadDaily(); }
 function anotherQ(){ const cur=$('#questionText').value; let cand; let tries=0; do{ cand = QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)]; tries++; }while(cand===cur && tries<5); $('#questionText').value=cand; }
 
 // ---------- weekly
-function updateWeekTexts(){ const now = new Date(); const wy = weekOfYear(now); $('#weekText').textContent = `${now.getFullYear()} ${String(wy)}번째 주`; $('#weekTextNice').textContent = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${weekOfMonth(now)}주`; }
-function thisWeek(){ const now=new Date(); const iso = now.toISOString().slice(0,4) + '-W' + String(weekOfYear(now)).padStart(2,'0'); $('#weekPicker').value = iso; updateWeekTexts(); }
+let _weekAnchor = new Date(); // state anchor for weekly view (any day within target week)
+function updateWeekTexts(){ 
+  const d = _weekAnchor;
+  const wy = weekOfYear(d);
+  $('#weekText').textContent = `${d.getFullYear()} ${String(wy)}번째 주`;
+  $('#weekTextNice').textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${weekOfMonth(d)}주`;
+}
+function thisWeek(){ _weekAnchor = new Date(); updateWeekTexts(); }
 // 안전한 미션 추가(문자열/HTML 주입 방지)
 function addMissionItem(text){ const box=document.createElement('div'); box.className='mission-item'; const cb=document.createElement('input'); cb.type='checkbox'; const input=document.createElement('input'); input.type='text'; input.value=text||''; const del=document.createElement('button'); del.className='btn'; del.textContent='삭제'; del.addEventListener('click', ()=>box.remove()); box.append(cb, input, del); $('#missionList').appendChild(box); }
 
@@ -287,8 +298,10 @@ document.addEventListener('click', e=>{
   if(id==='searchBtn') return void doSearch();
   if(id==='searchClear'){ $('#searchInput').value=''; $('#searchResults').textContent=''; return; }
   if(id==='thisWeekBtn') return void thisWeek();
+  if(id==='prevWeek'){ _weekAnchor = new Date(_weekAnchor.getFullYear(), _weekAnchor.getMonth(), _weekAnchor.getDate()-7); updateWeekTexts(); return; }
+  if(id==='nextWeek'){ _weekAnchor = new Date(_weekAnchor.getFullYear(), _weekAnchor.getMonth(), _weekAnchor.getDate()+7); updateWeekTexts(); return; }
   if(id==='randomHealing'){ const arr=['부러움 대신 배움을 고르면 마음은 가벼워진다.','작은 친절 하나가 하루를 바꾼다.','완벽보다 지속이 더 멀리 간다.','오늘의 나를 어제의 나와만 비교하자.']; $('#healingText').value = arr[Math.floor(Math.random()*arr.length)]; return; }
-  if(id==='saveWeekly') return void alert('저장 완료!');
+  if(id==='saveWeekly'){ (async()=>{ let m='저장 완료!'; try{ const ok=await cloudSaveWeekly(); if(ok) m='저장 완료(클라우드 동기화)!'; }catch(e){} alert(m); })(); return; }
   if(id==='clearWeekly'){ $('#healingText').value=''; $('#missionList').innerHTML=''; return; }
   if(id==='startCopy'){ $('#copyArea').classList.toggle('hidden'); return; }
   if(id==='addMission'){ const v=$('#newMission').value.trim(); if(!v) return; addMissionItem(v); $('#newMission').value=''; return; }
@@ -303,7 +316,7 @@ document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ const m=$('#lo
 
 // ---------- inputs
 document.addEventListener('input', e=>{ if(e.target.matches('textarea.auto')){ e.target.style.height='auto'; e.target.style.height=(e.target.scrollHeight+2)+'px'; } });
-document.addEventListener('change', e=>{ if(e.target.id==='dailyDate'){ const d=new Date(e.target.value); $('#dailyDateText').textContent=`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`; loadDaily(); } if(e.target.id==='weekPicker') updateWeekTexts(); });
+document.addEventListener('change', e=>{ if(e.target.id==='dailyDate'){ const d=new Date(e.target.value); $('#dailyDateText').textContent=`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`; loadDaily(); } });
 
 // ---------- init
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -315,6 +328,49 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // weekly defaults
   thisWeek();
 });
+
+
+// ---------- Firestore Cloud Sync
+let _auth=null, _db=null;
+async function cloudSaveDaily(){
+  if(!_auth || !_auth.currentUser || !_db) return false;
+  const uid=_auth.currentUser.uid;
+  const dateKey=($('#dailyDate').value);
+  const docRef = _db.collection('users').doc(uid).collection('daily').doc(dateKey);
+  const payload = { q: $('#questionText').value, a: $('#answerText').value, e: $('#eventField').value, t: $('#thoughtField').value, f: $('#feelingField').value, r: $('#resultField').value, g1: $('#grat1').value, g2: $('#grat2').value, g3: $('#grat3').value, note: $('#dailyNote').value, tags: $('#tagsField').value, updatedAt: new Date() };
+  await docRef.set(payload, {merge:true});
+  return true;
+}
+async function cloudLoadDaily(){
+  if(!_auth || !_auth.currentUser || !_db) return false;
+  const uid=_auth.currentUser.uid;
+  const dateKey=($('#dailyDate').value);
+  const snap = await _db.collection('users').doc(uid).collection('daily').doc(dateKey).get();
+  if(!snap.exists) return false;
+  const d=snap.data();
+  $('#questionText').value = d.q||''; $('#answerText').value=d.a||''; $('#eventField').value=d.e||''; $('#thoughtField').value=d.t||''; $('#feelingField').value=d.f||''; $('#resultField').value=d.r||''; $('#grat1').value=d.g1||''; $('#grat2').value=d.g2||''; $('#grat3').value=d.g3||''; $('#dailyNote').value=d.note||''; $('#tagsField').value=d.tags||'';
+  $('#statusDaily').textContent='클라우드에서 불러옴';
+  return true;
+}
+function isoWeekKey(d){ return d.getFullYear() + '-W' + String(weekOfYear(d)).padStart(2,'0'); }
+async function cloudSaveWeekly(){
+  if(!_auth || !_auth.currentUser || !_db) return false;
+  const uid=_auth.currentUser.uid;
+  const key=isoWeekKey(_weekAnchor);
+  const missions = Array.from(document.querySelectorAll('#missionList .mission-item')).map(mi=>({done: mi.querySelector('input[type=checkbox]').checked, text: mi.querySelector('input[type=text]').value||''}));
+  const payload = { weekAnchor: _weekAnchor, weekText: $('#weekText').textContent, weekTextNice: $('#weekTextNice').textContent, healing: $('#healingText').value||'', missions, updatedAt:new Date() };
+  await _db.collection('users').doc(uid).collection('weekly').doc(key).set(payload, {merge:true});
+  return true;
+}
+async function cloudLoadWeekly(){
+  if(!_auth || !_auth.currentUser || !_db) return false;
+  const uid=_auth.currentUser.uid;
+  const key=isoWeekKey(_weekAnchor);
+  const ref=_db.collection('users').doc(uid).collection('weekly').doc(key);
+  const snap=await ref.get();
+  if(!snap.exists) return false;
+  const d=snap.data(); $('#healingText').value=d.healing||''; $('#missionList').innerHTML=''; (d.missions||[]).forEach(m=>{ addMissionItem(m.text||''); const last=document.querySelector('#missionList .mission-item:last-child'); if(last){ last.querySelector('input[type=checkbox]').checked=!!m.done; } }); return true;
+}
 
 // ---------- Firebase auth (compat)
 const firebaseConfig = {
@@ -329,6 +385,8 @@ const firebaseConfig = {
 try{
   const app = firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
+  const db = firebase.firestore();
+  _auth = auth; _db = db;
 
   // 상태 표시
   auth.onAuthStateChanged((user)=>{
