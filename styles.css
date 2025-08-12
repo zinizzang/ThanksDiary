@@ -54,3 +54,33 @@ main{padding:16px;display:block}
   .tab-btn{max-width:none}
   main{max-width:760px;margin:0 auto}
 }
+/* === Tap 막힘/정렬깨짐 긴급패치 === */
+html, body { overflow-x: hidden; }
+
+/* 헤더 장식/그라데이션/섀도 같은 꾸밈 레이어는 탭을 받지 않게 */
+.header-gradient,
+.header-shadow,
+.header-glow,
+.top-decor,
+.hero-overlay,
+.page-overlay,
+.date-strip::before,
+.date-strip::after { pointer-events: none !important; }
+
+/* 헤더가 콘텐츠를 덮지 않도록 레이어/여백 정리 */
+.top-bar, header { position: sticky; top: 0; z-index: 10; }
+.main { position: relative; z-index: 0; padding-top: 8px; }
+
+/* 날짜/오늘 배지 주의: 의도치 않은 absolute 제거 */
+.week-badge, .today-badge { position: static !important; }
+
+/* 상단 메뉴 너무 커지는 것 축소 + 간격 */
+.nav-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.nav-buttons .menu { font-size: 15px; padding: 10px 14px; border-radius: 14px; }
+.nav-buttons .menu .icon { width: 18px; height: 18px; }
+
+/* 카드 사이 간격 조금 벌리기 */
+.section-card { margin-top: 14px; }
+
+/* 입력칸 폰트도 동일 적용(고운돋움) */
+input, textarea, button, select { font-family: "Gowun Dodum", system-ui, -apple-system, sans-serif !important; }
