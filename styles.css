@@ -1,66 +1,62 @@
-
+/* Pastel yellow theme */
 :root{
-  --bg:#fff7df; --card:#fffaf0; --ink:#3c2f21; --muted:#8c7a66;
-  --border:#efdfbf; --accent:#ffd457; --accent-ink:#4a380a; --ring:rgba(0,0,0,.06);
+  --bg:#fff6d6;
+  --card:#fff8e6;
+  --ink:#3d2b1f;
+  --muted:#8b7e74;
+  --brand:#ffcf48;
+  --btn:#f0c23d;
+  --gap:14px; /* increased spacing */
+  --radius:18px;
+  --shadow:0 6px 18px rgba(0,0,0,.06);
 }
+
 *{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; background:radial-gradient(260px 160px at 12% 10%, #ffeaa4 0%, var(--bg) 60%);
-  color:var(--ink); font-family:'Gowun Dodum', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif; line-height:1.56;
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', sans-serif;}
+
+.site-header{position:sticky;top:0;background:linear-gradient(180deg,#fff3c4,#fff6d6);padding:14px 16px 10px;border-bottom:1px solid #f3e6b0;z-index:10}
+.title-wrap{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.title-star{color:#ffb300}
+.app-title{font-size:24px;margin:0;font-weight:800;letter-spacing:-.5px}
+
+.main-nav{display:flex;gap:10px}
+.nav-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:10px 14px;border-radius:14px;border:1px solid #f0e2ad;
+  background:#fffaf0;box-shadow:var(--shadow);
+  font-size:15px; /* smaller label */
 }
-h1,h2,h3,.logo{font-family:'Jua','Gowun Dodum',sans-serif}
+.nav-btn .nav-ico{font-size:16px;line-height:1;} /* icon near text size */
+.nav-btn.is-active{outline:2px solid #ffd65e;background:#fffbe6}
 
-.app-header{position:sticky; top:0; z-index:5; border-bottom:1px solid var(--border);
-  background:linear-gradient(180deg,#fff1c6,#fff7df); padding:10px 14px}
-.brand{display:flex; align-items:center; gap:8px}
-.logo{margin:0; font-size:22px; letter-spacing:.2px}
-.star{width:16px; height:16px}
+.content{padding:14px 16px 90px;}
 
-.tabs{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:8px 0 6px}
-.tab-btn{display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px; border-radius:14px; font-weight:700;
-  border:1px solid var(--border); background:#fff; box-shadow:0 6px 16px var(--ring); cursor:pointer; font-size:16px}
-.tab-btn img{width:16px; height:16px}
-.tab-btn[aria-selected="true"]{outline:2px solid #f2d27a}
-
-#view{padding:12px; max-width:900px; margin:0 auto}
-.view{display:none} .view.active{display:block}
-
-.toolbar{display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap}
-.label{font-weight:700}
-.week-label{padding:6px 10px; border-radius:999px; background:#fff; border:1px solid var(--border)}
-
-.card{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:12px; margin:10px 0; box-shadow:0 10px 24px var(--ring)}
-.card h2{display:flex; align-items:center; gap:8px; margin:0 0 6px; font-size:18px}
-.hint{color:var(--muted); margin:0 0 8px}
-.q-box{background:#fff; border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin:2px 0 8px}
-
-.field label{font-weight:700; display:block; margin:6px 0 4px}
-.input, textarea, input[type="date"], input[type="text"], input[type="email"], input[type="password"]{
-  width:100%; border:1px solid var(--border); border-radius:12px; padding:10px 10px; background:#fff; color:inherit;
-  font-family: inherit;
+.date-row{display:flex;gap:10px;align-items:center;margin:6px 0 14px}
+input[type="date"], .input{
+  width:100%;padding:12px 14px;border-radius:14px;border:1px solid #efdfad;background:#fffdf2;font-size:15px;
 }
-textarea{min-height:90px; resize:vertical}
+.chip{padding:10px 12px;border-radius:999px;border:1px solid #efdca0;background:#fffbe8}
 
-.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
-.grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
-@media (max-width:640px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+.card{background:var(--card);border:1px solid #f0e2ad;border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.card-ico{width:22px;height:22px;display:grid;place-items:center;background:#ffeaa6;border-radius:7px;font-size:14px}
+.card-title{margin:0;font-size:18px;font-weight:800}
+.hint{color:var(--muted);margin:6px 0 12px;font-size:14px}
 
-.btn{border:1px solid var(--border); background:#fff; color:var(--ink); padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:700}
-.btn.primary{background:var(--accent); border-color:#f0d27a; color:var(--accent-ink)}
-.btn.ghost{background:transparent}
-.btn.outline{background:#fff}
-.btn.danger{background:#ffe1e1; border-color:#e9bcbc; color:#7a2a2a}
-.btn.block{width:100%}
+.field{display:block;margin:8px 0}
+.field .label{display:block;font-weight:700;margin:6px 0 6px}
+.textarea{width:100%;min-height:84px;padding:12px 14px;border-radius:14px;border:1px solid #efdfad;background:#fffdf2;font-size:15px;resize:vertical}
 
-.result-list{list-style:none; padding:0; margin:8px 0}
-.result-list li{background:#fff; border:1px solid var(--border); border-radius:12px; padding:8px; margin:6px 0}
+.btn-row{display:flex;gap:12px;margin-top:12px} /* more gap */
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
 
-.app-footer{position:fixed; bottom:10px; left:0; right:0; text-align:center; color:var(--muted)}
+.btn{padding:11px 16px;border-radius:14px;border:1px solid #e6d086;background:#fffbe8;font-weight:700}
+.btn.primary{background:var(--btn);border-color:#e6bf32}
+.btn.ghost{background:#fffdf2}
+.btn.danger{background:#ffd1d1;border-color:#f5a6a6}
 
-#toast{position:fixed; left:50%; transform:translateX(-50%); bottom:16px; background:#222; color:#fff; padding:8px 12px; border-radius:12px; font-size:.9rem; opacity:0; transition:opacity .25s, transform .25s; z-index:20}
-#toast.show{opacity:.96; transform:translate(-50%,-6px)}
-.filebtn{display:inline-flex; align-items:center; gap:8px}
-.mission-list{display:flex; flex-direction:column; gap:6px}
-.mission-item{display:flex; gap:8px; align-items:center}
-.mission-item input[type="text"]{flex:1}
+.check-row{display:flex;flex-direction:column;gap:10px}
+.muted{color:var(--muted);font-weight:600;font-size:.9em}
+
+.site-footer{position:sticky;bottom:0;left:0;right:0;background:#fff6d6;border-top:1px solid #f3e6b0;padding:10px 16px;color:var(--muted);text-align:center;font-size:13px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}

@@ -1,594 +1,194 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>지니짱 감사일기</title>
-<style>
-:root{
-  --bg:#FFF6D8;           /* 파스텔 노랑 배경 */
-  --panel:#FFF9E6;        /* 카드 배경 */
-  --ink:#3b2f1e;          /* 본문 글자색 */
-  --sub:#7b6a4f;          /* 보조 텍스트 */
-  --line:#f1e4bb;         /* 라인 색 */
-  --brand:#ffd75a;        /* 버튼/포커스 */
-  --brand-ink:#3a2a00;
-  --accent:#ffb4c2;       /* 위험/지우기 */
-  --ok:#ffe08a;           /* 저장 버튼 */
-  --radius:18px;
-  --gap:12px;
-  --btn-h:44px;
-  --shadow:0 6px 20px rgba(0,0,0,.06);
-  --font: "Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-}
-html,body{background:var(--bg);color:var(--ink);font-family:var(--font);margin:0}
-.wrap{max-width:860px;margin:0 auto;padding:14px}
-header{
-  background:linear-gradient(180deg,#ffeebc, var(--bg));
-  border-bottom:1px solid var(--line);
-  position:sticky;top:0;z-index:20;
-}
-.head{
-  display:flex;align-items:center;gap:12px; padding:14px 6px 8px 6px;
-}
-.star{width:18px;height:18px;flex:0 0 18px}
-.title{font-weight:800; font-size:28px; letter-spacing:-0.5px}
-.login-status{margin-left:auto; font-size:13px; color:var(--sub)}
-.tabs{display:flex; gap:10px; padding:10px 6px 14px 6px; flex-wrap:wrap}
-.tab{
-  display:flex; align-items:center; gap:8px; height:44px; padding:0 14px;
-  background:#fff; border:1px solid var(--line); border-radius:16px;
-  box-shadow:var(--shadow); color:var(--ink); font-weight:700;
-}
-.tab svg{width:17px;height:17px; opacity:.9} /* 아이콘을 글자 높이 수준으로 */
-.tab.active{outline:3px solid #ffe395}
-main{padding:14px 6px 60px}
-
-.card{
-  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
-  padding:16px; margin:14px 0; box-shadow:var(--shadow)
-}
-.card h3{
-  margin:0 0 10px; font-size:20px; letter-spacing:-0.3px; display:flex; gap:8px; align-items:center
-}
-.card .hint{color:var(--sub); font-size:13px}
-.row{display:flex; gap:10px; flex-wrap:wrap}
-input[type="text"], input[type="date"], textarea{
-  width:100%; border:1px solid var(--line); border-radius:14px; background:#fff;
-  padding:12px 14px; font-size:16px; outline:none
-}
-textarea{min-height:110px; resize:vertical}
-.btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
-.btn{
-  height:var(--btn-h); padding:0 18px; border-radius:999px; border:0; cursor:pointer;
-  font-weight:800; letter-spacing:-0.3px
-}
-.btn.save{background:var(--ok); color:var(--brand-ink)}
-.btn.del{background:var(--accent); color:#5a1020}
-.btn.ghost{background:#fff; color:var(--sub); border:1px solid var(--line)}
-.btn.primary{background:var(--brand); color:var(--brand-ink)}
-.badge{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; background:#fff; border:1px solid var(--line); border-radius:999px; font-size:13px}
-.inline{display:flex; gap:8px}
-.small{font-size:13px; color:var(--sub)}
-.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-@media (max-width:720px){ .grid2{grid-template-columns:1fr} }
-
-.date-bar{display:flex; gap:8px; align-items:center}
-.date-bar .today{white-space:nowrap}
-.section-title{font-weight:900; font-size:18px; margin:14px 0 8px}
-
-footer{padding:24px 0 60px; color:var(--sub); text-align:center; font-size:13px}
-
-.toast{
-  position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:1000;
-  background:#222; color:#fff; padding:12px 16px; border-radius:999px; opacity:0; pointer-events:none;
-  transition:opacity .25s ease
-}
-.toast.show{opacity:1}
-
-.hidden{display:none}
-
-/* 체크박스 목록(미션) */
-.missions{display:flex; flex-direction:column; gap:8px; margin-top:8px}
-.mission{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px}
-.mission input[type="text"]{flex:1; min-width:0; height:36px; padding:8px 10px}
-
-/* 아주 작은 아이콘칩 */
-.chip{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; background:#fff; border:1px solid var(--line); border-radius:999px;font-size:12px}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <div class="head">
-      <!-- 노란 별 아이콘 -->
-      <svg class="star" viewBox="0 0 24 24" fill="#FFC531" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.5l2.6 5.3 5.8.9-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 8.7l5.8-.9L12 2.5z"/></svg>
-      <div class="title">지니짱 감사일기</div>
-      <div class="login-status"><span id="who"></span></div>
+  <header class="site-header">
+    <div class="title-wrap">
+      <span class="title-star" aria-hidden="true">★</span>
+      <h1 class="app-title">지니짱 감사일기</h1>
     </div>
-
-    <nav class="tabs">
-      <button class="tab active" data-tab="daily" aria-label="데일리">
-        <!-- 작고 귀여운 아이콘들(인라인 SVG) -->
-        <svg viewBox="0 0 24 24" fill="#e0a800"><path d="M6 3h9a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6a3 3 0 013-3zm0 2a1 1 0 00-1 1v12a1 1 0 001 1h9a1 1 0 001-1V6a1 1 0 00-1-1H6zm2 4h7v2H8V9zm0 4h7v2H8v-2z"/></svg>
-        데일리
+    <nav class="main-nav" role="tablist" aria-label="메인 메뉴">
+      <button class="nav-btn is-active" role="tab" aria-selected="true" data-target="#daily">
+        <span class="nav-ico" aria-hidden="true">📒</span>
+        <span class="nav-label">데일리</span>
       </button>
-      <button class="tab" data-tab="weekly" aria-label="위클리">
-        <svg viewBox="0 0 24 24" fill="#e0a800"><path d="M4 5h16v2H4V5zm0 6h16v2H4v-2zm0 6h10v2H4v-2z"/></svg>
-        위클리
+      <button class="nav-btn" role="tab" aria-selected="false" data-target="#weekly">
+        <span class="nav-ico" aria-hidden="true">📝</span>
+        <span class="nav-label">위클리</span>
       </button>
-      <button class="tab" data-tab="search" aria-label="검색">
-        <svg viewBox="0 0 24 24" fill="#e0a800"><path d="M10 4a6 6 0 014.8 9.6l4.3 4.3-1.4 1.4-4.3-4.3A6 6 0 1110 4zm0 2a4 4 0 100 8 4 4 0 000-8z"/></svg>
-        검색
+      <button class="nav-btn" role="tab" aria-selected="false" data-target="#search">
+        <span class="nav-ico" aria-hidden="true">🔎</span>
+        <span class="nav-label">검색</span>
       </button>
-      <button class="tab" data-tab="settings" aria-label="설정">
-        <svg viewBox="0 0 24 24" fill="#e0a800"><path d="M12 7a5 5 0 110 10 5 5 0 010-10zm9 5l1.9 1.1-1.7 3-2.2-.5a7.9 7.9 0 01-1.7 1l-.3 2.2h-3.4l-.3-2.2a7.9 7.9 0 01-1.7-1l-2.2.5-1.7-3L3 12l1.9-1.1 0-.1a8.4 8.4 0 011.7-1L6.9 7.6 10.3 7l.3 2.2a7.9 7.9 0 011.4 0L12.3 7h3.4l.3 2.2c.6.3 1.2.6 1.7 1l2.2-.5 1.7 3L21 12z"/></svg>
-        설정
+      <button class="nav-btn" role="tab" aria-selected="false" data-target="#settings">
+        <span class="nav-ico" aria-hidden="true">🌞</span>
+        <span class="nav-label">설정</span>
       </button>
     </nav>
-  </div>
-</header>
+  </header>
 
-<main class="wrap">
-  <!-- 날짜 선택 라인 -->
-  <div class="date-bar card">
-    <div class="section-title">날짜</div>
-    <div class="row">
-      <input id="date" type="date" />
-      <button class="btn ghost today" id="btnToday">오늘</button>
-      <span id="weekLabel" class="badge"></span>
-    </div>
-  </div>
-
-  <!-- 데일리 -->
-  <section id="daily" class="page">
-    <!-- 오늘의 질문 -->
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#e0a800"><circle cx="12" cy="12" r="5"/></svg>
-          오늘의 질문
-        </span>
-      </h3>
-      <div class="hint">나를 되돌아보는 한 줄 질문이에요.</div>
-      <input id="qToday" type="text" readonly />
-      <textarea id="qAnswer" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
-      <div class="btns">
-        <button class="btn ghost" id="btnRandom">다른 질문</button>
-        <button class="btn save" id="btnSaveQ">저장</button>
-        <button class="btn del" id="btnClearQ">지우기</button>
+  <main class="content">
+    <!-- Daily -->
+    <section id="daily" class="page is-active" role="tabpanel" aria-labelledby="데일리">
+      <div class="date-row">
+        <label class="sr-only" for="dateInput">날짜</label>
+        <input id="dateInput" type="date">
+        <button class="chip" id="btnToday" type="button">오늘</button>
       </div>
-    </div>
 
-    <!-- 감정일기 -->
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#ffb74d"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zM8 10.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm8 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM7 15h10a3.5 3.5 0 00-10 0z"/></svg>
-          감정일기
-        </span>
-      </h3>
-      <div class="hint">사건을 사실대로 적고, 그때의 생각과 감정을 구분해 본 뒤 결과를 간단히 남겨보세요.</div>
-      <div class="section-title">사건</div>
-      <textarea id="emoEvent" placeholder="오늘 무슨 일이 있었나요?"></textarea>
-      <div class="section-title">생각</div>
-      <textarea id="emoThought" placeholder="그때 어떤 생각이 들었나요?"></textarea>
-      <div class="section-title">감정</div>
-      <textarea id="emoFeeling" placeholder="감정을 구체적으로 적어보세요."></textarea>
-      <div class="section-title">결과</div>
-      <textarea id="emoResult" placeholder="그 결과는 무엇이었나요?"></textarea>
-      <div class="btns">
-        <button class="btn save" id="btnSaveEmotion">저장</button>
-        <button class="btn del" id="btnClearEmotion">지우기</button>
-        <button class="btn ghost" id="btnEmotionLoad">불러옴</button>
-      </div>
-    </div>
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">💡</div>
+          <h2 class="card-title">오늘의 질문</h2>
+        </header>
+        <p class="hint">나를 되돌아보는 한 줄 질문이에요.</p>
+        <input class="input" placeholder="질문을 입력하거나 불러오세요.">
+        <textarea class="textarea" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+        <div class="btn-row">
+          <button class="btn primary">저장</button>
+          <button class="btn ghost">지우기</button>
+        </div>
+      </article>
 
-    <!-- 감사일기 3개 -->
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#ffcc66"><path d="M12 21s-8-4.3-8-11a5 5 0 019-3 5 5 0 019 3c0 6.7-8 11-8 11z"/></svg>
-          감사일기 (3)
-        </span>
-      </h3>
-      <div class="grid2">
-        <textarea id="gr1" placeholder="감사한 일 1"></textarea>
-        <textarea id="gr2" placeholder="감사한 일 2"></textarea>
-      </div>
-      <textarea id="gr3" placeholder="감사한 일 3"></textarea>
-      <div class="btns">
-        <button class="btn save" id="btnSaveGrat">저장</button>
-        <button class="btn del" id="btnClearGrat">지우기</button>
-      </div>
-    </div>
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">🧠</div>
+          <h2 class="card-title">감정일기 <span class="muted">사건 · 생각 · 감정 · 결과</span></h2>
+        </header>
+        <label class="field">
+          <span class="label">사건</span>
+          <textarea class="textarea" placeholder="오늘 무슨 일이 있었나요?"></textarea>
+        </label>
+        <label class="field">
+          <span class="label">생각</span>
+          <textarea class="textarea" placeholder="그때 어떤 생각이 들었나요?"></textarea>
+        </label>
+        <label class="field">
+          <span class="label">감정</span>
+          <textarea class="textarea" placeholder="감정의 강도/이유를 함께 적어보세요."></textarea>
+        </label>
+        <label class="field">
+          <span class="label">결과</span>
+          <textarea class="textarea" placeholder="그 결과 나는 무엇을 배웠나요?"></textarea>
+        </label>
+        <div class="btn-row">
+          <button class="btn primary">저장</button>
+          <button class="btn ghost">지우기</button>
+        </div>
+      </article>
 
-    <!-- 일상일기 + 태그 -->
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#f6c44f"><path d="M6 4h12v14H6zM4 6h2v10H4z"/></svg>
-          일상일기
-        </span>
-      </h3>
-      <textarea id="dailyNote" placeholder="하루를 가볍게 기록해요."></textarea>
-      <div class="section-title">태그 달기</div>
-      <input id="tags" type="text" placeholder="#가족, #산책 처럼 심플로 구분" />
-      <div class="btns">
-        <button class="btn save" id="btnSaveDaily">저장</button>
-        <button class="btn del" id="btnClearDaily">지우기</button>
-      </div>
-    </div>
-  </section>
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">🙏</div>
+          <h2 class="card-title">감사일기 <span class="muted">3개</span></h2>
+        </header>
+        <input class="input" placeholder="감사 1">
+        <input class="input" placeholder="감사 2">
+        <input class="input" placeholder="감사 3">
+        <div class="btn-row">
+          <button class="btn primary">저장</button>
+        </div>
+      </article>
 
-  <!-- 위클리 -->
-  <section id="weekly" class="page hidden">
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#ffcd4d"><path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h10v2H4v-2z"/></svg>
-          미션 (체크박스)
-        </span>
-        <span id="weekOnly" class="badge" style="margin-left:auto"></span>
-      </h3>
-      <div id="missionList" class="missions"></div>
-      <div class="btns">
-        <button class="btn ghost" id="btnAddMission">+ 추가</button>
-        <button class="btn save" id="btnSaveMission">저장</button>
-      </div>
-    </div>
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">📄</div>
+          <h2 class="card-title">일상일기</h2>
+        </header>
+        <textarea class="textarea" rows="5" placeholder="하루를 가볍게 기록해요."></textarea>
+        <div class="btn-row">
+          <button class="btn primary">저장</button>
+        </div>
+      </article>
 
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#ffc94f"><path d="M12 3a7 7 0 00-7 7c0 3.9 3.1 5.7 5.4 9.2.3.5.9.8 1.6.8s1.3-.3 1.6-.8C15.9 15.7 19 13.9 19 10a7 7 0 00-7-7z"/></svg>
-          힐링문구
-        </span>
-      </h3>
-      <textarea id="healing" placeholder="마음을 가볍게 하는 한 줄을 골라 필사해요."></textarea>
-      <div class="btns">
-        <button class="btn save" id="btnSaveHealing">저장</button>
-      </div>
-    </div>
-  </section>
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">🏷️</div>
+          <h2 class="card-title">태그 달기</h2>
+        </header>
+        <input class="input" placeholder="#가족, #산책 처럼 심표로 구분">
+        <div class="btn-row">
+          <button class="btn primary">저장</button>
+        </div>
+      </article>
+    </section>
 
-  <!-- 검색 -->
-  <section id="search" class="page hidden">
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#e0a800"><path d="M10 4a6 6 0 014.8 9.6l4.3 4.3-1.4 1.4-4.3-4.3A6 6 0 1110 4zm0 2a4 4 0 100 8 4 4 0 000-8z"/></svg>
-          전체내용 검색
-        </span>
-      </h3>
-      <div class="row">
-        <input id="kw" type="text" placeholder="키워드를 입력하세요." />
-        <button class="btn primary" id="btnDoSearch">검색</button>
-      </div>
-      <div class="section-title">결과</div>
-      <div id="searchResult" class="small"></div>
-    </div>
-  </section>
+    <!-- Weekly -->
+    <section id="weekly" class="page" role="tabpanel">
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">✅</div>
+          <h2 class="card-title">미션 (체크박스)</h2>
+        </header>
+        <div class="check-row">
+          <label><input type="checkbox"> 물 2L 마시기</label>
+          <label><input type="checkbox"> 20분 산책</label>
+          <label><input type="checkbox"> 감사 3개 쓰기</label>
+        </div>
+      </article>
 
-  <!-- 설정 -->
-  <section id="settings" class="page hidden">
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#e0a800"><path d="M12 7a5 5 0 110 10 5 5 0 010-10z"/></svg>
-          로그인
-        </span>
-      </h3>
-      <div class="row">
-        <input id="email" type="text" placeholder="이메일(표시용, 로컬 저장)" />
-        <button class="btn primary" id="btnLogin">로그인</button>
-        <button class="btn ghost" id="btnLogout">로그아웃</button>
-      </div>
-      <div class="small">※ 현재는 로컬 모드(오프라인 저장). Firebase 키 연결 전까지 임시 표시용입니다.</div>
-    </div>
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">🌿</div>
+          <h2 class="card-title">힐링 문구</h2>
+        </header>
+        <p class="quote">오늘의 나는 어제의 나를 이긴다.</p>
+      </article>
+    </section>
 
-    <div class="card">
-      <h3>
-        <span class="chip">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="#ffcd4d"><path d="M3 6h18v2H3V6zm0 5h12v2H3v-2zm0 5h18v2H3v-2z"/></svg>
-          백업 / 복원
-        </span>
-      </h3>
-      <div class="btns">
-        <button class="btn primary" id="btnExport">JSON 내보내기</button>
-        <button class="btn ghost" id="btnImport">JSON 가져오기</button>
-        <button class="btn del" id="btnReset">로컬 데이터 초기화</button>
-      </div>
-      <textarea id="xfer" placeholder="내보낸 JSON을 붙여넣거나, 여기에 JSON을 넣고 [가져오기]를 누르세요." style="margin-top:10px"></textarea>
-    </div>
-  </section>
-</main>
+    <!-- Search -->
+    <section id="search" class="page" role="tabpanel">
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">🔎</div>
+          <h2 class="card-title">전체 내용 검색</h2>
+        </header>
+        <input class="input" placeholder="검색어를 입력하세요.">
+        <div class="btn-row">
+          <button class="btn primary">검색</button>
+        </div>
+        <div class="search-result">
+          <p class="muted">검색 결과가 여기에 표시됩니다.</p>
+        </div>
+      </article>
+    </section>
 
-<footer class="wrap">
-  v2.7.2-final-ui232r4
-</footer>
+    <!-- Settings -->
+    <section id="settings" class="page" role="tabpanel">
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">🔐</div>
+          <h2 class="card-title">로그인</h2>
+        </header>
+        <div class="btn-row">
+          <button class="btn primary">로그인</button>
+          <button class="btn ghost">로그아웃</button>
+          <button class="btn ghost">회원가입</button>
+        </div>
+      </article>
 
-<div id="toast" class="toast">저장 완료</div>
+      <article class="card">
+        <header class="card-head">
+          <div class="card-ico" aria-hidden="true">💾</div>
+          <h2 class="card-title">백업 / 복원</h2>
+        </header>
+        <div class="btn-grid">
+          <button class="btn ghost">JSON 파일로 저장</button>
+          <button class="btn ghost">JSON 가져오기</button>
+          <button class="btn ghost">카카오톡 공유</button>
+          <button class="btn danger">로컬 데이터 초기화</button>
+        </div>
+      </article>
+    </section>
+  </main>
 
-<script>
-/* ===================== 유틸 ===================== */
-const $ = (s,sc=document)=>sc.querySelector(s);
-const $$= (s,sc=document)=>Array.from(sc.querySelectorAll(s));
-const toast = (msg)=>{
-  const el = $("#toast");
-  el.textContent = msg || "저장 완료";
-  el.classList.add("show");
-  setTimeout(()=>el.classList.remove("show"), 1400);
-};
-const storageKey = (date)=>`td_${date}`; // YYYY-MM-DD 로컬 키
+  <footer class="site-footer">v2.7.2-final-ui232r4</footer>
 
-const fmtDate = (d)=> d.toISOString().slice(0,10);
-const todayStr = ()=> fmtDate(new Date());
-
-/* ===================== 탭 전환 ===================== */
-const pages = { daily:$("#daily"), weekly:$("#weekly"), search:$("#search"), settings:$("#settings") };
-$(".tabs").addEventListener("click",(e)=>{
-  const btn = e.target.closest(".tab");
-  if(!btn) return;
-  $$(".tab").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  const name = btn.dataset.tab;
-  Object.entries(pages).forEach(([k,el])=> el.classList.toggle("hidden", k!==name));
-});
-/* ===================== 날짜/주차 ===================== */
-const dateInput = $("#date");
-const weekLabel = $("#weekLabel");
-const weekOnly = $("#weekOnly");
-const calcWeek = (d)=>{
-  const date = new Date(d+"T12:00:00");
-  const y = date.getFullYear();
-  const m = date.getMonth()+1;
-  // 해당 월의 첫 날 기준 주차(한국식): 해당 월 1일의 요일 보정
-  const first = new Date(y,m-1,1);
-  const offset = (first.getDay()+6)%7; // 월=0 기준 보정
-  const week = Math.floor((date.getDate()+offset-1)/7)+1;
-  return `${y}년 ${m}월 ${week}주`;
-};
-const updateWeek = ()=>{
-  const w = calcWeek(dateInput.value);
-  weekLabel.textContent = w;
-  weekOnly.textContent = w;
-};
-$("#btnToday").addEventListener("click", ()=>{ dateInput.value = todayStr(); updateWeek(); loadAllForDate(); });
-
-/* ===================== 질문(랜덤) ===================== */
-const QUESTIONS = [
-  "사람들에게 어떤 사람으로 기억되고 싶나요?",
-  "오늘 나를 미소짓게 한 순간은?",
-  "지금의 나에게 꼭 필요한 한 마디는?",
-  "오늘 배운(깨달은) 한 가지는?",
-  "오늘 가장 고마웠던 사람은 누구였나요? 이유는?",
-  "내가 더 알고 싶은 나의 모습은 어떤 모습인가요?",
-  "내가 잘하고 있는 작은 습관 하나는?",
-  "오늘 놓아도 될 걱정은 무엇인가요?",
-  "이번 주 나의 '딱 한 가지' 우선순위는?",
-  "요즘 나를 설레게 하는 것은?"
-];
-const pickQ = ()=>{
-  // 중복 줄이기: 오늘 날짜의 인덱스를 기준으로 순환
-  const idx = (new Date(dateInput.value).getTime()/86400000|0) % QUESTIONS.length;
-  $("#qToday").value = QUESTIONS[idx];
-};
-
-/* ===================== 로드/세이브 포맷 ===================== */
-const blank = ()=>({
-  q:{q:"",a:""},
-  emotion:{e:"",t:"",f:"",r:""},
-  grat:["","",""],
-  daily:"", tags:"",
-  missions:[], healing:""
-});
-
-const load = (d)=>{
-  const raw = localStorage.getItem(storageKey(d));
-  return raw? JSON.parse(raw) : blank();
-};
-const save = (d,data)=>{
-  localStorage.setItem(storageKey(d), JSON.stringify(data));
-  toast("저장 완료");
-};
-
-/* ===================== 현재 날짜 바인딩 ===================== */
-dateInput.value = todayStr();
-updateWeek();
-
-/* ===================== 날짜별 데이터 로드/바인딩 ===================== */
-function loadAllForDate(){
-  const d = dateInput.value;
-  const data = load(d);
-  // 질문
-  pickQ();
-  if(data.q.q) $("#qToday").value = data.q.q;
-  $("#qAnswer").value = data.q.a || "";
-
-  // 감정일기
-  $("#emoEvent").value   = data.emotion.e || "";
-  $("#emoThought").value = data.emotion.t || "";
-  $("#emoFeeling").value = data.emotion.f || "";
-  $("#emoResult").value  = data.emotion.r || "";
-
-  // 감사
-  $("#gr1").value = data.grat[0] || "";
-  $("#gr2").value = data.grat[1] || "";
-  $("#gr3").value = data.grat[2] || "";
-
-  // 일상/태그
-  $("#dailyNote").value = data.daily || "";
-  $("#tags").value = data.tags || "";
-
-  // 주차 데이터(같은 저장소 키 사용: 날짜 기준이라 미션은 주 단위로 병합 저장)
-  renderMissions(data.missions||[]);
-  $("#healing").value = data.healing || "";
-}
-dateInput.addEventListener("change", ()=>{ updateWeek(); loadAllForDate(); });
-loadAllForDate();
-
-/* ===================== 버튼 동작: 질문 ===================== */
-$("#btnRandom").addEventListener("click", ()=>{
-  // 랜덤(비중복) 시도
-  let idx = Math.floor(Math.random()*QUESTIONS.length);
-  if($("#qToday").value === QUESTIONS[idx]){
-    idx = (idx+1)%QUESTIONS.length;
-  }
-  $("#qToday").value = QUESTIONS[idx];
-});
-$("#btnSaveQ").addEventListener("click", ()=>{
-  const d = dateInput.value, data = load(d);
-  data.q.q = $("#qToday").value;
-  data.q.a = $("#qAnswer").value;
-  save(d,data);
-});
-$("#btnClearQ").addEventListener("click", ()=>{
-  $("#qAnswer").value="";
-});
-
-/* ===================== 감정일기 ===================== */
-$("#btnSaveEmotion").addEventListener("click", ()=>{
-  const d = dateInput.value, data = load(d);
-  data.emotion = {
-    e:$("#emoEvent").value,
-    t:$("#emoThought").value,
-    f:$("#emoFeeling").value,
-    r:$("#emoResult").value
-  };
-  save(d,data);
-});
-$("#btnClearEmotion").addEventListener("click",()=>{
-  $("#emoEvent").value=$("#emoThought").value=$("#emoFeeling").value=$("#emoResult").value="";
-});
-$("#btnEmotionLoad").addEventListener("click",()=>loadAllForDate());
-
-/* ===================== 감사/일상 ===================== */
-$("#btnSaveGrat").addEventListener("click", ()=>{
-  const d = dateInput.value, data = load(d);
-  data.grat = [$("#gr1").value, $("#gr2").value, $("#gr3").value];
-  save(d,data);
-});
-$("#btnClearGrat").addEventListener("click", ()=>{
-  $("#gr1").value=$("#gr2").value=$("#gr3").value="";
-});
-
-$("#btnSaveDaily").addEventListener("click", ()=>{
-  const d = dateInput.value, data = load(d);
-  data.daily = $("#dailyNote").value;
-  data.tags  = $("#tags").value;
-  save(d,data);
-});
-$("#btnClearDaily").addEventListener("click", ()=>{
-  $("#dailyNote").value=$("#tags").value="";
-});
-
-/* ===================== 위클리: 미션 & 힐링 ===================== */
-const missionList = $("#missionList");
-const renderMissions = (arr)=>{
-  missionList.innerHTML="";
-  arr.forEach((m,i)=>{
-    const row = document.createElement("div");
-    row.className="mission";
-    row.innerHTML = `
-      <input type="checkbox" ${m.done?"checked":""} />
-      <input type="text" value="${m.text||""}" placeholder="미션 내용" />
-      <button class="btn ghost" data-act="del">삭제</button>
-    `;
-    missionList.appendChild(row);
-  });
-};
-$("#btnAddMission").addEventListener("click", ()=>{
-  const d = dateInput.value, data = load(d);
-  data.missions = data.missions || [];
-  data.missions.push({text:"",done:false});
-  save(d,data);
-  renderMissions(data.missions);
-});
-missionList.addEventListener("click",(e)=>{
-  if(e.target.dataset.act==="del"){
-    const idx = $$(".mission",missionList).indexOf(e.target.closest(".mission"));
-    const d = dateInput.value, data = load(d);
-    data.missions.splice(idx,1);
-    save(d,data);
-    renderMissions(data.missions);
-  }
-});
-missionList.addEventListener("input",(e)=>{
-  const row = e.target.closest(".mission"); if(!row) return;
-  const idx = $$(".mission",missionList).indexOf(row);
-  const d = dateInput.value, data = load(d);
-  if(e.target.type==="text") data.missions[idx].text = e.target.value;
-  if(e.target.type==="checkbox") data.missions[idx].done = e.target.checked;
-});
-$("#btnSaveMission").addEventListener("click", ()=>{
-  const d = dateInput.value, data = load(d); // 이미 실시간 반영됨이지만 한번 더 저장
-  save(d,data);
-});
-$("#btnSaveHealing").addEventListener("click", ()=>{
-  const d = dateInput.value, data = load(d);
-  data.healing = $("#healing").value;
-  save(d,data);
-});
-
-/* ===================== 검색 ===================== */
-$("#btnDoSearch").addEventListener("click", ()=>{
-  const q = ($("#kw").value||"").trim();
-  const out = $("#searchResult");
-  if(!q){ out.textContent=""; return; }
-  const items = [];
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(!k.startsWith("td_")) continue;
-    const d = JSON.parse(localStorage.getItem(k)||"{}");
-    const blob = JSON.stringify(d);
-    if(blob.includes(q)) items.push(`${k.slice(3)} – 일치`);
-  }
-  out.innerHTML = items.length? items.map(x=>`• ${x}`).join("<br/>") : "결과 없음";
-});
-
-/* ===================== 로그인(로컬 표기) ===================== */
-const who = $("#who");
-const syncWho = ()=>{
-  const email = localStorage.getItem("td_user")||"로그인됨";
-  who.textContent = email;
-};
-$("#btnLogin").addEventListener("click", ()=>{
-  const email = ($("#email").value||"").trim();
-  if(email){ localStorage.setItem("td_user",email); syncWho(); toast("로그인(표시)"); }
-});
-$("#btnLogout").addEventListener("click", ()=>{
-  localStorage.removeItem("td_user"); syncWho(); toast("로그아웃(표시)");
-});
-syncWho();
-
-/* ===================== 백업/복원 ===================== */
-$("#btnExport").addEventListener("click", ()=>{
-  const dump = {};
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(k.startsWith("td_") || k==="td_user") dump[k]=localStorage.getItem(k);
-  }
-  $("#xfer").value = JSON.stringify(dump, null, 2);
-  toast("내보내기 완료");
-});
-$("#btnImport").addEventListener("click", ()=>{
-  try{
-    const obj = JSON.parse($("#xfer").value||"{}");
-    Object.entries(obj).forEach(([k,v])=> localStorage.setItem(k,v));
-    toast("가져오기 완료");
-    loadAllForDate();
-  }catch(e){ alert("JSON 형식이 올바르지 않습니다."); }
-});
-$("#btnReset").addEventListener("click", ()=>{
-  if(!confirm("로컬 데이터를 모두 삭제할까요?")) return;
-  const keepUser = localStorage.getItem("td_user");
-  Object.keys(localStorage).forEach(k=>{ if(k.startsWith("td_")) localStorage.removeItem(k); });
-  if(keepUser) localStorage.setItem("td_user",keepUser);
-  $("#xfer").value="";
-  toast("초기화 완료");
-  loadAllForDate();
-});
-</script>
+<script src="app.js"></script>
 </body>
 </html>
