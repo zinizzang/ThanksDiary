@@ -1,31 +1,115 @@
-
-/* === Minimal patch: emotional font + week chip visibility === */
-
-/* 1) Emotional font across the whole app (including inputs you type in) */
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
+/* Pastel yellow theme + emotional font */
 :root{
-  --app-font: 'Nanum Pen Script', system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, sans-serif;
+  --bg:#FFF6D5;
+  --card:#FFF2C2;
+  --ink:#3B2C1A;
+  --muted:#8A7E6E;
+  --accent:#F6C445;
+  --accent-2:#FFD76E;
+  --danger:#F28AA6;
+  --line:#ECDCA8;
+  --radius:16px;
+  --gap:12px;
 }
 
-/* Apply to everything, including inputs/textarea/buttons */
-html, body, *,
-button, input, textarea, select {
-  font-family: var(--app-font) !important;
-  letter-spacing: 0.2px;
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Gowun Dodum', 'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
 }
 
-/* Keep input readability a touch tighter than headings */
-input, textarea {
-  font-size: 1.04em;
-  line-height: 1.55;
+.app-header{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px clamp(16px, 3vw, 28px);
+  background:linear-gradient(180deg,#FFD56A 0%, #FFE595 100%);
+  position:sticky; top:0; z-index:5;
+  border-bottom:1px solid var(--line);
 }
+.brand{font-size:24px; font-weight:700}
+.star{color:#FFC400; margin-right:8px}
+.auth .pill{margin-left:8px}
 
-/* 2) Show week-chip only on Weekly, hide on Daily (no other layout change) */
-.view-daily .week-chip { display: none !important; }
-.view-weekly .week-chip { display: inline-flex !important; }
-
-/* Safeguard: make sure chips stay neat after the change */
-.chip, .week-chip {
-  align-items:center;
-  gap:.35rem;
+.tabs{
+  display:flex; gap:10px;
+  padding:12px clamp(16px, 3vw, 28px);
+  position:sticky; top:66px; z-index:4;
+  background:linear-gradient(180deg,#FFEFAF 0%, #FFF6D5 100%);
+  border-bottom:1px solid var(--line);
 }
+.tab-btn{
+  border:none; background: white; padding:10px 14px; border-radius:14px;
+  box-shadow:0 1px 0 rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.05);
+  font-size:16px; display:flex; align-items:center; gap:8px;
+}
+.tab-btn .icon{font-size:16px}
+.tab-btn.active{outline:2px solid var(--accent)}
+
+main{padding:16px clamp(16px, 3vw, 28px) 48px}
+
+.tab{display:none}
+.tab.active{display:block}
+
+.row{display:flex; align-items:center; gap:10px}
+.flex1{flex:1}
+.date-input{
+  border:none; background:#fff; padding:10px 12px; border-radius:12px;
+  box-shadow:0 1px 0 rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.05);
+  font:inherit;
+}
+.week-info{color:var(--muted); font-size:14px}
+
+.card{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:16px; margin:18px 0;
+  box-shadow:0 1px 0 rgba(0,0,0,.03), 0 3px 14px rgba(0,0,0,.05);
+}
+h2{margin:0 0 8px 0; font-size:22px; display:flex; align-items:center; gap:8px}
+h2 .hint{font-weight:400; font-size:14px; color:var(--muted)}
+.sub{margin:0 0 10px 0; color:var(--muted)}
+
+.input, .textarea{
+  width:100%; border:none; background:#fff; border-radius:12px; padding:12px 14px;
+  box-shadow:inset 0 0 0 1px var(--line), 0 1px 0 rgba(0,0,0,.02);
+  font:inherit; color:var(--ink);
+}
+.textarea{min-height:120px; resize:vertical}
+
+.btns{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
+.pill{
+  border:none; border-radius:999px; padding:10px 16px;
+  background:var(--accent); color:#412D00; font-weight:700;
+  box-shadow:0 3px 0 #E5B12A; cursor:pointer;
+}
+.pill.secondary{background:#fff; box-shadow:inset 0 0 0 1px var(--line)}
+.pill.ghost{background:#fff7dd; box-shadow:inset 0 0 0 1px var(--line)}
+.pill.danger{background:var(--danger); box-shadow:0 3px 0 #CC6C86; color:white}
+.pill.tiny{padding:6px 10px; font-size:12px}
+.pill:disabled{opacity:.5; cursor:not-allowed}
+
+.mission{display:flex; align-items:center; gap:10px; margin:8px 0}
+.mission input[type="text"]{flex:1}
+
+.results{display:grid; gap:12px}
+.result-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px}
+.result-card .title{font-weight:700; margin-bottom:6px}
+.result-card .snippet{color:var(--muted); font-size:14px}
+
+.version{margin-top:20px; color:var(--muted); font-size:12px; text-align:center}
+
+.modal{position:fixed; inset:0; display:none}
+.modal.open{display:block}
+.modal__backdrop{position:absolute; inset:0; background:rgba(0,0,0,.35);}
+.modal__panel{
+  position:relative; margin:10vh auto 0; background:#fff; width:min(520px, calc(100% - 32px));
+  border-radius:20px; padding:16px; z-index:2;
+  box-shadow:0 20px 50px rgba(0,0,0,.25);
+}
+.modal .btns.right{justify-content:flex-end}
+
+.muted{color:var(--muted)}
+.tiny{font-size:12px}

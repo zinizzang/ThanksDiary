@@ -2,169 +2,170 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>지니짱 감사일기</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>지니짱 감사일기 · v2.7.2-hotfix-modal-font-icons</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- 감성글꼴(본문) + 타이틀 -->
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="app-header">
-  <div class="star" aria-hidden="true">★</div>
-  <h1 class="title">지니짱 감사일기</h1>
-  <div class="auth">
-    <button id="btnLogin" class="pill">로그인</button>
-    <button id="btnLogout" class="pill ghost">로그아웃</button>
-  </div>
-</header>
-
-<nav class="tabs">
-  <button class="tab active" data-tab="daily"><span class="ico">📒</span><span>데일리</span></button>
-  <button class="tab" data-tab="weekly"><span class="ico">🧾</span><span>위클리</span></button>
-  <button class="tab" data-tab="search"><span class="ico">🔍</span><span>검색</span></button>
-  <button class="tab" data-tab="settings"><span class="ico">☀️</span><span>설정</span></button>
-</nav>
-
-<main>
-  <!-- DAILY -->
-  <section id="view-daily" class="view active">
-    <div class="date-bar">
-      <input id="dateInput" type="date">
-      <button id="btnToday" class="pill ghost">오늘</button>
-      <span id="weekLabel" class="week-label"></span>
+  <header class="app-header">
+    <div class="brand"><span class="star">⭐</span> 지니짱 감사일기</div>
+    <div class="auth">
+      <button id="btnLogin" class="pill">로그인</button>
+      <button id="btnLogout" class="pill secondary">로그아웃</button>
+      <span id="authStatus" class="muted"></span>
     </div>
+  </header>
 
-    <article class="card">
-      <h2>오늘의 질문</h2>
-      <p class="hint">나를 되돌아보는 한 줄 질문이에요.</p>
-      <input id="qText" class="input" placeholder="질문이 들어옵니다…">
-      <textarea id="qAnswer" class="input" rows="3" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
-      <div class="row">
-        <button id="btnRandomQ" class="pill ghost">다른 질문</button>
-        <button id="btnSaveQ" class="pill primary">저장</button>
-        <button id="btnClearQ" class="pill danger">지우기</button>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="daily"><span class="icon">📒</span> 데일리</button>
+    <button class="tab-btn" data-tab="weekly"><span class="icon">🧾</span> 위클리</button>
+    <button class="tab-btn" data-tab="search"><span class="icon">🔍</span> 검색</button>
+    <button class="tab-btn" data-tab="settings"><span class="icon">🌞</span> 설정</button>
+  </nav>
+
+  <main>
+    <!-- DAILY -->
+    <section id="tab-daily" class="tab active" aria-label="데일리">
+      <div class="row date-row">
+        <input id="dateInput" type="date" class="date-input">
+        <button id="btnToday" class="pill tiny">오늘</button>
+        <span id="weekInfo" class="week-info"></span>
       </div>
-    </article>
 
-    <article class="card">
-      <h2>감정일기</h2>
-      <p class="hint">사건·생각·감정·결과 를 간단히 남겨요.</p>
-      <textarea id="eEvent" class="input" rows="2" placeholder="사건"></textarea>
-      <textarea id="eThought" class="input" rows="2" placeholder="생각"></textarea>
-      <textarea id="eFeeling" class="input" rows="2" placeholder="감정"></textarea>
-      <textarea id="eResult" class="input" rows="2" placeholder="결과"></textarea>
-      <div class="row">
-        <button id="btnSaveEmotion" class="pill primary">저장</button>
-        <button id="btnClearEmotion" class="pill danger">지우기</button>
-      </div>
-    </article>
+      <article class="card">
+        <h2><span class="dot">•</span> 오늘의 질문</h2>
+        <p class="sub">나를 되돌아보는 한 줄 질문이에요.</p>
+        <input id="qText" class="input" placeholder="질문이 들어옵니다…">
+        <textarea id="qAnswer" class="textarea" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+        <div class="btns">
+          <button id="btnRandomQ" class="pill ghost">다른 질문</button>
+          <button id="btnQSave" class="pill">저장</button>
+          <button id="btnQClear" class="pill danger">지우기</button>
+        </div>
+      </article>
 
-    <article class="card">
-      <h2>감사일기</h2>
-      <div class="grid3">
+      <article class="card">
+        <h2><span class="dot">•</span> 감정일기 <small class="hint">사건 · 생각 · 감정 · 결과</small></h2>
+        <textarea id="eEvent" class="textarea" placeholder="오늘 무슨 일이 있었나요?"></textarea>
+        <textarea id="eThought" class="textarea" placeholder="그때 어떤 생각이 들었나요?"></textarea>
+        <textarea id="eEmotion" class="textarea" placeholder="감정을 구체적으로 적어보세요."></textarea>
+        <textarea id="eResult" class="textarea" placeholder="그 후 나는 어떻게 했나요? 무엇을 배웠나요?"></textarea>
+        <div class="btns">
+          <button id="btnEmotionSave" class="pill">저장</button>
+          <button id="btnEmotionClear" class="pill danger">지우기</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2><span class="dot">•</span> 감사일기 <small class="hint">3개</small></h2>
         <input id="g1" class="input" placeholder="감사 1">
         <input id="g2" class="input" placeholder="감사 2">
         <input id="g3" class="input" placeholder="감사 3">
-      </div>
-      <div class="row">
-        <button id="btnSaveThanks" class="pill primary">저장</button>
-        <button id="btnClearThanks" class="pill danger">지우기</button>
-      </div>
-    </article>
+        <div class="btns">
+          <button id="btnThanksSave" class="pill">저장</button>
+          <button id="btnThanksClear" class="pill danger">지우기</button>
+        </div>
+      </article>
 
-    <article class="card">
-      <h2>일상일기</h2>
-      <textarea id="dailyNote" class="input" rows="4" placeholder="하루를 가볍게 기록해요."></textarea>
-      <div class="row">
-        <button id="btnSaveDaily" class="pill primary">저장</button>
-      </div>
-    </article>
+      <article class="card">
+        <h2><span class="dot">•</span> 일상일기</h2>
+        <textarea id="dailyNote" class="textarea" placeholder="하루를 가볍게 기록해요."></textarea>
+        <div class="btns">
+          <button id="btnDailySave" class="pill">저장</button>
+          <button id="btnDailyClear" class="pill danger">지우기</button>
+        </div>
+      </article>
 
-    <article class="card">
-      <h2>태그</h2>
-      <input id="tags" class="input" placeholder="#가족 #산책 처럼 쉼표로 구분">
-      <div class="row">
-        <button id="btnSaveTags" class="pill primary">저장</button>
-      </div>
-    </article>
-  </section>
+      <article class="card">
+        <h2><span class="dot">•</span> 태그</h2>
+        <input id="tags" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분">
+        <div class="btns">
+          <button id="btnTagsSave" class="pill">저장</button>
+          <button id="btnTagsClear" class="pill danger">지우기</button>
+        </div>
+      </article>
+    </section>
 
-  <!-- WEEKLY -->
-  <section id="view-weekly" class="view">
-    <article class="card">
-      <h2>미션 (체크박스)</h2>
-      <div id="missionList" class="mission-list"></div>
-      <div class="row">
-        <input id="newMission" class="input" placeholder="미션 추가">
-        <button id="btnAddMission" class="pill primary">+ 추가</button>
+    <!-- WEEKLY -->
+    <section id="tab-weekly" class="tab" aria-label="위클리">
+      <div class="row date-row">
+        <span id="weekLabel" class="week-info"></span>
       </div>
-      <div class="row">
-        <button id="btnSaveMissions" class="pill primary">저장</button>
-        <button id="btnClearMissions" class="pill danger">지우기</button>
-      </div>
-    </article>
 
-    <article class="card">
-      <h2>힐링 문구</h2>
-      <input id="healing" class="input" placeholder="내가 선택한 힐링 문장">
-      <textarea id="copy" class="input" rows="3" placeholder="문장을 따라 적어보세요."></textarea>
-      <div class="row">
-        <button id="btnSaveHealing" class="pill primary">저장</button>
-      </div>
-    </article>
-  </section>
+      <article class="card">
+        <h2><span class="dot">•</span> 미션 (체크박스)</h2>
+        <div id="missionList" class="mission-list"></div>
+        <div class="row">
+          <input id="newMissionText" class="input flex1" placeholder="미션 추가">
+          <button id="btnAddMission" class="pill">+ 추가</button>
+        </div>
+      </article>
 
-  <!-- SEARCH -->
-  <section id="view-search" class="view">
-    <article class="card">
-      <h2>전체 내용 검색</h2>
-      <input id="searchInput" class="input" placeholder="키워드를 입력하세요">
-      <div id="searchResults" class="results"></div>
-    </article>
-  </section>
+      <article class="card">
+        <h2><span class="dot">•</span> 힐링 문구</h2>
+        <input id="healingText" class="input" placeholder="오늘 나에게 건네는 한 줄">
+        <textarea id="healingCopy" class="textarea" placeholder="필사 칸"></textarea>
+        <div class="btns">
+          <button id="btnHealingSave" class="pill">저장</button>
+        </div>
+      </article>
+    </section>
 
-  <!-- SETTINGS -->
-  <section id="view-settings" class="view">
-    <article class="card">
-      <h2>로그인 / 로그아웃</h2>
-      <p class="hint">지금은 로컬 저장 위주입니다.</p>
-      <div class="row">
-        <button id="openLogin" class="pill primary">로그인</button>
-        <button id="doLogout" class="pill ghost">로그아웃</button>
-      </div>
-    </article>
-    <article class="card">
-      <h2>백업/복원</h2>
-      <div class="row">
-        <button id="btnExport" class="pill primary">JSON 파일로 저장</button>
-        <label class="pill file">
+    <!-- SEARCH -->
+    <section id="tab-search" class="tab" aria-label="검색">
+      <article class="card">
+        <h2><span class="dot">•</span> 전체 내용 검색</h2>
+        <input id="searchInput" class="input" placeholder="키워드를 입력하세요">
+        <div id="searchResults" class="results"></div>
+      </article>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="tab-settings" class="tab" aria-label="설정">
+      <article class="card">
+        <h2><span class="dot">•</span> 로그인</h2>
+        <p class="sub">Firebase가 연결되어 있으면 이메일/비밀번호로 로그인 돼요. 아니면 로컬 저장만 됩니다.</p>
+        <button id="openLogin" class="pill">로그인</button>
+        <button id="doLogout" class="pill secondary">로그아웃</button>
+      </article>
+      <article class="card">
+        <h2><span class="dot">•</span> 백업/복원</h2>
+        <div class="row">
+          <button id="btnExport" class="pill">JSON 파일로 저장</button>
           <input id="importFile" type="file" accept="application/json">
-          JSON 가져오기
-        </label>
-      </div>
-    </article>
-    <p class="ver">v2.7.2-ui-hotfix</p>
-  </section>
-</main>
+          <button id="btnImport" class="pill">JSON 가져오기</button>
+        </div>
+      </article>
+      <footer class="version">v2.7.2-hotfix-modal-font-icons</footer>
+    </section>
+  </main>
 
-<!-- 로그인 모달 -->
-<div id="loginModal" class="modal hidden" role="dialog" aria-modal="true">
-  <div class="modal-body">
-    <h3>로그인</h3>
-    <input id="email" class="input" placeholder="이메일">
-    <input id="pw" class="input" type="password" placeholder="비밀번호">
-    <div class="row right">
-      <button id="loginCancel" class="pill ghost">닫기</button>
-      <button id="loginOk" class="pill primary">로그인</button>
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <h3 id="loginTitle">로그인</h3>
+      <input id="loginEmail" class="input" placeholder="이메일">
+      <input id="loginPassword" class="input" placeholder="비밀번호" type="password">
+      <div class="btns right">
+        <button class="pill secondary" data-close="1">닫기</button>
+        <button id="doLogin" class="pill">로그인</button>
+      </div>
+      <p class="muted tiny">지금은 로컬 저장만 사용해도 돼요 😊</p>
     </div>
   </div>
-</div>
 
-<div id="toast" class="toast">저장 완료!</div>
+  <template id="missionItemTpl">
+    <label class="mission">
+      <input type="checkbox" class="mission-check">
+      <input type="text" class="mission-text" placeholder="미션">
+      <button class="pill tiny danger mission-del">삭제</button>
+    </label>
+  </template>
 
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
