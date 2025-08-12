@@ -2,149 +2,166 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>지니짱 감사일기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="app-header">
-    <div class="star">⭐</div>
+<header class="topbar">
+  <div class="brand">
+    <span class="star">★</span>
     <h1>지니짱 감사일기</h1>
-    <div class="auth-buttons">
-      <button id="loginBtn" class="chip">로그인</button>
-      <button id="logoutBtn" class="chip secondary" style="display:none">로그아웃</button>
+  </div>
+  <div class="auth">
+    <button id="btnLogin" class="pill">로그인</button>
+    <button id="btnLogout" class="pill secondary">로그아웃</button>
+  </div>
+</header>
+
+<nav class="nav-buttons">
+  <button class="menu active" data-page="daily"><span class="icon">📁</span> 데일리</button>
+  <button class="menu" data-page="weekly"><span class="icon">🧾</span> 위클리</button>
+  <button class="menu" data-page="search"><span class="icon">🔍</span> 검색</button>
+  <button class="menu" data-page="settings"><span class="icon">🌞</span> 설정</button>
+</nav>
+
+<main class="main">
+
+  <!-- Daily Page -->
+  <section id="page-daily" class="page visible">
+    <div class="row date-row">
+      <input type="date" id="dailyDate" class="date-input">
+      <button id="btnToday" class="pill small">오늘</button>
+      <span id="dailyWeek" class="week-badge"></span>
     </div>
-  </header>
 
-  <nav class="tabs">
-    <button class="tab-btn active" data-tab="daily"><span>📔</span> 데일리</button>
-    <button class="tab-btn" data-tab="weekly"><span>🧾</span> 위클리</button>
-    <button class="tab-btn" data-tab="search"><span>🔎</span> 검색</button>
-    <button class="tab-btn" data-tab="settings"><span>🌞</span> 설정</button>
-  </nav>
-
-  <main>
-    <!-- DAILY -->
-    <section id="daily" class="tab active">
-      <div class="date-row">
-        <input id="dateInput" type="date" />
-        <button id="todayBtn" class="chip">오늘</button>
-        <div id="weekBadge" class="chip ghost"></div>
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 오늘의 질문</div>
+      <p class="hint">나를 되돌아보는 한 줄 질문이에요.</p>
+      <input id="dailyQuestion" class="text-input" placeholder="질문이 들어옵니다..." />
+      <textarea id="dailyAnswer" class="multiline" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+      <div class="btns">
+        <button id="btnNewQ" class="pill ghost">다른 질문</button>
+        <button id="btnSaveDailyQ" class="pill accent">저장</button>
+        <button id="btnClearDailyQ" class="pill danger">지우기</button>
       </div>
+    </div>
 
-      <article class="card">
-        <div class="card-title">
-          <span class="dot yellow"></span>
-          <h2>오늘의 질문</h2>
-        </div>
-        <p class="hint">나를 되돌아보는 한 줄 질문이에요.</p>
-        <input id="qText" class="input" placeholder="질문이 들어옵니다…" readonly />
-        <textarea id="qAnswer" class="textarea" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
-        <div class="btn-row">
-          <button id="newQBtn" class="chip ghost">다른 질문</button>
-          <button id="saveQBtn" class="chip primary">저장</button>
-          <button id="clearQBtn" class="chip danger">지우기</button>
-        </div>
-      </article>
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 감정일기 (사건·생각·감정·결과)</div>
+      <textarea id="evEvent" class="multiline" placeholder="사건"></textarea>
+      <textarea id="evThought" class="multiline" placeholder="생각"></textarea>
+      <textarea id="evFeeling" class="multiline" placeholder="감정"></textarea>
+      <textarea id="evResult" class="multiline" placeholder="결과"></textarea>
+    </div>
 
-      <article class="card">
-        <div class="card-title">
-          <span class="dot purple"></span>
-          <h2>감정일기 (사건·생각·감정·결과)</h2>
-        </div>
-        <textarea id="evt" class="textarea" placeholder="사건"></textarea>
-        <textarea id="thought" class="textarea" placeholder="생각"></textarea>
-        <textarea id="feel" class="textarea" placeholder="감정"></textarea>
-        <textarea id="result" class="textarea" placeholder="결과"></textarea>
-        <div class="btn-row">
-          <button id="saveEmotionBtn" class="chip primary">저장</button>
-          <button id="clearEmotionBtn" class="chip danger">지우기</button>
-        </div>
-      </article>
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 감사일기</div>
+      <input id="th1" class="text-input" placeholder="감사 1" />
+      <input id="th2" class="text-input" placeholder="감사 2" />
+      <input id="th3" class="text-input" placeholder="감사 3" />
+    </div>
 
-      <article class="card">
-        <div class="card-title">
-          <span class="dot orange"></span>
-          <h2>감사일기 (3개)</h2>
-        </div>
-        <input id="g1" class="input" placeholder="감사 1" />
-        <input id="g2" class="input" placeholder="감사 2" />
-        <input id="g3" class="input" placeholder="감사 3" />
-        <div class="btn-row">
-          <button id="saveThanksBtn" class="chip primary">저장</button>
-          <button id="clearThanksBtn" class="chip danger">지우기</button>
-        </div>
-      </article>
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 일상일기</div>
+      <textarea id="dailyNote" class="multiline" placeholder="오늘의 하루"></textarea>
+    </div>
 
-      <article class="card">
-        <div class="card-title">
-          <span class="dot green"></span>
-          <h2>일상일기</h2>
-        </div>
-        <textarea id="dailyNote" class="textarea" placeholder="하루를 가볍게 기록해요."></textarea>
-        <input id="tags" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분" />
-        <div class="btn-row">
-          <button id="saveDailyBtn" class="chip primary">저장</button>
-          <button id="clearDailyBtn" class="chip danger">지우기</button>
-        </div>
-      </article>
-    </section>
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 태그</div>
+      <input id="tags" class="text-input" placeholder="#가족, #산책 처럼 쉼표로 구분" />
+    </div>
 
-    <!-- WEEKLY -->
-    <section id="weekly" class="tab">
-      <div class="date-row">
-        <div id="weekLabel" class="chip ghost"></div>
-        <button id="addMissionBtn" class="chip">+ 미션 추가</button>
+    <div class="btns stick">
+      <button id="btnSaveDailyAll" class="pill accent big">데일리 전체 저장</button>
+    </div>
+  </section>
+
+  <!-- Weekly Page -->
+  <section id="page-weekly" class="page">
+    <div class="row date-row">
+      <input type="week" id="weekPicker" class="date-input">
+      <span id="weeklyWeek" class="week-badge"></span>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 미션 (체크박스)</div>
+      <div id="missions"></div>
+      <div class="row">
+        <input id="missionText" class="text-input" placeholder="미션 추가">
+        <button id="btnAddMission" class="pill small">+ 추가</button>
       </div>
-      <article class="card">
-        <div class="card-title">
-          <span class="dot green"></span><h2>미션 (체크박스)</h2>
-        </div>
-        <ul id="missionList" class="mission-list"></ul>
-      </article>
+    </div>
 
-      <article class="card">
-        <div class="card-title">
-          <span class="dot yellow"></span><h2>힐링 문구</h2>
-        </div>
-        <input id="healingText" class="input" placeholder="이번 주 나를 위한 한 줄" />
-        <textarea id="healingCopy" class="textarea" placeholder="필사 칸"></textarea>
-        <div class="btn-row">
-          <button id="saveWeeklyBtn" class="chip primary">저장</button>
-          <button id="clearWeeklyBtn" class="chip danger">지우기</button>
-        </div>
-      </article>
-    </section>
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 힐링 문구</div>
+      <input id="healing" class="text-input" placeholder="한 줄 힐링 문구">
+      <textarea id="copy" class="multiline" placeholder="필사해보기"></textarea>
+      <div class="btns">
+        <button id="btnRandomHealing" class="pill ghost">랜덤</button>
+      </div>
+    </div>
 
-    <!-- SEARCH -->
-    <section id="search" class="tab">
-      <article class="card">
-        <div class="card-title"><span class="dot purple"></span><h2>전체 내용 검색</h2></div>
-        <input id="searchInput" class="input" placeholder="키워드를 입력하세요" />
-        <button id="searchBtn" class="chip primary">검색</button>
-        <div id="searchResults" class="results"></div>
-      </article>
-    </section>
+    <div class="btns stick">
+      <button id="btnSaveWeekly" class="pill accent big">위클리 저장</button>
+    </div>
+  </section>
 
-    <!-- SETTINGS -->
-    <section id="settings" class="tab">
-      <article class="card">
-        <div class="card-title"><span class="dot orange"></span><h2>로그인</h2></div>
-        <input id="email" class="input" placeholder="이메일" />
-        <input id="password" class="input" placeholder="비밀번호" type="password" />
-        <div class="btn-row">
-          <button id="doLogin" class="chip primary">로그인</button>
-          <button id="doSignup" class="chip">회원가입</button>
-          <button id="doLogout" class="chip danger">로그아웃</button>
-        </div>
-        <p class="hint">※ 로그인 시 클라우드 동기화, 미설정 시 로컬 저장</p>
-      </article>
-    </section>
-  </main>
+  <!-- Search Page -->
+  <section id="page-search" class="page">
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 전체 내용 검색</div>
+      <input id="searchInput" class="text-input" placeholder="키워드 입력">
+      <button id="btnSearch" class="pill small">검색</button>
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </section>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <!-- Settings Page -->
+  <section id="page-settings" class="page">
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 로그인</div>
+      <div class="row">
+        <input id="email" class="text-input" placeholder="이메일">
+        <input id="password" class="text-input" type="password" placeholder="비밀번호">
+      </div>
+      <div class="btns">
+        <button id="doLogin" class="pill accent">로그인</button>
+        <button id="doSignup" class="pill">회원가입</button>
+        <button id="doLogout" class="pill secondary">로그아웃</button>
+      </div>
+      <p class="muted">※ Firebase 설정 시 클라우드 동기화됩니다. (미설정 시 로컬 저장)</p>
+    </div>
 
-  <script type="module" src="app.js"></script>
+    <div class="section-card">
+      <div class="section-title"><span class="dot"></span> 백업/복원</div>
+      <div class="btns">
+        <button id="btnExport" class="pill">JSON 파일로 저장</button>
+        <input type="file" id="importFile" accept="application/json">
+        <button id="btnImport" class="pill">JSON 가져오기</button>
+      </div>
+      <div class="btns">
+        <button id="btnClear" class="pill danger">로컬 데이터 초기화</button>
+        <button id="btnRefresh" class="pill ghost">캐시 새로고침(업데이트)</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">v2.7.2 • Gowun Dodum</footer>
+
+<!-- Toast -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+
+<script src="app.js"></script>
 </body>
 </html>

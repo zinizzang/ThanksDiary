@@ -1,8 +1,4 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-// --- Firebase (user-provided config) ---
+// Firebase config from user
 const firebaseConfig = {
   apiKey: "AIzaSyAOqrdA0aHL5lMXOOmdtj8mnLi6zgSXoiM",
   authDomain: "thanksdiary-dca35.firebaseapp.com",
@@ -12,198 +8,327 @@ const firebaseConfig = {
   appId: "1:250477396044:web:aa1cf155f01263e08834e9",
   measurementId: "G-J0Z03LHYYC"
 };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
 
-// --- UI helpers ---
-const $ = sel => document.querySelector(sel);
-const $$ = sel => document.querySelectorAll(sel);
-function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1500); }
+let app=null, auth=null, db=null, currentUser=null;
 
-// --- Tabs ---
-$$('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  $$('.tab-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const id = btn.dataset.tab;
-  $$('.tab').forEach(sec=>sec.classList.remove('active'));
-  $("#"+id).classList.add('active');
-}));
-
-// --- Date helpers ---
-function toDateStr(d){ return d.toISOString().slice(0,10); }
-function getWeekStr(d){
-  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = dt.getUTCDay() || 7; // ISO week
-  dt.setUTCDate(dt.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(dt.getUTCFullYear(),0,1));
-  const weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1)/7);
-  return `${dt.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
+// safe init
+try{
+  app = firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db   = firebase.firestore();
+}catch(e){
+  console.warn('Firebase init issue -> local only mode', e);
 }
 
-const dateInput = $("#dateInput");
+// Toast helper
+const toast = (msg)=>{
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 1600);
+};
+
+// Navigation
+const pages = ['daily','weekly','search','settings'];
+document.querySelectorAll('.nav-buttons .menu').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const pg = btn.dataset.page;
+    document.querySelectorAll('.nav-buttons .menu').forEach(b=>b.classList.toggle('active', b===btn));
+    pages.forEach(p=>document.getElementById('page-'+p).classList.toggle('visible', p===pg));
+    if(pg==='weekly'){ updateWeekBadge(); }
+  });
+});
+
+// Dates
+const dailyDate = document.getElementById('dailyDate');
 const today = new Date();
-dateInput.value = toDateStr(today);
-$("#todayBtn").onclick = ()=>{ dateInput.value = toDateStr(new Date()); loadForDate(); };
-$("#weekBadge").textContent = getWeekStr(new Date(dateInput.value));
-dateInput.addEventListener('change',()=>{
-  $("#weekBadge").textContent = getWeekStr(new Date(dateInput.value));
-  loadForDate();
+dailyDate.valueAsDate = today;
+document.getElementById('btnToday').addEventListener('click', ()=>{
+  dailyDate.valueAsDate = new Date();
+  updateDailyWeek();
+  loadDaily();
 });
-$("#weekLabel").textContent = getWeekStr(new Date());
+function yyyy_mm_dd(d){
+  const z = (n)=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
+}
+function getISOWeek(d){
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+  return date.getUTCFullYear() + '-W' + String(weekNo).padStart(2,'0');
+}
+function updateDailyWeek(){
+  const span = document.getElementById('dailyWeek');
+  const d = dailyDate.valueAsDate || new Date();
+  span.textContent = getISOWeek(d);
+}
+updateDailyWeek();
 
-// --- Questions (simple unique rotation) ---
-const QUESTIONS = [
-  "지금의 나에게 꼭 필요한 한 마디는?","오늘 나를 미소 짓게 한 순간은?","요즘 가장 에너지를 주는 일은 무엇?",
-  "올해 꼭 해보고 싶은 작은 도전은?","요즘 내가 배우고 있는 것은?","지금 감사한 사람 한 명은 누구?",
-  "내가 진짜 원하는 삶의 분위기는?","오늘 배운 교훈 한 가지는?","내가 지키고 싶은 나만의 규칙은?",
-  "요즘 나를 힘나게 하는 음악/문장은?","오늘 내 마음이 말하는 필요는?","미루고 있는 일, 왜 미루고 있을까?",
-  "오늘의 나에게 칭찬 한 마디를 한다면?","나를 설명하는 단어 세 가지는?","최근의 작은 성장 하나는?"
+// Weekly picker default to current week
+const weekPicker = document.getElementById('weekPicker');
+weekPicker.value = getISOWeek(new Date());
+function updateWeekBadge(){
+  document.getElementById('weeklyWeek').textContent = weekPicker.value;
+}
+updateWeekBadge();
+
+// Daily Questions (non-repeating)
+const dailyQuestions = [
+  "지금의 나에게 꼭 필요한 한 마디는?", "오늘 나를 미소 짓게 한 순간은?",
+  "내가 지키고 싶은 작은 약속 하나는?", "요즘 내가 배우는 가장 큰 교훈은?",
+  "오늘 스스로에게 칭찬해주고 싶은 점은?", "최근 보였던 용기는 무엇이었나?",
+  "내가 진짜 원하는 삶의 분위기는?", "오늘의 작은 성취는 무엇이었나?",
+  "내 마음이 편안했던 순간은 언제였나?", "이번 주에 줄이고 싶은 습관은?"
 ];
-function pickQuestion(dateStr){
-  // Pick deterministically by date index to avoid duplicates day-to-day scrolling
-  const idx = (new Date(dateStr).getTime()/86400000)|0;
-  return QUESTIONS[idx % QUESTIONS.length];
+function pickDailyQuestion(){
+  const key='lastQuestionIndex';
+  const used = Number(localStorage.getItem(key) || '-1');
+  const next = (used + 1) % dailyQuestions.length;
+  localStorage.setItem(key, String(next));
+  return dailyQuestions[next];
+}
+const qInput = document.getElementById('dailyQuestion');
+qInput.value = pickDailyQuestion();
+document.getElementById('btnNewQ').addEventListener('click', ()=> qInput.value = pickDailyQuestion());
+
+// Auth buttons on header & settings
+const loginHeader  = document.getElementById('btnLogin');
+const logoutHeader = document.getElementById('btnLogout');
+const doLogin = document.getElementById('doLogin');
+const doLogout = document.getElementById('doLogout');
+const doSignup = document.getElementById('doSignup');
+
+function uiAuthUpdate(user){
+  currentUser = user || null;
+  if(currentUser){ toast('로그인됨'); }
+  else { toast('로그아웃됨'); }
 }
 
-// --- Auth ---
-const loginBtn = $("#loginBtn");
-const logoutBtn = $("#logoutBtn");
-const doLogin = $("#doLogin");
-const doSignup = $("#doSignup");
-const doLogout = $("#doLogout");
+if(auth){
+  auth.onAuthStateChanged(uiAuthUpdate);
+  const emailEl = document.getElementById('email');
+  const pwEl = document.getElementById('password');
+  const tryLogin = ()=>{
+    const email=emailEl.value.trim(), pw=pwEl.value;
+    auth.signInWithEmailAndPassword(email,pw).catch(err=>toast(err.message));
+  };
+  const trySignup = ()=>{
+    const email=emailEl.value.trim(), pw=pwEl.value;
+    auth.createUserWithEmailAndPassword(email,pw).catch(err=>toast(err.message));
+  };
+  (doLogin||{}).onclick = tryLogin;
+  (doSignup||{}).onclick = trySignup;
+  (doLogout||{}).onclick = ()=>auth.signOut();
+  (loginHeader||{}).onclick = ()=>document.querySelector('[data-page="settings"]').click();
+  (logoutHeader||{}).onclick = ()=>auth.signOut();
+}
 
-doLogin.onclick = async ()=>{
-  try{
-    const email = $("#email").value.trim();
-    const pass  = $("#password").value.trim();
-    await signInWithEmailAndPassword(auth,email,pass);
-    toast("로그인 성공");
-  }catch(e){ toast("로그인 실패: "+e.message); }
-};
-doSignup.onclick = async ()=>{
-  try{
-    const email = $("#email").value.trim();
-    const pass  = $("#password").value.trim();
-    await createUserWithEmailAndPassword(auth,email,pass);
-    toast("회원가입 완료, 로그인됨");
-  }catch(e){ toast("회원가입 실패: "+e.message); }
-};
-doLogout.onclick = async ()=>{ await signOut(auth); toast("로그아웃"); };
-
-onAuthStateChanged(auth,(user)=>{
-  if(user){ $("#logoutBtn").style.display="inline-block"; $("#loginBtn").style.display="none"; $("#weekLabel").textContent=getWeekStr(new Date()); loadForDate(); }
-  else { $("#logoutBtn").style.display="none"; $("#loginBtn").style.display="inline-block"; }
-});
-
-// --- Firestore paths ---
-function userPath(){ return auth.currentUser ? `users/${auth.currentUser.uid}` : null; }
-
-async function loadForDate(){
-  const d = dateInput.value;
-  $("#qText").value = pickQuestion(d);
-  $("#qAnswer").value = "";
-  $("#evt").value = $("#thought").value = $("#feel").value = $("#result").value = "";
-  $("#g1").value = $("#g2").value = $("#g3").value = "";
-  $("#dailyNote").value = ""; $("#tags").value = "";
-  const base = userPath();
-  if(!base) return; // local-only view reset
-  const snap = await getDoc(doc(db, `${base}/daily/${d}`));
-  if(snap.exists()){
-    const v = snap.data();
-    $("#qText").value = v.qText || $("#qText").value;
-    $("#qAnswer").value = v.qAnswer || "";
-    $("#evt").value = v.evt||""; $("#thought").value=v.thought||""; $("#feel").value=v.feel||""; $("#result").value=v.result||"";
-    $("#g1").value=v.g1||""; $("#g2").value=v.g2||""; $("#g3").value=v.g3||"";
-    $("#dailyNote").value=v.dailyNote||""; $("#tags").value=v.tags||"";
+// Firestore helpers
+function userPath(){ return `users/${currentUser.uid}`; }
+async function saveDaily(){
+  const d = dailyDate.valueAsDate || new Date();
+  const docId = yyyy_mm_dd(d);
+  const data = {
+    date: docId,
+    question: qInput.value,
+    answer: document.getElementById('dailyAnswer').value,
+    emotion: {
+      event:   document.getElementById('evEvent').value,
+      thought: document.getElementById('evThought').value,
+      feeling: document.getElementById('evFeeling').value,
+      result:  document.getElementById('evResult').value
+    },
+    thanks: [document.getElementById('th1').value,document.getElementById('th2').value,document.getElementById('th3').value],
+    note: document.getElementById('dailyNote').value,
+    tags: document.getElementById('tags').value
+  };
+  if(db && currentUser){
+    await db.doc(`${userPath()}/daily/${docId}`).set(data,{merge:true});
+    toast('클라우드 저장 완료');
+  }else{
+    localStorage.setItem('daily:'+docId, JSON.stringify(data));
+    toast('로컬 저장 완료');
   }
 }
 
-// --- Save handlers (Daily) ---
-$("#newQBtn").onclick = ()=>{ $("#qText").value = pickQuestion(dateInput.value + Math.random()); };
-$("#clearQBtn").onclick = ()=>{ $("#qAnswer").value=""; };
-$("#saveQBtn").onclick = async ()=>{ await saveDaily({ qText:$("#qText").value, qAnswer:$("#qAnswer").value }); };
-
-$("#saveEmotionBtn").onclick = async ()=>{ await saveDaily({ evt:$("#evt").value, thought:$("#thought").value, feel:$("#feel").value, result:$("#result").value }); };
-$("#clearEmotionBtn").onclick = ()=>{ $("#evt").value=$("#thought").value=$("#feel").value=$("#result").value=""; };
-
-$("#saveThanksBtn").onclick = async ()=>{ await saveDaily({ g1:$("#g1").value,g2:$("#g2").value,g3:$("#g3").value }); };
-$("#clearThanksBtn").onclick = ()=>{ $("#g1").value=$("#g2").value=$("#g3").value=""; };
-
-$("#saveDailyBtn").onclick = async ()=>{ await saveDaily({ dailyNote:$("#dailyNote").value, tags:$("#tags").value }); };
-$("#clearDailyBtn").onclick = ()=>{ $("#dailyNote").value=""; $("#tags").value=""; };
-
-async function saveDaily(patch){
-  const base=userPath();
-  if(!base){ toast("로그인 필요 (로컬 미제공)"); return; }
-  const d=dateInput.value;
-  const ref=doc(db, `${base}/daily/${d}`);
-  const snap=await getDoc(ref);
-  if(snap.exists()) await updateDoc(ref, patch);
-  else await setDoc(ref, {date:d, ...patch});
-  toast("저장 완료");
+async function loadDaily(){
+  const d = dailyDate.valueAsDate || new Date();
+  const docId = yyyy_mm_dd(d);
+  let data=null;
+  if(db && currentUser){
+    const snap = await db.doc(`${userPath()}/daily/${docId}`).get();
+    data = snap.exists ? snap.data() : null;
+  }else{
+    const raw = localStorage.getItem('daily:'+docId);
+    data = raw ? JSON.parse(raw) : null;
+  }
+  if(!data){ 
+    // clear fields
+    document.getElementById('dailyAnswer').value='';
+    document.getElementById('evEvent').value='';
+    document.getElementById('evThought').value='';
+    document.getElementById('evFeeling').value='';
+    document.getElementById('evResult').value='';
+    document.getElementById('th1').value='';
+    document.getElementById('th2').value='';
+    document.getElementById('th3').value='';
+    document.getElementById('dailyNote').value='';
+    document.getElementById('tags').value='';
+    return;
+  }
+  qInput.value = data.question || qInput.value;
+  document.getElementById('dailyAnswer').value = data.answer || '';
+  document.getElementById('evEvent').value   = data.emotion?.event || '';
+  document.getElementById('evThought').value = data.emotion?.thought || '';
+  document.getElementById('evFeeling').value = data.emotion?.feeling || '';
+  document.getElementById('evResult').value  = data.emotion?.result || '';
+  document.getElementById('th1').value = data.thanks?.[0] || '';
+  document.getElementById('th2').value = data.thanks?.[1] || '';
+  document.getElementById('th3').value = data.thanks?.[2] || '';
+  document.getElementById('dailyNote').value = data.note || '';
+  document.getElementById('tags').value = data.tags || '';
 }
+dailyDate.addEventListener('change', ()=>{ updateDailyWeek(); loadDaily(); });
+document.getElementById('btnSaveDailyQ').onclick = saveDaily;
+document.getElementById('btnClearDailyQ').onclick = ()=>{ document.getElementById('dailyAnswer').value=''; };
+document.getElementById('btnSaveDailyAll').onclick = saveDaily;
 
-// --- Weekly ---
-const missionList = $("#missionList");
-$("#addMissionBtn").onclick = ()=>{
-  const id = crypto.randomUUID();
-  const li = document.createElement('li');
-  li.innerHTML = \`<input type="checkbox" id="\${id}"><input class="input" placeholder="미션 내용">\`;
-  missionList.prepend(li);
+// Weekly
+function missionItem(text, done=false, i=null){
+  const div = document.createElement('div');
+  div.className='row';
+  const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=done; cb.className='mission-cb';
+  const inp= document.createElement('input'); inp.value=text||''; inp.className='text-input mission-text';
+  if(i!==null){ div.dataset.index=i; }
+  div.appendChild(cb); div.appendChild(inp);
+  return div;
+}
+document.getElementById('btnAddMission').onclick = ()=>{
+  document.getElementById('missions').appendChild(missionItem('',false));
 };
-
-$("#saveWeeklyBtn").onclick = async ()=>{
-  const base=userPath(); if(!base){ toast("로그인 필요"); return; }
-  const week = getWeekStr(new Date(dateInput.value));
-  const items=[...missionList.querySelectorAll('li')].map(li=>({done:li.querySelector('input[type=checkbox]').checked,text:li.querySelector('.input').value}));
-  const data={ missions:items, healing:$("#healingText").value, copy:$("#healingCopy").value };
-  await setDoc(doc(db, `${base}/weekly/${week}`), data, {merge:true});
-  toast("주간 저장 완료");
-  $("#weekLabel").textContent = week;
+document.getElementById('btnRandomHealing').onclick = ()=>{
+  const arr = [
+    "작은 실천이 큰 변화를 만든다.", "오늘의 나는 어제의 나를 이긴다.",
+    "충분히 잘하고 있어.", "천천히, 그러나 꾸준히."
+  ];
+  document.getElementById('healing').value = arr[Math.floor(Math.random()*arr.length)];
 };
-$("#clearWeeklyBtn").onclick = ()=>{ missionList.innerHTML=""; $("#healingText").value=$("#healingCopy").value=""; };
+async function saveWeekly(){
+  const id = weekPicker.value; // e.g. 2025-W33
+  const missionEls = Array.from(document.querySelectorAll('#missions .row'));
+  const missions = missionEls.map(row=>({done: row.querySelector('.mission-cb').checked, text: row.querySelector('.mission-text').value}));
+  const data = {
+    week: id,
+    missions,
+    healing: document.getElementById('healing').value,
+    copy: document.getElementById('copy').value
+  };
+  if(db && currentUser){
+    await db.doc(`${userPath()}/weekly/${id}`).set(data,{merge:true});
+    toast('주간 저장 완료');
+  }else{
+    localStorage.setItem('weekly:'+id, JSON.stringify(data));
+    toast('주간 로컬 저장 완료');
+  }
+}
+document.getElementById('btnSaveWeekly').onclick = saveWeekly;
 
+// Load weekly when week changes
 async function loadWeekly(){
-  const base=userPath(); if(!base) return;
-  const week = getWeekStr(new Date(dateInput.value));
-  const snap = await getDoc(doc(db, `${base}/weekly/${week}`));
-  missionList.innerHTML="";
-  if(snap.exists()){
-    const v=snap.data();
-    for(const m of (v.missions||[])){
-      const id=crypto.randomUUID();
-      const li=document.createElement('li');
-      li.innerHTML=\`<input type="checkbox" \${m.done?'checked':''}><input class="input" value="\${m.text||''}">\`;
-      missionList.appendChild(li);
-    }
-    $("#healingText").value=v.healing||""; $("#healingCopy").value=v.copy||"";
+  const id = weekPicker.value;
+  let data=null;
+  if(db && currentUser){
+    const snap = await db.doc(`${userPath()}/weekly/${id}`).get();
+    data = snap.exists ? snap.data() : null;
+  }else{
+    const raw = localStorage.getItem('weekly:'+id);
+    data = raw ? JSON.parse(raw) : null;
   }
-  $("#weekLabel").textContent = week;
+  document.getElementById('missions').innerHTML='';
+  if(data){
+    (data.missions||[]).forEach((m,i)=>{
+      document.getElementById('missions').appendChild(missionItem(m.text,m.done,i));
+    });
+    document.getElementById('healing').value = data.healing||'';
+    document.getElementById('copy').value = data.copy||'';
+  }
+  updateWeekBadge();
 }
-dateInput.addEventListener('change',loadWeekly);
+weekPicker.addEventListener('change', loadWeekly);
+loadWeekly();
 
-// --- Search ---
-$("#searchBtn").onclick = async ()=>{
-  const base=userPath(); if(!base){ toast("로그인 필요"); return; }
-  const k = $("#searchInput").value.trim(); if(!k) return;
-  const results = $("#searchResults"); results.innerHTML="";
-  // Pull daily docs and weekly docs; basic contains search
-  const dCol = collection(db, `${base}/daily`);
-  const wCol = collection(db, `${base}/weekly`);
-  const dSnap = await getDocs(dCol);
-  const wSnap = await getDocs(wCol);
-  const arr=[];
-  dSnap.forEach(docu=>{ const v=docu.data(); const text=JSON.stringify(v); if(text.includes(k)) arr.push({title:docu.id, text}); });
-  wSnap.forEach(docu=>{ const v=docu.data(); const text=JSON.stringify(v); if(text.includes(k)) arr.push({title:docu.id, text}); });
-  if(!arr.length){ results.textContent="검색 결과 없음"; return; }
-  for(const r of arr){
-    const div=document.createElement('div'); div.className='result';
-    div.innerHTML = \`<b>\${r.title}</b><pre style="white-space:pre-wrap">\${r.text}</pre>\`;
-    results.appendChild(div);
+// Search (simple client filter of recent)
+document.getElementById('btnSearch').onclick = async ()=>{
+  const kw = (document.getElementById('searchInput').value||'').trim();
+  const box = document.getElementById('searchResults'); box.innerHTML='';
+  if(!kw){ return; }
+  let results=[];
+  if(db && currentUser){
+    // fetch last 90 days daily
+    const ref = db.collection(`${userPath()}/daily`).orderBy('date','desc').limit(200);
+    const snaps = await ref.get();
+    snaps.forEach(doc=>{
+      const v=doc.data(); const blob=JSON.stringify(v);
+      if(blob.includes(kw)){
+        results.push({id:doc.id,type:'daily',data:v});
+      }
+    });
+    const wref = db.collection(`${userPath()}/weekly`).orderBy('week','desc').limit(60);
+    const ws = await wref.get();
+    ws.forEach(doc=>{
+      const v=doc.data(); const blob=JSON.stringify(v);
+      if(blob.includes(kw)) results.push({id:doc.id,type:'weekly',data:v});
+    });
+  }else{
+    // local
+    Object.keys(localStorage).forEach(k=>{
+      if(k.startsWith('daily:')||k.startsWith('weekly:')){
+        const v = JSON.parse(localStorage.getItem(k));
+        if(JSON.stringify(v).includes(kw)){
+          results.push({id:k,type:k.split(':')[0],data:v});
+        }
+      }
+    });
   }
+  if(results.length===0){ box.innerHTML='<div class="muted">검색 결과가 없어요.</div>'; return; }
+  results.slice(0,50).forEach(r=>{
+    const div=document.createElement('div'); div.className='result-card';
+    div.textContent = `[${r.type}] ${r.id} - ` + (r.data.question || r.data.healing || r.data.note || '');
+    box.appendChild(div);
+  });
 };
 
-// initial
-loadForDate();
-loadWeekly();
+// Backup/restore
+document.getElementById('btnExport').onclick = ()=>{
+  const dump = {};
+  Object.keys(localStorage).forEach(k=>{
+    if(k.startsWith('daily:')||k.startsWith('weekly:')) dump[k]=localStorage.getItem(k);
+  });
+  const blob = new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='thanks-diary-backup.json'; a.click();
+};
+document.getElementById('btnImport').onclick = ()=>{
+  const f = document.getElementById('importFile').files[0];
+  if(!f) return;
+  const fr=new FileReader();
+  fr.onload=()=>{
+    const json = JSON.parse(fr.result);
+    Object.entries(json).forEach(([k,v])=>localStorage.setItem(k,v));
+    toast('가져오기 완료');
+  };
+  fr.readAsText(f);
+};
+document.getElementById('btnClear').onclick = ()=>{
+  Object.keys(localStorage).forEach(k=>{
+    if(k.startsWith('daily:')||k.startsWith('weekly:')) localStorage.removeItem(k);
+  });
+  toast('로컬 데이터 삭제');
+};
+document.getElementById('btnRefresh').onclick = ()=>location.reload(true);
+
+// initial load
+loadDaily();
