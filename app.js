@@ -1,204 +1,152 @@
+// Simple state by date/week in localStorage
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const todayStr = () => new Date().toISOString().slice(0,10);
+const weekOf = (d)=>{
+  const dt = new Date(d);
+  const first = new Date(dt.getFullYear(),0,1);
+  const day = Math.round(((dt - first)/86400000 + first.getDay()+6)/7);
+  return `${dt.getFullYear()}-W${String(day).padStart(2,'0')}`;
+};
+const key = (scope, id) => `td:${scope}:${id}`;
 
-// Basic state + helpers
-const $ = (s, el=document)=>el.querySelector(s);
-const $$ = (s, el=document)=>[...el.querySelectorAll(s)];
-const toast = (msg)=>{ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1400); };
+const toast = (msg='저장 완료!') => {
+  const t = $("#toast"); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1300);
+};
 
 // Tabs
-$$('.tab').forEach(b=>b.addEventListener('click', e=>{
-  $$('.tab').forEach(x=>x.classList.remove('active'));
-  e.currentTarget.classList.add('active');
-  const name = e.currentTarget.dataset.tab;
-  $$('.tabpage').forEach(p=>p.classList.remove('active'));
-  $('#tab-'+name).classList.add('active');
+$$('.tab').forEach(btn=>btn.addEventListener('click', e=>{
+  $$('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const id = btn.dataset.tab;
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $(`#view-${id}`).classList.add('active');
 }));
 
-// Date + week
+// Date
 const dateInput = $('#dateInput');
-const weekBadge = $('#weekBadge');
-function toDateStr(d){ return d.toISOString().slice(0,10); }
-function calcWeek(d){
-  // ISO week
-  const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = (tmp.getUTCDay() || 7);
-  tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(),0,1));
-  const weekNo = Math.ceil((((tmp - yearStart) / 86400000) + 1)/7);
-  return `${tmp.getUTCFullYear()} ${weekNo}주`;
-}
-function setToday(){
-  const now = new Date();
-  dateInput.value = toDateStr(now);
-  weekBadge.textContent = calcWeek(now);
-}
-$('#btnToday').addEventListener('click', setToday);
-dateInput.addEventListener('change', e=>{
-  const d = new Date(e.target.value); weekBadge.textContent = calcWeek(d);
-});
-setToday();
+dateInput.value = todayStr();
+$('#btnToday').onclick = () => { dateInput.value = todayStr(); renderDaily(); };
 
-// Random questions (sample)
-const questions = [
-  "지금의 나에게 꼭 필요한 한 마디는?",
-  "오늘 나를 미소짓게 한 순간은?",
-  "사람들에게 어떤 사람으로 기억되고 싶나요?",
-  "올해 꼭 해보고 싶은 작은 도전은?"
+function renderDaily(){
+  const d = dateInput.value;
+  $('#weekLabel').textContent = weekOf(d);
+  // load daily data
+  const q = JSON.parse(localStorage.getItem(key('q', d)) || '{}');
+  $('#qText').value = q.text || '';
+  $('#qAnswer').value = q.answer || '';
+
+  const e = JSON.parse(localStorage.getItem(key('e', d)) || '{}');
+  $('#eEvent').value = e.ev || ''; $('#eThought').value = e.th || '';
+  $('#eFeeling').value = e.fe || ''; $('#eResult').value = e.re || '';
+
+  const g = JSON.parse(localStorage.getItem(key('g', d)) || '{}');
+  $('#g1').value = g.g1 || ''; $('#g2').value = g.g2 || ''; $('#g3').value = g.g3 || '';
+
+  $('#dailyNote').value = localStorage.getItem(key('note', d)) || '';
+  $('#tags').value = localStorage.getItem(key('tags', d)) || '';
+}
+renderDaily();
+
+// Daily saves
+$('#btnSaveQ').onclick = () => {
+  const d = dateInput.value;
+  localStorage.setItem(key('q', d), JSON.stringify({text:$('#qText').value, answer:$('#qAnswer').value}));
+  toast();
+};
+$('#btnClearQ').onclick = () => { $('#qText').value=''; $('#qAnswer').value=''; };
+const QUESTIONS = [
+  '오늘의 나는 어제의 나와 무엇이 달랐나요?',
+  '사람들에게 어떤 사람으로 기억되고 싶나요?',
+  '지금의 나에게 꼭 필요한 한 마디는?',
+  '오늘 가장 고마웠던 순간은 언제였나요?'
 ];
-function pickQuestion(){
-  $('#qText').value = questions[Math.floor(Math.random()*questions.length)];
-}
-$('#btnNewQ').addEventListener('click', pickQuestion);
-pickQuestion();
+$('#btnRandomQ').onclick = () => {
+  const q = QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
+  $('#qText').value = q;
+};
 
-// Local save key helpers
-function kDaily(date){ return `td:${date}` }
-function kWeekly(week){ return `tw:${week}` }
+$('#btnSaveEmotion').onclick = () => {
+  const d = dateInput.value;
+  localStorage.setItem(key('e', d), JSON.stringify({
+    ev:$('#eEvent').value, th:$('#eThought').value, fe:$('#eFeeling').value, re:$('#eResult').value
+  }));
+  toast();
+};
+$('#btnClearEmotion').onclick = () => { ['#eEvent','#eThought','#eFeeling','#eResult'].forEach(s=>$(s).value=''); };
 
-// Save actions
-function saveDaily(part){
-  const key = kDaily(dateInput.value);
-  const cur = JSON.parse(localStorage.getItem(key) || '{}');
-  if(part==='question'){
-    cur.question = { q: $('#qText').value, a: $('#qAnswer').value };
-  }else if(part==='ttc'){
-    cur.ttc = {
-      event: $('#ttcEvent').value,
-      thought: $('#ttcThought').value,
-      feeling: $('#ttcFeeling').value,
-      result: $('#ttcResult').value
-    };
-  }else if(part==='thanks'){
-    cur.thanks = [$('#g1').value, $('#g2').value, $('#g3').value];
-  }else if(part==='note'){
-    cur.note = $('#dailyNote').value;
-  }else if(part==='tags'){
-    cur.tags = $('#tags').value;
-  }
-  localStorage.setItem(key, JSON.stringify(cur));
-  toast('저장 완료!');
-}
-function clearDaily(part){
-  const key = kDaily(dateInput.value);
-  const cur = JSON.parse(localStorage.getItem(key) || '{}');
-  if(part==='ttc'){ delete cur.ttc; $('#ttcEvent').value=$('#ttcThought').value=$('#ttcFeeling').value=$('#ttcResult').value=''; }
-  if(part==='thanks'){ $('#g1').value=$('#g2').value=$('#g3').value=''; delete cur.thanks; }
-  if(part==='note'){ $('#dailyNote').value=''; delete cur.note; }
-  if(part==='tags'){ $('#tags').value=''; delete cur.tags; }
-  localStorage.setItem(key, JSON.stringify(cur));
-  toast('지웠어요');
-}
-$$('[data-save="question"]').forEach(b=>b.addEventListener('click',()=>saveDaily('question')));
-$$('[data-save="ttc"]').forEach(b=>b.addEventListener('click',()=>saveDaily('ttc')));
-$$('[data-save="thanks"]').forEach(b=>b.addEventListener('click',()=>saveDaily('thanks')));
-$$('[data-save="note"]').forEach(b=>b.addEventListener('click',()=>saveDaily('note')));
-$$('[data-save="tags"]').forEach(b=>b.addEventListener('click',()=>saveDaily('tags')));
-$$('[data-clear="ttc"]').forEach(b=>b.addEventListener('click',()=>clearDaily('ttc')));
-$$('[data-clear="thanks"]').forEach(b=>b.addEventListener('click',()=>clearDaily('thanks')));
-$$('[data-clear="note"]').forEach(b=>b.addEventListener('click',()=>clearDaily('note')));
-$$('[data-clear="tags"]').forEach(b=>b.addEventListener('click',()=>clearDaily('tags')));
+$('#btnSaveThanks').onclick = () => {
+  const d = dateInput.value;
+  localStorage.setItem(key('g', d), JSON.stringify({g1:$('#g1').value,g2:$('#g2').value,g3:$('#g3').value}));
+  toast();
+};
+$('#btnClearThanks').onclick = () => { ['#g1','#g2','#g3'].forEach(s=>$(s).value=''); };
 
-// Load daily on date change
-function loadDaily(){
-  const key = kDaily(dateInput.value);
-  const cur = JSON.parse(localStorage.getItem(key) || '{}');
-  if(cur.question){ $('#qText').value=cur.question.q || ''; $('#qAnswer').value=cur.question.a || ''; }
-  if(cur.ttc){
-    $('#ttcEvent').value=cur.ttc.event||'';
-    $('#ttcThought').value=cur.ttc.thought||'';
-    $('#ttcFeeling').value=cur.ttc.feeling||'';
-    $('#ttcResult').value=cur.ttc.result||'';
-  } else { $('#ttcEvent').value=$('#ttcThought').value=$('#ttcFeeling').value=$('#ttcResult').value=''; }
-  if(cur.thanks){ $('#g1').value=cur.thanks[0]||''; $('#g2').value=cur.thanks[1]||''; $('#g3').value=cur.thanks[2]||''; } else { $('#g1').value=$('#g2').value=$('#g3').value='';}
-  $('#dailyNote').value = cur.note || '';
-  $('#tags').value = cur.tags || '';
-}
-dateInput.addEventListener('change', loadDaily);
-loadDaily();
+$('#btnSaveDaily').onclick = () => { localStorage.setItem(key('note', dateInput.value), $('#dailyNote').value); toast(); };
+$('#btnSaveTags').onclick = () => { localStorage.setItem(key('tags', dateInput.value), $('#tags').value); toast(); };
 
 // Weekly
-const missionInput = $('#missionInput');
-const missionList = $('#missionList');
-function addMission(text, done=false){
-  const li = document.createElement('li');
-  li.innerHTML = `<input type="checkbox" class="chk"${done?' checked':''}> <span class="mtext"></span>
-                  <button class="btn ghost del">삭제</button>`;
-  li.querySelector('.mtext').textContent = text;
-  li.querySelector('.del').addEventListener('click', ()=>{ li.remove(); saveWeekly(); });
-  missionList.appendChild(li);
+function renderWeekly(){
+  const w = weekOf(dateInput.value);
+  const ms = JSON.parse(localStorage.getItem(key('missions', w)) || '[]');
+  const wrap = $('#missionList'); wrap.innerHTML='';
+  ms.forEach((m,i)=>{
+    const line = document.createElement('label');
+    line.className = 'row';
+    line.innerHTML = `<input type="checkbox" data-idx="${i}" ${m.done?'checked':''}> <span class="input" contenteditable="true">${m.text}</span>`;
+    wrap.appendChild(line);
+  });
 }
-$('#btnAddMission').addEventListener('click', ()=>{
-  const t = missionInput.value.trim(); if(!t) return;
-  addMission(t, false); missionInput.value=''; saveWeekly();
-});
-function getWeekKey(){
-  return kWeekly($('#weekBadge').textContent || 'week');
-}
-function saveWeekly(){
-  const key = getWeekKey();
-  const payload = {
-    missions: [...missionList.querySelectorAll('li')].map(li=>({text: li.querySelector('.mtext').textContent, done: li.querySelector('.chk').checked})),
-    healing: $('#healing').value,
-    copy: $('#healingCopy').value
-  };
-  localStorage.setItem(key, JSON.stringify(payload));
-}
-$$('[data-save="missions"]').forEach(b=>b.addEventListener('click', ()=>{ saveWeekly(); toast('저장 완료!'); }));
-$$('[data-save="healing"]').forEach(b=>b.addEventListener('click', ()=>{ saveWeekly(); toast('저장 완료!'); }));
+renderWeekly();
 
-function loadWeekly(){
-  const cur = JSON.parse(localStorage.getItem(getWeekKey()) || '{}');
-  missionList.innerHTML='';
-  (cur.missions||[]).forEach(m=>addMission(m.text, m.done));
-  $('#healing').value = cur.healing || '';
-  $('#healingCopy').value = cur.copy || '';
-}
-loadWeekly();
+$('#btnAddMission').onclick = () => {
+  const txt = $('#newMission').value.trim();
+  if(!txt) return;
+  const w = weekOf(dateInput.value);
+  const ms = JSON.parse(localStorage.getItem(key('missions', w)) || '[]');
+  ms.push({text:txt, done:false});
+  localStorage.setItem(key('missions', w), JSON.stringify(ms));
+  $('#newMission').value=''; renderWeekly(); toast('추가되었습니다!');
+};
+
+$('#btnSaveMissions').onclick = () => {
+  const w = weekOf(dateInput.value);
+  const lines = Array.from(document.querySelectorAll('#missionList label'));
+  const ms = lines.map((l,i)=>({text:l.querySelector('span').textContent.trim(), done:l.querySelector('input').checked}));
+  localStorage.setItem(key('missions', w), JSON.stringify(ms)); toast();
+};
+$('#btnClearMissions').onclick = () => {
+  const w = weekOf(dateInput.value); localStorage.removeItem(key('missions', w)); renderWeekly();
+};
+
+$('#btnSaveHealing').onclick = () => {
+  const w = weekOf(dateInput.value);
+  localStorage.setItem(key('healing', w), $('#healing').value);
+  localStorage.setItem(key('copy', w), $('#copy').value);
+  toast();
+};
 
 // Search
 $('#searchInput').addEventListener('input', e=>{
-  const kw = e.target.value.trim(); const box = $('#searchResults'); box.innerHTML='';
-  if(!kw) return;
-  const cards = [];
-  Object.keys(localStorage).forEach(k=>{
-    if(!/^t[dw]:/.test(k)) return;
+  const q = e.target.value.trim(); const box = $('#searchResults'); box.innerHTML='';
+  if(!q) return;
+  // simple scan over localStorage
+  Object.keys(localStorage).filter(k=>k.startsWith('td:')).forEach(k=>{
     const v = localStorage.getItem(k);
-    if(v && v.includes(kw)){
-      const data = JSON.parse(v);
-      const el = document.createElement('div'); el.className='result';
-      el.innerHTML = `<h4>${k}</h4><pre>${(JSON.stringify(data, null, 2))}</pre>`;
-      cards.push(el);
+    if(v && v.toLowerCase().includes(q.toLowerCase())){
+      const card = document.createElement('div'); card.className = 'result';
+      card.innerHTML = `<div class="ttl">${k.replace('td:','')}</div><div>${v.replace(/</g,'&lt;')}</div>`;
+      box.appendChild(card);
     }
   });
-  cards.forEach(c=>box.appendChild(c));
 });
 
-// Login modal (no Firebase key by default; modal opens)
-const loginModal = $('#loginModal');
-$('#btnLogin')?.addEventListener('click', ()=>loginModal.classList.remove('hide'));
-$('#btnOpenLogin')?.addEventListener('click', ()=>loginModal.classList.remove('hide'));
-$('#btnModalClose').addEventListener('click', ()=>loginModal.classList.add('hide'));
+// Settings: fake login modal
+const modal = $('#loginModal');
+$('#openLogin').onclick = ()=> modal.classList.remove('hidden');
+$('#loginCancel').onclick = ()=> modal.classList.add('hidden');
+$('#loginOk').onclick = ()=> { modal.classList.add('hidden'); toast('로그인 성공(데모)'); };
 
-// Fake auth state text for now
-$('#btnModalLogin').addEventListener('click', ()=>{ $('#authState').textContent='로그인됨'; loginModal.classList.add('hide'); toast('로그인 성공!'); });
-$('#btnModalSignup').addEventListener('click', ()=>{ toast('회원가입 준비중'); });
-
-// Export / Import
-$('#btnExport').addEventListener('click', ()=>{
-  const all = {};
-  Object.keys(localStorage).forEach(k=>{ if(/^t[dw]:/.test(k)) all[k]=JSON.parse(localStorage.getItem(k)); });
-  const blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'thanks-diary-backup.json'; a.click();
-  URL.revokeObjectURL(a.href);
-});
-$('#btnImport').addEventListener('click', ()=>{
-  const f = $('#filePicker').files[0]; if(!f) return;
-  const r = new FileReader(); r.onload = ()=>{
-    try{
-      const data = JSON.parse(r.result);
-      Object.entries(data).forEach(([k,v])=>localStorage.setItem(k, JSON.stringify(v)));
-      toast('가져오기 완료'); loadDaily(); loadWeekly();
-    }catch(e){ toast('가져오기 실패'); }
-  };
-  r.readAsText(f);
-});
+// When date changes, rerender both
+dateInput.addEventListener('change', ()=>{ renderDaily(); renderWeekly(); });
