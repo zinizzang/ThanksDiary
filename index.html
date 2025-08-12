@@ -1,184 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>지니짱 감사일기</title>
-  <!-- Font: Gowun Dodum -->
+  <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
-  <!-- Firebase v8 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
 <body>
   <header class="app-header">
-    <div class="brand">
-      <span class="star">★</span>
-      <h1>지니짱 감사일기</h1>
-    </div>
-    <div class="auth-pill">
-      <button id="btnOpenLogin" class="btn ghost">로그인</button>
-      <button id="btnLogout" class="btn ghost" style="display:none">로그아웃</button>
+    <div class="star">★</div>
+    <h1 class="title">지니짱 감사일기</h1>
+    <div class="auth">
+      <button class="btn ghost" id="btnLogin">로그인</button>
+      <button class="btn ghost" id="btnLogout">로그아웃</button>
     </div>
   </header>
 
-  <nav class="tabs">
-    <button class="tab active" data-target="daily">📁 데일리</button>
-    <button class="tab" data-target="weekly">🧾 위클리</button>
-    <button class="tab" data-target="search">🔍 검색</button>
-    <button class="tab" data-target="settings">☀️ 설정</button>
+  <nav class="menu">
+    <button class="chip active">📒 데일리</button>
+    <button class="chip">🧾 위클리</button>
+    <button class="chip">🔎 검색</button>
+    <button class="chip">☀️ 설정</button>
   </nav>
 
-  <main class="pages">
-    <!-- DAILY -->
-    <section id="daily" class="page visible">
-      <div class="row date-row">
-        <input id="dateInput" type="date" class="date-input"/>
-        <button id="btnToday" class="chip">오늘</button>
-        <span class="chip hollow" id="weekLabel">W</span>
+  <section class="toolbar">
+    <div class="date-wrap">
+      <input id="dateInput" class="input" type="date">
+      <button class="chip lite" id="btnToday">오늘</button>
+      <span class="badge" id="weekBadge">2025-W33</span>
+    </div>
+  </section>
+
+  <main class="content">
+
+    <section class="card">
+      <div class="card-head">
+        <span class="dot"></span>
+        <h2>오늘의 질문</h2>
       </div>
-
-      <!-- 오늘의 질문 -->
-      <section class="card">
-        <div class="card-title">
-          <div class="dot"></div>
-          <h2>오늘의 질문</h2>
-        </div>
-        <p class="sub">나를 되돌아보는 한 줄 질문이에요.</p>
-        <input id="qText" class="input" placeholder="질문이 들어옵니다..." readonly />
-        <textarea id="qAnswer" class="textarea" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
-        <div class="actions">
-          <button id="btnNewQ" class="btn light">다른 질문</button>
-          <button id="btnSaveDaily" class="btn primary">저장</button>
-          <button id="btnClearDaily" class="btn danger">지우기</button>
-        </div>
-      </section>
-
-      <!-- 감정일기 -->
-      <section class="card">
-        <div class="card-title">
-          <div class="dot purple"></div>
-          <h2>감정일기 (사건·생각·감정·결과)</h2>
-        </div>
-        <textarea id="evt" class="textarea" placeholder="사건"></textarea>
-        <textarea id="tht" class="textarea" placeholder="생각"></textarea>
-        <textarea id="feel" class="textarea" placeholder="감정"></textarea>
-        <textarea id="res" class="textarea" placeholder="결과"></textarea>
-      </section>
-
-      <!-- 감사일기 -->
-      <section class="card">
-        <div class="card-title">
-          <div class="dot yellow"></div>
-          <h2>감사일기</h2>
-        </div>
-        <div class="grid-3">
-          <input id="g1" class="input" placeholder="감사 1"/>
-          <input id="g2" class="input" placeholder="감사 2"/>
-          <input id="g3" class="input" placeholder="감사 3"/>
-        </div>
-      </section>
-
-      <!-- 일상일기 & 태그 -->
-      <section class="card">
-        <div class="card-title">
-          <div class="dot orange"></div>
-          <h2>일상일기 · 태그</h2>
-        </div>
-        <textarea id="dailyNote" class="textarea" placeholder="하루를 가볍게 기록해요."></textarea>
-        <input id="tags" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분"/>
-      </section>
-    </section>
-
-    <!-- WEEKLY -->
-    <section id="weekly" class="page">
-      <div class="row date-row">
-        <span class="chip hollow" id="weekLabelWeekly">주차</span>
+      <p class="sub">나를 되돌아보는 한 줄 질문이에요.</p>
+      <input class="input" id="q" placeholder="질문이 들어옵니다…">
+      <textarea class="textarea" id="a" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+      <div class="row">
+        <button class="btn lite">다른 질문</button>
+        <div class="spacer"></div>
+        <button class="btn">저장</button>
+        <button class="btn danger">지우기</button>
       </div>
-
-      <section class="card">
-        <div class="card-title">
-          <div class="dot green"></div>
-          <h2>미션 (체크박스)</h2>
-        </div>
-        <div id="missionList" class="mission-list"></div>
-        <div class="row">
-          <input id="missionInput" class="input" placeholder="미션 추가"/>
-          <button id="btnAddMission" class="btn primary">+ 추가</button>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-title">
-          <div class="dot blue"></div>
-          <h2>힐링 문구</h2>
-        </div>
-        <textarea id="healingInput" class="textarea" placeholder="스스로에게 건네는 한 줄 위로/동기부여"></textarea>
-        <textarea id="copyInput" class="textarea" placeholder="필사할 문장을 적어보세요."></textarea>
-        <div class="actions">
-          <button id="btnSaveWeekly" class="btn primary">저장</button>
-        </div>
-      </section>
     </section>
 
-    <!-- SEARCH -->
-    <section id="search" class="page">
-      <section class="card">
-        <div class="card-title">
-          <div class="dot"></div>
-          <h2>전체 내용 검색</h2>
-        </div>
-        <input id="searchQuery" class="input" placeholder="키워드 입력"/>
-        <button id="btnSearch" class="btn primary">검색</button>
-        <div id="searchResults" class="search-results"></div>
-      </section>
+    <section class="card">
+      <div class="card-head">
+        <span class="dot"></span>
+        <h2>감정일기 (사건·생각·감정·결과)</h2>
+      </div>
+      <input class="input" placeholder="사건">
+      <input class="input" placeholder="생각">
+      <input class="input" placeholder="감정">
+      <input class="input" placeholder="결과">
     </section>
 
-    <!-- SETTINGS -->
-    <section id="settings" class="page">
-      <section class="card">
-        <div class="card-title">
-          <div class="dot"></div>
-          <h2>로그인</h2>
-        </div>
-        <div class="grid-2">
-          <input id="email" class="input" placeholder="이메일" type="email"/>
-          <input id="password" class="input" placeholder="비밀번호" type="password"/>
-        </div>
-        <div class="actions">
-          <button id="btnLogin" class="btn primary">로그인</button>
-          <button id="btnSignup" class="btn light">회원가입</button>
-          <button id="btnLogout2" class="btn danger">로그아웃</button>
-        </div>
-        <p class="hint">※ Firebase 설정 시 클라우드 동기화됩니다. (미설정 시 로컬 저장)</p>
-      </section>
-
-      <section class="card">
-        <div class="card-title">
-          <div class="dot"></div>
-          <h2>백업/복원</h2>
-        </div>
-        <div class="actions">
-          <button id="btnExport" class="btn light">JSON 파일로 저장</button>
-          <label class="btn ghost">
-            파일 선택
-            <input id="fileImport" type="file" accept="application/json" hidden>
-          </label>
-          <button id="btnResetLocal" class="btn danger">로컬 데이터 초기화</button>
-        </div>
-        <button id="btnRefreshCache" class="btn ghost">캐시 새로고침(업데이트)</button>
-      </section>
+    <section class="card">
+      <div class="card-head">
+        <span class="dot"></span>
+        <h2>감사일기</h2>
+      </div>
+      <input class="input" placeholder="1. 감사한 일">
+      <input class="input" placeholder="2. 감사한 일">
+      <input class="input" placeholder="3. 감사한 일">
     </section>
+
+    <section class="card">
+      <div class="card-head">
+        <span class="dot"></span>
+        <h2>일상일기</h2>
+      </div>
+      <textarea class="textarea" placeholder="오늘 하루"></textarea>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <span class="dot"></span>
+        <h2>태그</h2>
+      </div>
+      <input class="input" placeholder="#가족, #산책 처럼 쉼표로 구분">
+    </section>
+
   </main>
 
-  <div id="toast" class="toast" aria-live="polite"></div>
+  <footer class="footer">v2.7.2 · Gowun Dodum</footer>
 
-  <footer class="foot">v2.7.2-integrated • Gowun Dodum</footer>
-  <script src="questions.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
