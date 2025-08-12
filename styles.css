@@ -1,80 +1,112 @@
-/* Pastel theme & fonts */
+
+@font-face{
+  font-family:'Cafe24Oneprettynight';
+  src: local('Cafe24 Oneprettynight'), local('Cafe24Oneprettynight'),
+       url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/Cafe24Oneprettynight.woff') format('woff');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+
 :root{
-  --font-body:'Gowun Dodum',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-  --font-title:'Cafe24Oneprettynight','Gowun Dodum',sans-serif;
-  --bg:#fff7da;
-  --card:#fff4d0;
-  --ink:#3b3425;
-  --muted:#8a6e3d;
-  --accent:#f5c23c;
+  --bg:#FFF7D6;
+  --card:#FFF3C7;
+  --ink:#3a2f1a;
+  --muted:#7a6d4d;
+  --primary:#F7C948;
+  --danger:#f38a9e;
+  --light:#fff6da;
+  --radius:16px;
+  --maxw:720px;
+  --gap:14px;
+  --fs-1: clamp(18px, 2.4vw, 22px);
+  --fs-2: clamp(16px, 2.2vw, 20px);
+  --fs-3: clamp(14px, 2vw, 18px);
 }
 
 *{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Gowun Dodum', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  overflow-x:hidden;
+}
 
-.app-header{display:flex;align-items:center;gap:10px;padding:16px 14px 6px}
-.star{color:#ffd34d}
-.title{font-family:var(--font-title);margin:0;font-size:28px}
-.auth{margin-left:auto;display:flex;gap:8px;align-items:center}
-.chip{border:none;border-radius:18px;padding:6px 12px;background:#fff3bd}
-.hidden{display:none !important}
+.app-header{
+  position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.1);
+  background:linear-gradient(180deg,#FFD967, #FFE89A 60%, transparent);
+  padding:12px 16px;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.brand{display:flex; align-items:center; gap:10px; max-width:var(--maxw); margin:0 auto;}
+.brand .star{color:#F8C10F;}
+.brand h1{font-family:'Cafe24Oneprettynight', cursive; font-size:clamp(22px,4.2vw,32px); margin:0;}
+.auth{max-width:var(--maxw); margin:6px auto 0; display:flex; gap:8px; align-items:center; justify-content:flex-end; font-size:var(--fs-3)}
+.auth .btn{padding:6px 12px}
 
-.tabs{display:flex;gap:10px; padding:8px 12px 16px}
-.tab{flex:0 0 auto;display:flex;align-items:center;gap:6px;
-  padding:10px 14px;border-radius:16px;border:1px solid #f2e2a9;background:#fff7dd;
-  font-family:var(--font-title);font-size:16px}
-.tab .ico{font-size:16px}
-.tab.active{box-shadow:0 6px 18px rgba(0,0,0,.06),0 1px 0 rgba(0,0,0,.05); background:#fff}
-main{padding:0 12px 80px}
+.tabs{max-width:var(--maxw); margin:10px auto; display:flex; gap:10px; padding:0 8px}
+.tab{
+  flex:1; border:none; border-radius:14px; background:#fff; padding:10px 0;
+  font-size:var(--fs-2); box-shadow:0 4px 10px rgba(0,0,0,.05); cursor:pointer;
+}
+.tab.active{outline:2px solid #F3D36C; background:#fffdf3}
 
-.page{max-width:760px;margin:0 auto}
-.card{background:var(--card);border-radius:20px;padding:16px;margin:14px 0;
-  box-shadow:0 10px 24px rgba(0,0,0,.06), 0 1px 0 rgba(0,0,0,.05)}
-.section-title{display:flex;align-items:center;gap:8px;font-family:var(--font-title);font-size:20px;margin-bottom:8px}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.yellow{background:#ffd34d}.purple{background:#cda4ff}.orange{background:#ffbe7a}
-.brown{background:#a17a58}.gold{background:#ffde7c}.green{background:#9adf8f}
-.blue{background:#9bd0ff}.navy{background:#7aa7ff}.sun{background:#ffd34d}
+.container{max-width:var(--maxw); margin:0 auto; padding:0 12px 80px}
 
-.hint{margin:0 0 10px;color:var(--muted);font-size:14px}
-.label{display:block;margin:12px 0 6px;font-weight:700}
+.tabpage{display:none}
+.tabpage.active{display:block}
 
-.input,.textarea{width:100%;border-radius:14px;border:1px solid #f2e2a9;background:#fff;
-  padding:12px 12px;font-size:16px;outline:none}
-.textarea{min-height:110px;resize:vertical}
-.thanks-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-@media (max-width:480px){.thanks-grid{grid-template-columns:1fr}}
+.card{background:var(--card); border-radius:var(--radius); padding:16px; margin:16px 0; box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.card-h{display:flex; align-items:center; gap:8px}
+.card-h .dot{width:8px; height:8px; border-radius:50%; background:#F4B400; display:inline-block}
+.card h2{font-family:'Cafe24Oneprettynight'; font-size:var(--fs-1); margin:0}
+.help{color:var(--muted); font-size:var(--fs-3); margin:.3rem 0 1rem}
 
-.btn-row{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
-.btn{padding:10px 16px;border-radius:14px;border:none;box-shadow:0 2px 0 rgba(0,0,0,.05);font-weight:600; font-family:var(--font-title)}
-.btn.primary{background:#f5c23c}
-.btn.danger{background:#f4a1b1}
-.btn.ghost{background:#fff}
+.lbl{display:block; margin:10px 0 6px; font-size:var(--fs-3); color:var(--muted)}
 
-.date-row{display:flex;gap:10px;align-items:center;margin:8px 0}
-.date-row .chip{padding:8px 12px}
-.week-label{color:var(--muted);font-size:14px}
+.input,.textarea{
+  width:100%; border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:12px 14px;
+  background:#fff; font-size:var(--fs-2);
+  font-family:'Gowun Dodum', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.textarea{min-height:110px; resize:vertical}
 
-.mission-add{display:flex;gap:10px;align-items:center;margin-bottom:8px}
-.mission-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
-.mission-item{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid #f2e2a9;border-radius:12px;padding:10px}
+.grid-3{display:grid; grid-template-columns:1fr; gap:var(--gap)}
+@media (min-width:520px){ .grid-3{ grid-template-columns:repeat(3,1fr);} }
 
-.search-results{display:grid;gap:12px;margin-top:12px}
-.result-card{background:#fffaf0;border-radius:16px;padding:14px 16px;
-  box-shadow:0 6px 18px rgba(0,0,0,.06), 0 1px 0 rgba(0,0,0,.05)}
-.result-card .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
-.result-card .line{margin:4px 0}
-.result-card .tag{display:inline-block;background:#fff3bd;border-radius:10px;padding:2px 8px;margin-right:6px;font-size:12px}
+.row{display:flex; gap:10px; align-items:center}
+.flex1{flex:1}
 
-.ver{opacity:.5;text-align:center;padding:30px 10px}
+.btn{
+  border:none; border-radius:999px; padding:10px 16px; font-size:var(--fs-3); cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,.05);
+  font-family:'Cafe24Oneprettynight', cursive;
+}
+.btn.primary{background:var(--primary)}
+.btn.danger{background:var(--danger); color:#fff}
+.btn.light{background:var(--light)}
+.btn.ghost{background:transparent; border:1px dashed rgba(0,0,0,.12)}
+.btn.outline{background:#fff; border:1px solid rgba(0,0,0,.12)}
+.btn.pill{border-radius:999px}
+.btn:active{transform:translateY(1px)}
 
-.toast{
-  position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
-  background:rgba(0,0,0,.86);color:#fff;padding:10px 14px;border-radius:10px;
-  font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}
+.actions{display:flex; gap:10px; justify-content:flex-start; margin-top:10px; flex-wrap:wrap}
+
+.badge{margin-left:auto; font-size:var(--fs-3); color:#7a6d4d}
+.date-row{justify-content:flex-start; gap:8px}
+
+.checklist{list-style:none; padding:0; margin:8px 0}
+.checklist li{display:flex; gap:10px; align-items:center; background:#fff; border-radius:12px; padding:10px 12px; margin:6px 0;}
+
+.results{display:grid; gap:12px; margin-top:12px}
+.result{background:#fff; border-radius:12px; padding:12px; border:1px solid rgba(0,0,0,.06)}
+.result h4{margin:.2rem 0 .4rem; font-size:var(--fs-2)}
+
+.version{margin-top:10px; color:var(--muted); text-align:center; font-size:12px}
+
+.toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#333; color:#fff; padding:10px 14px; border-radius:999px; opacity:0; pointer-events:none; transition:.3s; z-index:100}
 .toast.show{opacity:1}
 
-.file-btn{cursor:pointer}
-.file-btn input{display:none}
-.hidden{display:none !important}
+.modal{position:fixed; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center}
+.modal.hide{display:none}
+.modal-body{background:#fff; padding:18px; border-radius:14px; width:min(92vw, 420px);}
+.modal-body h3{margin:0 0 10px; font-family:'Cafe24Oneprettynight'}

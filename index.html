@@ -1,150 +1,175 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>지니짱 감사일기</title>
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
-  <link rel="preload" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2107@1.1/Cafe24Oneprettynight.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css"/>
+  <script defer src="app.js"></script>
 </head>
 <body>
-  <header class="app-header">
-    <div class="star">★</div>
-    <h1 class="title">지니짱 감사일기</h1>
-    <div class="auth">
-      <span id="authState">로그아웃 상태</span>
-      <button id="loginOpen" class="chip">로그인</button>
-      <button id="logoutBtn" class="chip hidden">로그아웃</button>
+<header class="app-header">
+  <div class="brand">
+    <span class="star">★</span>
+    <h1>지니짱 감사일기</h1>
+  </div>
+  <div class="auth">
+    <span id="authState">로그아웃 상태</span>
+    <button id="btnLogin" class="btn pill">로그인</button>
+    <button id="btnLogout" class="btn pill outline hide">로그아웃</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="daily">📒 데일리</button>
+  <button class="tab" data-tab="weekly">🧾 위클리</button>
+  <button class="tab" data-tab="search">🔎 검색</button>
+  <button class="tab" data-tab="settings">☀️ 설정</button>
+</nav>
+
+<main class="container">
+  <!-- DAILY -->
+  <section id="tab-daily" class="tabpage active">
+    <div class="row date-row">
+      <input id="dateInput" type="date" class="input"/>
+      <button id="btnToday" class="btn ghost">오늘</button>
+      <span id="weekBadge" class="badge"></span>
     </div>
-  </header>
 
-  <nav class="tabs">
-    <button id="tabDaily" class="tab active"><span class="ico">📒</span><span>데일리</span></button>
-    <button id="tabWeekly" class="tab"><span class="ico">🧾</span><span>위클리</span></button>
-    <button id="tabSearch" class="tab"><span class="ico">🔎</span><span>검색</span></button>
-    <button id="tabSettings" class="tab"><span class="ico">☀️</span><span>설정</span></button>
-  </nav>
-
-  <main>
-    <!-- Daily -->
-    <section id="page-daily" class="page">
-      <div class="date-row">
-        <input id="dateInput" type="date" />
-        <button id="todayBtn" class="chip">오늘</button>
-        <div id="weekLabel" class="week-label"></div>
+    <article class="card">
+      <header class="card-h">
+        <span class="dot"></span><h2>오늘의 질문</h2>
+      </header>
+      <p class="help">나를 되돌아보는 한 줄 질문이에요.</p>
+      <input id="qText" class="input" placeholder="질문이 들어옵니다…" readonly/>
+      <textarea id="qAnswer" class="textarea" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+      <div class="actions">
+        <button id="btnNewQ" class="btn light">다른 질문</button>
+        <button id="btnSaveQ" class="btn primary" data-save="question">저장</button>
+        <button id="btnClearQ" class="btn danger">지우기</button>
       </div>
+    </article>
 
-      <article class="card">
-        <div class="section-title"><span class="dot yellow"></span>오늘의 질문</div>
-        <p class="hint">나를 되돌아보는 한 줄 질문이에요.</p>
-        <input id="question" class="input" placeholder="질문이 표시됩니다." readonly>
-        <textarea id="answer" class="textarea" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
-        <div class="btn-row">
-          <button id="qRandom" class="btn ghost">다른 질문</button>
-          <button id="qSave" class="btn primary">저장</button>
-          <button id="qClear" class="btn danger">지우기</button>
-        </div>
-      </article>
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>감정일기</h2></header>
+      <p class="help">사건을 사실대로 적고, 그때의 생각과 감정을 구분해 본 뒤 결과를 간단히 남겨보세요.</p>
+      <label class="lbl">사건</label>
+      <textarea id="ttcEvent" class="textarea" placeholder="오늘 무슨 일이 있었나요?"></textarea>
+      <label class="lbl">생각</label>
+      <textarea id="ttcThought" class="textarea" placeholder="그때 어떤 생각이 들었나요?"></textarea>
+      <label class="lbl">감정</label>
+      <textarea id="ttcFeeling" class="textarea" placeholder="감정을 구체적으로 적어보세요."></textarea>
+      <label class="lbl">결과</label>
+      <textarea id="ttcResult" class="textarea" placeholder="결과/배운 점을 남겨보세요."></textarea>
+      <div class="actions">
+        <button class="btn primary" data-save="ttc">저장</button>
+        <button class="btn danger" data-clear="ttc">지우기</button>
+      </div>
+    </article>
 
-      <article class="card">
-        <div class="section-title"><span class="dot purple"></span>감정일기</div>
-        <p class="hint">사건을 사실대로 적고, 그때의 생각과 감정을 구분해 본 뒤 결과를 간단히 남겨보세요.</p>
-        <label class="label">사건</label>
-        <textarea id="ttcEvent" class="textarea" placeholder="오늘 무슨 일이 있었나요?"></textarea>
-        <label class="label">생각</label>
-        <textarea id="ttcThought" class="textarea" placeholder="그때 어떤 생각이 들었나요?"></textarea>
-        <label class="label">감정</label>
-        <textarea id="ttcEmotion" class="textarea" placeholder="감정을 구체적으로 적어보세요."></textarea>
-        <label class="label">결과</label>
-        <textarea id="ttcResult" class="textarea" placeholder="그 일의 결과/배운점은 무엇인가요?"></textarea>
-        <div class="btn-row">
-          <button id="dailySaveBtn" class="btn primary">저장</button>
-          <button id="dailyClearBtn" class="btn danger">지우기</button>
-        </div>
-      </article>
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>감사일기</h2></header>
+      <div class="grid-3">
+        <input id="g1" class="input" placeholder="감사 1"/>
+        <input id="g2" class="input" placeholder="감사 2"/>
+        <input id="g3" class="input" placeholder="감사 3"/>
+      </div>
+      <div class="actions">
+        <button class="btn primary" data-save="thanks">저장</button>
+        <button class="btn danger" data-clear="thanks">지우기</button>
+      </div>
+    </article>
 
-      <article class="card">
-        <div class="section-title"><span class="dot orange"></span>감사일기</div>
-        <div class="thanks-grid">
-          <input id="thanks1" class="input" placeholder="감사 1">
-          <input id="thanks2" class="input" placeholder="감사 2">
-          <input id="thanks3" class="input" placeholder="감사 3">
-        </div>
-      </article>
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>일상일기</h2></header>
+      <textarea id="dailyNote" class="textarea" placeholder="하루를 가볍게 기록해요."></textarea>
+      <div class="actions">
+        <button class="btn primary" data-save="note">저장</button>
+        <button class="btn danger" data-clear="note">지우기</button>
+      </div>
+    </article>
 
-      <article class="card">
-        <div class="section-title"><span class="dot brown"></span>일상일기</div>
-        <textarea id="dailyNote" class="textarea" placeholder="하루를 가볍게 기록해요."></textarea>
-      </article>
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>태그</h2></header>
+      <input id="tags" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분"/>
+      <div class="actions">
+        <button class="btn primary" data-save="tags">저장</button>
+        <button class="btn danger" data-clear="tags">지우기</button>
+      </div>
+    </article>
+  </section>
 
-      <article class="card">
-        <div class="section-title"><span class="dot gold"></span>태그</div>
-        <input id="tagInput" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분">
-      </article>
-    </section>
+  <!-- WEEKLY -->
+  <section id="tab-weekly" class="tabpage">
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>미션 (체크박스)</h2></header>
+      <div class="row">
+        <input id="missionInput" class="input flex1" placeholder="미션 추가"/>
+        <button id="btnAddMission" class="btn light">+ 추가</button>
+      </div>
+      <ul id="missionList" class="checklist"></ul>
+      <div class="actions">
+        <button class="btn primary" data-save="missions">저장</button>
+      </div>
+    </article>
 
-    <!-- Weekly -->
-    <section id="page-weekly" class="page hidden">
-      <article class="card">
-        <div class="section-title"><span class="dot green"></span>미션 (체크박스)</div>
-        <div class="mission-add">
-          <input id="newMission" class="input" placeholder="미션 추가">
-          <button id="addMission" class="btn ghost">+ 추가</button>
-        </div>
-        <ul id="missionList" class="mission-list"></ul>
-        <div class="btn-row">
-          <button id="weeklySaveBtn" class="btn primary">저장</button>
-        </div>
-      </article>
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>힐링 문구</h2></header>
+      <input id="healing" class="input" placeholder="이번 주 나를 다독이는 한 줄"/>
+      <textarea id="healingCopy" class="textarea" placeholder="필사 칸"></textarea>
+      <div class="actions">
+        <button class="btn primary" data-save="healing">저장</button>
+      </div>
+    </article>
+  </section>
 
-      <article class="card">
-        <div class="section-title"><span class="dot blue"></span>힐링 문구</div>
-        <input id="healing" class="input" placeholder="오늘의 힐링 문구">
-        <textarea id="copy" class="textarea" placeholder="문장을 따라 적어보세요."></textarea>
-      </article>
-    </section>
+  <!-- SEARCH -->
+  <section id="tab-search" class="tabpage">
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>전체 내용 검색</h2></header>
+      <input id="searchInput" class="input" placeholder="키워드 입력"/>
+      <div id="searchResults" class="results"></div>
+    </article>
+  </section>
 
-    <!-- Search -->
-    <section id="page-search" class="page hidden">
-      <article class="card">
-        <div class="section-title"><span class="dot navy"></span>전체 내용 검색</div>
-        <input id="searchInput" class="input" placeholder="키워드를 입력하세요">
-        <div id="searchResults" class="search-results"></div>
-      </article>
-    </section>
+  <!-- SETTINGS -->
+  <section id="tab-settings" class="tabpage">
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>로그인</h2></header>
+      <div class="row">
+        <button id="btnOpenLogin" class="btn primary">로그인/회원가입</button>
+        <button id="btnDoLogout" class="btn outline">로그아웃</button>
+      </div>
+      <p class="help">로그인 후에는 기기 간 동기화가 됩니다.</p>
+    </article>
 
-    <!-- Settings -->
-    <section id="page-settings" class="page hidden">
-      <article class="card">
-        <div class="section-title"><span class="dot sun"></span>로그인</div>
-        <div class="login-row">
-          <input id="email" class="input" placeholder="이메일">
-          <input id="password" class="input" placeholder="비밀번호" type="password">
-        </div>
-        <div class="btn-row">
-          <button id="loginBtn" class="btn primary">로그인</button>
-          <button id="signupBtn" class="btn ghost">회원가입</button>
-          <button id="logoutBtn2" class="btn danger">로그아웃</button>
-        </div>
-      </article>
+    <article class="card">
+      <header class="card-h"><span class="dot"></span><h2>백업/복원</h2></header>
+      <div class="row">
+        <button id="btnExport" class="btn light">JSON 파일로 저장</button>
+        <input id="filePicker" type="file" accept="application/json"/>
+        <button id="btnImport" class="btn light">JSON 가져오기</button>
+      </div>
+    </article>
+    <footer class="version">v2.7.2-ui-fix</footer>
+  </section>
+</main>
 
-      <article class="card">
-        <div class="section-title"><span class="dot sun"></span>백업/복원</div>
-        <div class="btn-row">
-          <button id="exportBtn" class="btn ghost">JSON 파일로 저장</button>
-          <label class="file-btn btn"><input id="importFile" type="file" accept="application/json"> JSON 가져오기</label>
-        </div>
-      </article>
-    </section>
-  </main>
+<!-- Login Modal -->
+<div id="loginModal" class="modal hide" aria-hidden="true">
+  <div class="modal-body">
+    <h3>로그인</h3>
+    <input id="loginEmail" class="input" placeholder="이메일"/>
+    <input id="loginPw" class="input" type="password" placeholder="비밀번호"/>
+    <div class="actions">
+      <button id="btnModalLogin" class="btn primary">로그인</button>
+      <button id="btnModalSignup" class="btn outline">회원가입</button>
+      <button id="btnModalClose" class="btn ghost">닫기</button>
+    </div>
+  </div>
+</div>
 
-  <footer id="ver" class="ver">v2.7.2-final-ui232r3</footer>
-
-  <div id="toast" class="toast">저장 완료!</div>
-
-  <script src="firebase-config.js"></script>
-  <script src="app.js"></script>
+<div id="toast" class="toast"></div>
 </body>
 </html>
