@@ -1,1 +1,0 @@
-웹폰트는 Google Fonts(Jua, Gowun Dodum)를 index.html에서 로드합니다.
