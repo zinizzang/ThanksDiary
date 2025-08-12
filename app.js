@@ -1,257 +1,362 @@
+// ======= Firebase bootstrap (optional, with graceful fallback) =======
+let app, auth, db;
+(function initFirebase(){
+  if (window.firebaseConfig && window.firebase && window.firebase.initializeApp){
+    app = firebase.initializeApp(window.firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+  }else{
+    console.warn('Firebase config not found. Local-only mode.');
+  }
+})();
 
-// ===== Router (hash) =====
-const views = {
-  daily: document.getElementById('view-daily'),
-  weekly: document.getElementById('view-weekly'),
-  search: document.getElementById('view-search'),
-  settings: document.getElementById('view-settings'),
-};
-const tabs = {
-  daily: document.getElementById('tab-daily'),
-  weekly: document.getElementById('tab-weekly'),
-  search: document.getElementById('tab-search'),
-  settings: document.getElementById('tab-settings'),
-};
-function showView(name){
-  Object.values(views).forEach(v=>v.classList.add('hidden'));
-  Object.values(tabs).forEach(t=>t.classList.remove('active'));
-  const v = views[name] || views.daily;
-  const t = tabs[name] || tabs.daily;
-  v.classList.remove('hidden');
-  t.classList.add('active');
-  location.hash = `#/${name}`;
+// ======= State =======
+let currentDate = new Date();
+
+// ======= DOM Utils =======
+function $(id){return document.getElementById(id);}
+function fmtDate(d){ return d.toISOString().slice(0,10); } // YYYY-MM-DD
+
+function getISODate(d){
+  if(typeof d === 'string') return d;
+  return fmtDate(d);
 }
-window.addEventListener('hashchange', ()=>{
-  const name = (location.hash.replace('#/','')||'daily');
-  showView(name);
+
+// Week label (YYYY-Www)
+function getWeekLabel(dateStr){
+  const d = new Date(dateStr);
+  const onejan = new Date(d.getFullYear(),0,1);
+  const days = Math.floor((d - onejan) / 86400000);
+  const week = Math.ceil((days + onejan.getDay()+1)/7);
+  return `${d.getFullYear()}년 ${week}주`;
+}
+
+// Toast
+function toast(msg="저장 완료!"){
+  const t = $('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1300);
+}
+
+// Section routing
+function showSection(key){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  $(`page-${key}`).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  $(`tab${key[0].toUpperCase()+key.slice(1)}`).classList.add('active');
+}
+
+$('tabDaily')?.addEventListener('click', ()=>showSection('daily'));
+$('tabWeekly')?.addEventListener('click', ()=>showSection('weekly'));
+$('tabSearch')?.addEventListener('click', ()=>showSection('search'));
+$('tabSettings')?.addEventListener('click', ()=>showSection('settings'));
+
+// ======= Date controls =======
+function setDateToInput(d){
+  $('dateInput').value = fmtDate(d);
+  $('weekLabel').textContent = getWeekLabel(fmtDate(d));
+}
+$('dateInput')?.addEventListener('change', e=>{
+  currentDate = new Date(e.target.value);
+  loadDaily();
+  loadWeekly();
 });
-showView((location.hash.replace('#/',''))||'daily');
+$('todayBtn')?.addEventListener('click', ()=>{
+  currentDate = new Date();
+  setDateToInput(currentDate);
+  loadDaily();
+  loadWeekly();
+});
 
-// ===== Toast =====
-const toast = document.getElementById('toast');
-function showToast(msg){
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'), 1700);
-}
-
-// ===== Today / date =====
-const dailyDate = document.getElementById('dailyDate');
-function setToday(){
-  const d = new Date(); d.setHours(9,0,0,0);
-  dailyDate.valueAsDate = d;
-}
-document.getElementById('btnToday').addEventListener('click', setToday);
-setToday();
-
-// ===== Questions (simple local pool, no duplicates in a session) =====
+// ======= Questions (simple pool) =======
 const QUESTIONS = [
   "지금의 나에게 꼭 필요한 한 마디는?",
   "사람들에게 어떤 사람으로 기억되고 싶나요?",
-  "오늘 나를 웃게 한 순간은?",
-  "최근에 배운 작은 교훈은?",
-  "오늘 더 고마웠던 사람은 누구였나요?",
-  "내가 나에게 해주고 싶은 칭찬은?",
-  "지금 놓치고 있는 작은 행복은?",
-  "최근 바꿔보고 싶은 습관 한 가지는?",
-  "내가 지키고 싶은 나만의 약속은?",
-  "오늘의 나에게 점수를 준다면 몇 점? (이유는?)"
+  "오늘 나를 미소 짓게 한 순간은?",
+  "내가 더 알고 싶은 나의 모습은 어떤 모습인가요?"
 ];
-let usedQ = new Set();
-function nextQuestion(){
-  const pool = QUESTIONS.filter(q=>!usedQ.has(q));
-  if(pool.length===0){ usedQ.clear(); }
-  const list = pool.length?pool:QUESTIONS;
-  const pick = list[Math.floor(Math.random()*list.length)];
-  usedQ.add(pick);
-  document.getElementById('qText').value = pick;
+function randomQuestion(){
+  const used = JSON.parse(localStorage.getItem('usedQuestions')||'[]');
+  const pool = QUESTIONS.filter(q=>!used.includes(q));
+  const q = (pool.length? pool:QUESTIONS)[Math.floor(Math.random()* (pool.length? pool.length:QUESTIONS.length))];
+  $('question').value = q;
+  if(!used.includes(q)){ used.push(q); localStorage.setItem('usedQuestions', JSON.stringify(used));}
 }
-document.getElementById('btnNextQuestion').addEventListener('click', nextQuestion);
-nextQuestion();
+$('qRandom')?.addEventListener('click', randomQuestion);
+$('qClear')?.addEventListener('click', ()=>{$('answer').value='';});
 
-// ===== Local persistence (can be swapped to Firebase later) =====
-function localKey(prefix){
-  const d = dailyDate.value || new Date().toISOString().slice(0,10);
-  return `${prefix}:${d}`;
-}
-function saveDaily(){
+$('qSave')?.addEventListener('click', async ()=>{
+  const d = getISODate(currentDate);
   const data = {
-    date: dailyDate.value,
-    q: document.getElementById('qText').value,
-    a: document.getElementById('qAnswer').value,
-    emo:{ e:emoEvent.value, t:emoThought.value, f:emoFeeling.value, r:emoResult.value },
-    gr:[gr1.value,gr2.value,gr3.value],
-    note: dailyNote.value,
-    tags: tags.value
+    date: d,
+    question: $('question').value.trim(),
+    answer: $('answer').value.trim()
   };
-  localStorage.setItem(localKey('daily'), JSON.stringify(data));
-  showToast('저장 완료!');
-}
-function loadDaily(){
-  const raw = localStorage.getItem(localKey('daily'));
-  if(!raw){ return; }
-  try{
-    const d = JSON.parse(raw);
-    document.getElementById('qText').value = d.q || '';
-    document.getElementById('qAnswer').value = d.a || '';
-    emoEvent.value = d.emo?.e || '';
-    emoThought.value = d.emo?.t || '';
-    emoFeeling.value = d.emo?.f || '';
-    emoResult.value = d.emo?.r || '';
-    gr1.value = d.gr?.[0]||''; gr2.value = d.gr?.[1]||''; gr3.value = d.gr?.[2]||'';
-    dailyNote.value = d.note || '';
-    tags.value = d.tags || '';
-  }catch(e){}
-}
-document.getElementById('btnDailySave').addEventListener('click', saveDaily);
-document.getElementById('btnDailyClear').addEventListener('click', ()=>{
-  localStorage.removeItem(localKey('daily'));
-  document.querySelectorAll('#view-daily .input, #view-daily .textarea').forEach(el=>{ if(!el.readOnly) el.value=''; });
-  showToast('비웠어요!');
-});
-dailyDate.addEventListener('change', loadDaily);
-loadDaily();
-
-// ===== Weekly: missions + healing =====
-const missionInput = document.getElementById('missionInput');
-const missionList = document.getElementById('missionList');
-function weekKey(){ return `week:${document.getElementById('weekPicker').value||'current'}`; }
-function addMission(text='', checked=false){
-  const li = document.createElement('li');
-  li.innerHTML = `<input type="checkbox" ${checked?'checked':''}>
-                  <input type="text" value="${text.replace(/"/g,'&quot;')}" class="input">
-                  <button class="btn ghost tiny">삭제</button>`;
-  missionList.appendChild(li);
-  li.querySelector('button').addEventListener('click', ()=>li.remove());
-}
-document.getElementById('btnAddMission').addEventListener('click', ()=>{
-  const v = missionInput.value.trim(); if(!v){ missionInput.focus(); return; }
-  addMission(v,false); missionInput.value='';
-});
-function saveWeekly(){
-  const items = [...missionList.children].map(li=>({
-    done: li.querySelector('input[type="checkbox"]').checked,
-    text: li.querySelector('input[type="text"]').value
-  }));
-  const data = {
-    missions: items,
-    healing: document.getElementById('healingText').value,
-    copy: document.getElementById('healingCopy').value
-  };
-  localStorage.setItem(weekKey(), JSON.stringify(data));
-  showToast('주간 저장 완료!');
-}
-function loadWeekly(){
-  missionList.innerHTML='';
-  const raw = localStorage.getItem(weekKey());
-  if(!raw){ return; }
-  try{
-    const d = JSON.parse(raw);
-    (d.missions||[]).forEach(m=>addMission(m.text, m.done));
-    document.getElementById('healingText').value = d.healing||'';
-    document.getElementById('healingCopy').value = d.copy||'';
-  }catch(e){}
-}
-document.getElementById('btnWeeklySave').addEventListener('click', saveWeekly);
-document.getElementById('weekPicker').addEventListener('change', loadWeekly);
-loadWeekly();
-
-// ===== Search (demo over localStorage) =====
-function searchAll(){
-  const q = (document.getElementById('searchInput').value||'').trim();
-  const box = document.getElementById('searchResults');
-  box.innerHTML='';
-  if(!q){ return; }
-  const hits=[];
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(!k.startsWith('daily:') && !k.startsWith('week:')) continue;
-    try{
-      const v = JSON.parse(localStorage.getItem(k)||'{}');
-      const text = JSON.stringify(v);
-      if(text.includes(q)) hits.push({k, v});
-    }catch(e){}
+  saveLocal(`daily:${d}:qna`, data);
+  if(auth && auth.currentUser && db){
+    const ref = db.collection('users').doc(auth.currentUser.uid).collection('emotion').doc(d);
+    await ref.set({ qna:data }, { merge:true });
   }
-  if(hits.length===0){ box.innerHTML='<p class="help">결과 없음</p>'; return; }
-  hits.slice(0,100).forEach(h=>{
-    const d = document.createElement('div');
-    d.className='card';
-    d.innerHTML = `<div class="help small">${h.k}</div><pre style="white-space:pre-wrap">${JSON.stringify(h.v,null,2)}</pre>`;
-    box.appendChild(d);
+  toast('저장 완료!');
+});
+
+// ======= Local storage helpers =======
+function saveLocal(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+function getLocal(key){ try{ return JSON.parse(localStorage.getItem(key)||'null'); }catch(e){ return null; }}
+
+// ======= Daily save/load =======
+function collectDaily(){
+  return {
+    date: getISODate(currentDate),
+    ttc: {
+      event: $('ttcEvent').value.trim(),
+      thought: $('ttcThought').value.trim(),
+      emotion: $('ttcEmotion').value.trim(),
+      result: $('ttcResult').value.trim(),
+    },
+    thanks: [ $('thanks1').value.trim(), $('thanks2').value.trim(), $('thanks3').value.trim() ],
+    daily: $('dailyNote').value.trim(),
+    tags: $('tagInput').value.trim()
+  };
+}
+async function saveDaily(){
+  const data = collectDaily();
+  const key = `daily:${data.date}`;
+  saveLocal(key, data);
+  if(auth && auth.currentUser && db){
+    const ref = db.collection('users').doc(auth.currentUser.uid).collection('emotion').doc(data.date);
+    await ref.set(data, { merge:true });
+  }
+  toast('저장 완료!');
+}
+function clearDaily(){
+  ['ttcEvent','ttcThought','ttcEmotion','ttcResult','thanks1','thanks2','thanks3','dailyNote','tagInput']
+    .forEach(id=>{ const el=$(id); if(el) el.value=''; });
+  toast('비움!');
+}
+async function loadDaily(){
+  const d = getISODate(currentDate);
+  setDateToInput(currentDate);
+  let data = getLocal(`daily:${d}`);
+  if (!data && auth && auth.currentUser && db){
+    const snap = await db.collection('users').doc(auth.currentUser.uid).collection('emotion').doc(d).get();
+    data = snap.exists ? snap.data() : null;
+  }
+  $('ttcEvent').value = data?.ttc?.event || '';
+  $('ttcThought').value = data?.ttc?.thought || '';
+  $('ttcEmotion').value = data?.ttc?.emotion || '';
+  $('ttcResult').value = data?.ttc?.result || '';
+  $('thanks1').value = data?.thanks?.[0] || '';
+  $('thanks2').value = data?.thanks?.[1] || '';
+  $('thanks3').value = data?.thanks?.[2] || '';
+  $('dailyNote').value = data?.daily || '';
+  $('tagInput').value = data?.tags || '';
+  // QnA
+  const q = getLocal(`daily:${d}:qna`);
+  $('question').value = q?.question || $('question').value || QUESTIONS[0];
+  $('answer').value = q?.answer || '';
+}
+
+$('dailySaveBtn')?.addEventListener('click', saveDaily);
+$('dailyClearBtn')?.addEventListener('click', clearDaily);
+
+// ======= Weekly save/load =======
+function getWeekKey(dateStr){
+  // YYYY-Www
+  const d = new Date(dateStr);
+  const onejan = new Date(d.getFullYear(),0,1);
+  const days = Math.floor((d - onejan) / 86400000);
+  const week = Math.ceil((days + onejan.getDay()+1)/7);
+  const wk = `W${String(week).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${wk}`;
+}
+function renderMissions(items=[]){
+  const ul = $('missionList');
+  ul.innerHTML='';
+  items.forEach((m,idx)=>{
+    const li = document.createElement('li');
+    li.className='mission-item';
+    li.innerHTML = `<input type="checkbox" ${m.done?'checked':''} data-idx="${idx}">
+      <input class="input" value="${m.text||''}" data-idx="${idx}" style="flex:1">`;
+    ul.appendChild(li);
   });
 }
-document.getElementById('searchInput').addEventListener('input', ()=>{ clearTimeout(searchAll._t); searchAll._t=setTimeout(searchAll, 250); });
-
-// ===== Auth (dummy placeholders; replace with Firebase later) =====
-const loginStatus = document.getElementById('loginStatus');
-document.getElementById('btnLogin').addEventListener('click', ()=>{
-  document.querySelector('#view-settings .card').scrollIntoView({behavior:'smooth'});
-  showView('settings');
-});
-document.getElementById('btnDoLogin').addEventListener('click', ()=>{
-  // 실제 Firebase 로그인 연결 전까지는 성공으로 처리
-  loginStatus.textContent = '로그인됨';
-  document.getElementById('btnLogin').classList.add('hidden');
-  document.getElementById('btnLogout').classList.remove('hidden');
-  showToast('로그인 성공!');
-});
-document.getElementById('btnLogout').addEventListener('click', ()=>{
-  loginStatus.textContent = '로그아웃 상태';
-  document.getElementById('btnLogin').classList.remove('hidden');
-  document.getElementById('btnLogout').classList.add('hidden');
-  showToast('로그아웃!');
-});
-document.getElementById('btnSignup').addEventListener('click', ()=>{
-  showToast('회원가입은 로그인 방식 연결 후 활성화됩니다.');
+$('addMission')?.addEventListener('click', ()=>{
+  const txt = $('newMission').value.trim();
+  if(!txt) return;
+  missions.push({done:false, text:txt});
+  $('newMission').value='';
+  renderMissions(missions);
 });
 
-// ===== Backup / restore =====
-document.getElementById('btnExport').addEventListener('click', ()=>{
+let missions = [];
+async function loadWeekly(){
+  const d = getISODate(currentDate);
+  const wk = getWeekKey(d);
+  let data = getLocal(`weekly:${wk}`);
+  if(!data && auth && auth.currentUser && db){
+    const ref = db.collection('users').doc(auth.currentUser.uid).collection('weekly').doc(wk);
+    const snap = await ref.get();
+    data = snap.exists ? snap.data() : null;
+  }
+  missions = data?.missions || [];
+  $('healing').value = data?.healing || '';
+  $('copy').value = data?.copy || '';
+  renderMissions(missions);
+  $('weekLabel').textContent = getWeekLabel(d);
+}
+$('missionList')?.addEventListener('input', (e)=>{
+  const idx = +e.target.dataset.idx;
+  if(e.target.type==='checkbox'){ missions[idx].done = e.target.checked; }
+  else { missions[idx].text = e.target.value; }
+});
+$('weeklySaveBtn')?.addEventListener('click', async ()=>{
+  const d = getISODate(currentDate);
+  const wk = getWeekKey(d);
+  const data = { missions, healing:$('healing').value.trim(), copy:$('copy').value.trim(), week:wk };
+  saveLocal(`weekly:${wk}`, data);
+  if(auth && auth.currentUser && db){
+    const ref = db.collection('users').doc(auth.currentUser.uid).collection('weekly').doc(wk);
+    await ref.set(data, { merge:true });
+  }
+  toast('저장 완료!');
+});
+
+// ======= Search =======
+function escapeHtml(s=''){return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]));}
+async function fetchSearchResults(keyword){
+  keyword = keyword.toLowerCase();
+  const results = [];
+  // search local daily
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k.startsWith('daily:') && !k.includes(':qna')){
+      const d = JSON.parse(localStorage.getItem(k));
+      const hay = JSON.stringify(d).toLowerCase();
+      if(hay.includes(keyword)){
+        results.push({
+          date:d.date, week:getWeekKey(d.date),
+          ttc:d.ttc, thanks:d.thanks, daily:d.daily, tags:d.tags
+        });
+      }
+    }
+  }
+  // weekly
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k.startsWith('weekly:')){
+      const w = JSON.parse(localStorage.getItem(k));
+      const hay = JSON.stringify(w).toLowerCase();
+      if(hay.includes(keyword)){
+        results.push({ date:w.week, week:w.week, healing:w.healing, copy:w.copy, missions:w.missions });
+      }
+    }
+  }
+  return results;
+}
+async function searchAll(keyword){
+  const q = keyword.trim();
+  const box = $('searchResults');
+  box.innerHTML = '';
+  if(!q) return;
+  const results = await fetchSearchResults(q);
+  if(results.length===0){
+    box.innerHTML = `<div class="result-card"><div>검색 결과가 없어요.</div></div>`;
+    return;
+  }
+  results.forEach(r=>{
+    const tagsHtml = (r.tags||'').split(',').filter(Boolean).map(t=>`<span class="tag">${escapeHtml(t.trim())}</span>`).join('');
+    const thanksHtml = (r.thanks||[]).filter(Boolean).map(t=>`<div class="line">• ${escapeHtml(t)}</div>`).join('');
+    const ttcHtml = r.ttc ? `
+      <div class="line"><b>사건</b> ${escapeHtml(r.ttc.event||'')}</div>
+      <div class="line"><b>생각</b> ${escapeHtml(r.ttc.thought||'')}</div>
+      <div class="line"><b>감정</b> ${escapeHtml(r.ttc.emotion||'')}</div>
+      <div class="line"><b>결과</b> ${escapeHtml(r.ttc.result||'')}</div>` : '';
+    const heal = r.healing? `<div class="line"><b>힐링</b> ${escapeHtml(r.healing)}</div>`:'';
+    const copy = r.copy? `<div class="line"><b>필사</b> ${escapeHtml(r.copy)}</div>`:'';
+    const missions = r.missions? r.missions.map(m=>`<div class="line">- [${m.done?'x':' '}] ${escapeHtml(m.text||'')}</div>`).join(''):'';
+
+    const html = `<div class="result-card">
+      <div class="meta">${escapeHtml(r.date)} · ${escapeHtml(r.week||'')}</div>
+      ${ttcHtml}${thanksHtml}${r.daily?`<div class="line"><b>일상</b> ${escapeHtml(r.daily)}</div>`:''}
+      ${tagsHtml?`<div class="line">${tagsHtml}</div>`:''}
+      ${heal}${copy}${missions}
+    </div>`;
+    box.insertAdjacentHTML('beforeend', html);
+  });
+}
+$('searchInput')?.addEventListener('input', (e)=>searchAll(e.target.value));
+
+// ======= Settings: login/export/import =======
+function updateLoginUI(){
+  const user = auth && auth.currentUser;
+  $('authState').textContent = user? (user.email || '로그인됨') : '로그아웃 상태';
+  $('loginOpen')?.classList.toggle('hidden', !!user);
+  $('logoutBtn')?.classList.toggle('hidden', !user);
+}
+$('loginBtn')?.addEventListener('click', async ()=>{
+  if(!(auth && db)){ alert('로그인 구성 없음(로컬 모드)'); return; }
+  const email = $('email').value.trim();
+  const pw = $('password').value;
+  try{
+    await auth.signInWithEmailAndPassword(email, pw);
+    updateLoginUI();
+    alert('로그인 성공!');
+  }catch(e){
+    alert('로그인 실패: '+ e.message);
+  }
+});
+$('signupBtn')?.addEventListener('click', async ()=>{
+  if(!(auth && db)){ alert('구성 없음'); return; }
+  const email = $('email').value.trim();
+  const pw = $('password').value;
+  try{
+    await auth.createUserWithEmailAndPassword(email, pw);
+    updateLoginUI();
+    alert('회원가입 완료!');
+  }catch(e){ alert('실패: '+e.message); }
+});
+$('logoutBtn')?.addEventListener('click', ()=>auth?.signOut().then(updateLoginUI));
+$('logoutBtn2')?.addEventListener('click', ()=>auth?.signOut().then(updateLoginUI));
+if(auth){ auth.onAuthStateChanged(updateLoginUI); }
+
+$('exportBtn')?.addEventListener('click', ()=>{
   const dump = {};
   for(let i=0;i<localStorage.length;i++){
     const k = localStorage.key(i);
-    if(k.startsWith('daily:')||k.startsWith('week:')) dump[k]=localStorage.getItem(k);
+    if(k.startsWith('daily:') || k.startsWith('weekly:')){
+      dump[k] = JSON.parse(localStorage.getItem(k));
+    }
   }
   const blob = new Blob([JSON.stringify(dump,null,2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'thanksdiary-backup.json';
+  a.download = `thanks-diary-backup-${Date.now()}.json`;
   a.click();
 });
-document.getElementById('btnShare').addEventListener('click', async ()=>{
-  try{
-    const dump = {};
-    for(let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      if(k.startsWith('daily:')||k.startsWith('week:')) dump[k]=localStorage.getItem(k);
-    }
-    const file = new File([JSON.stringify(dump,null,2)], 'thanksdiary.json', {type:'application/json'});
-    await navigator.share({ files:[file], title:'ThanksDiary', text:'백업 파일' });
-  }catch(e){
-    showToast('공유가 지원되지 않아요.');
-  }
-});
-document.getElementById('btnImport').addEventListener('click', ()=>{
-  const f = document.getElementById('fileInput').files?.[0];
-  if(!f){ showToast('파일을 먼저 선택해요.'); return; }
-  const reader = new FileReader();
-  reader.onload = ()=>{
+$('importFile')?.addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=>{
     try{
-      const data = JSON.parse(reader.result);
-      Object.entries(data).forEach(([k,v])=> localStorage.setItem(k, v));
-      showToast('복원 완료!');
-    }catch(e){ showToast('가져오기 실패'); }
+      const obj = JSON.parse(fr.result);
+      Object.keys(obj).forEach(k=>localStorage.setItem(k, JSON.stringify(obj[k])));
+      alert('복원 완료!');
+      loadDaily(); loadWeekly();
+    }catch(_){ alert('JSON 파일이 아니에요');}
   };
-  reader.readAsText(f);
+  fr.readAsText(f);
 });
-document.getElementById('btnClearLocal').addEventListener('click', ()=>{
-  if(confirm('로컬 데이터를 모두 지울까요?')){
-    const del = [];
-    for(let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      if(k.startsWith('daily:')||k.startsWith('week:')) del.push(k);
-    }
-    del.forEach(k=>localStorage.removeItem(k));
-    showToast('로컬 초기화 완료');
-  }
-});
+
+// ======= Init =======
+function init(){
+  setDateToInput(currentDate);
+  randomQuestion();
+  loadDaily();
+  loadWeekly();
+  showSection('daily');
+}
+document.addEventListener('DOMContentLoaded', init);
