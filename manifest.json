@@ -1,9 +1,0 @@
-{
-  "name": "지니짱 감사일기",
-  "short_name": "감사일기",
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#F6C23E",
-  "background_color": "#FFF7D6",
-  "icons": []
-}
