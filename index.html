@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지니짱 감사일기</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="app-header">
+  <div class="title-wrap">
+    <span class="star">★</span>
+    <h1>지니짱 감사일기</h1>
+  </div>
+  <div class="auth-wrap">
+    <button id="btnLogin" class="chip">로그인</button>
+    <button id="btnLogout" class="chip secondary">로그아웃</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="daily">📒 데일리</button>
+  <button class="tab" data-tab="weekly">🧾 위클리</button>
+  <button class="tab" data-tab="search">🔎 검색</button>
+  <button class="tab" data-tab="settings">🌞 설정</button>
+</nav>
+
+<main>
+  <!-- Daily -->
+  <section id="daily" class="panel active">
+    <div class="date-row">
+      <input type="date" id="dailyDate">
+      <button id="btnToday" class="chip">오늘</button>
+      <span id="weekBadge" class="badge"></span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">오늘의 질문</div>
+      <input id="qText" class="input" placeholder="질문이 들어옵니다…">
+      <textarea id="qAnswer" class="textarea" placeholder="질문에 대한 나의 답을 적어보세요."></textarea>
+      <div class="row">
+        <button id="btnQSave" class="btn primary">저장</button>
+        <button id="btnQClear" class="btn danger">지우기</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">감정일기 (사건·생각·감정·결과)</div>
+      <textarea id="ev" class="textarea" placeholder="사건"></textarea>
+      <textarea id="th" class="textarea" placeholder="생각"></textarea>
+      <textarea id="em" class="textarea" placeholder="감정"></textarea>
+      <textarea id="rs" class="textarea" placeholder="결과"></textarea>
+      <div class="row">
+        <button id="btnEmoSave" class="btn primary">저장</button>
+        <button id="btnEmoClear" class="btn danger">지우기</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">감사일기 (3개)</div>
+      <input id="g1" class="input" placeholder="감사 1">
+      <input id="g2" class="input" placeholder="감사 2">
+      <input id="g3" class="input" placeholder="감사 3">
+      <div class="row">
+        <button id="btnThanksSave" class="btn primary">저장</button>
+        <button id="btnThanksClear" class="btn danger">지우기</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">일상일기</div>
+      <textarea id="dailyNote" class="textarea" placeholder="하루를 가볍게 기록해요."></textarea>
+      <div class="row">
+        <button id="btnNoteSave" class="btn primary">저장</button>
+        <button id="btnNoteClear" class="btn danger">지우기</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">태그</div>
+      <input id="tags" class="input" placeholder="#가족, #산책 처럼 쉼표로 구분">
+      <div class="row">
+        <button id="btnTagSave" class="btn primary">저장</button>
+        <button id="btnTagClear" class="btn danger">지우기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Weekly -->
+  <section id="weekly" class="panel">
+    <div class="date-row">
+      <span class="badge">이번 주: <span id="weeklyBadge"></span></span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">미션 (체크박스)</div>
+      <div id="missionList" class="checklist"></div>
+      <div class="row">
+        <input id="newMissionText" class="input flex" placeholder="미션 추가">
+        <button id="btnAddMission" class="btn primary">+ 추가</button>
+      </div>
+      <div class="row">
+        <button id="btnMissionSave" class="btn primary">저장</button>
+        <button id="btnMissionClear" class="btn danger">지우기</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">힐링문구 & 필사</div>
+      <input id="healing" class="input" placeholder="힐링 문구 입력">
+      <textarea id="copybox" class="textarea" placeholder="문장을 따라 적어보세요."></textarea>
+      <div class="row">
+        <button id="btnHealSave" class="btn primary">저장</button>
+        <button id="btnHealClear" class="btn danger">지우기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <section id="search" class="panel">
+    <div class="card">
+      <div class="card-title">전체 내용 검색</div>
+      <input id="searchKeyword" class="input" placeholder="키워드 입력">
+      <button id="btnSearch" class="btn primary">검색</button>
+      <div id="searchResults" class="results"></div>
+    </div>
+  </section>
+
+  <!-- Settings -->
+  <section id="settings" class="panel">
+    <div class="card">
+      <div class="card-title">로그인</div>
+      <div class="row">
+        <input id="email" class="input" placeholder="이메일">
+        <input id="password" type="password" class="input" placeholder="비밀번호">
+      </div>
+      <div class="row">
+        <button id="btnDoLogin" class="btn primary">로그인</button>
+        <button id="btnSignup" class="btn">회원가입</button>
+        <button id="btnDoLogout" class="btn secondary">로그아웃</button>
+      </div>
+      <p class="hint">※ Firebase 설정 시 클라우드 동기화됩니다. (미설정 시 로컬 저장)</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">백업/복원</div>
+      <div class="row">
+        <button id="btnExport" class="btn">JSON 파일로 저장</button>
+        <input id="importFile" type="file" accept="application/json">
+        <button id="btnImport" class="btn">JSON 가져오기</button>
+      </div>
+      <div class="row">
+        <button id="btnCache" class="btn secondary">캐시 새로고침(업데이트)</button>
+        <button id="btnReset" class="btn danger">로컬 데이터 초기화</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
